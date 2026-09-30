@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+* {
+	font-family: "scribbler", serif;
+}
+
 .pt-serif {
 	font-family: "PT Serif", serif;
+}
+
+@font-face {
+	font-family: "scribbler";
+	src: url("/scribbler-font/scribbler.otf") format("opentype");
+}
+
+.scribbler {
+	font-family: "scribbler", serif;
 }
