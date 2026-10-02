@@ -5,7 +5,7 @@ import Page1 from "@/components/Page1";
 import Page2 from "@/components/Page2";
 import Page3 from "@/components/Page3";
 
-const ANIMATION_MS = 800;
+const ANIMATION_MS = 700;
 
 const frames = (name: string, count: number) =>
 	Array.from(
@@ -131,7 +131,7 @@ export default function Home() {
 			{/* Normal open state */}
 			<img
 				src="/imgs/open.png"
-				className="w-screen h-screen top-0 left-0 fixed z-10 pointer-events-none"
+				className="w-screen h-screen top-0 left-0 fixed z-10 pointer-events-none drop-shadow-xl drop-shadow-black/40"
 				style={{
 					visibility: animationStage === "idle" ? "visible" : "hidden",
 				}}
@@ -151,13 +151,13 @@ export default function Home() {
 			    idle) so a click only has to draw, not show/hide anything */}
 			<canvas
 				ref={canvasRef}
-				className="w-screen h-screen top-0 left-0 fixed z-30 pointer-events-none"
+				className="w-screen h-screen top-0 left-0 fixed z-30 pointer-events-none drop-shadow-xl drop-shadow-black/40"
 			/>
 
 			{/* Content - no z-index here, so it doesn't form a stacking context:
 			    curtains (z-10) sit above it, buttons (z-20) sit above curtains,
 			    and the animation (z-30) covers everything */}
-			<div className="bg-white/5 border-2 border-black/5 w-[65vw] h-[75vh] mx-auto top-[25vh] relative">
+			<div className="bg-white/0 border-2 border-black/0 w-[65vw] h-[75vh] mx-auto top-[25vh] relative">
 				<CurrentPage
 					nextPage={nextPage}
 					previousPage={previousPage}
@@ -172,7 +172,7 @@ export default function Home() {
 				<img
 					src="/imgs/paper-bg-2560.jpg"
 					alt=""
-					className="w-full h-full object-cover"
+					className="w-full h-full object-cover opacity-60"
 				/>
 			</div>
 		</div>
