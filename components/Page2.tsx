@@ -1,49 +1,17 @@
 import PopsicleButton from "@/components/PopsicleButton";
 import { useEffect, useRef, useState } from "react";
+import { useStage } from "@/components/Stage";
+import { FRAMES, type FrameSize } from "@/lib/frames";
 
 // Extra-wide is sized so it's the same height as a wide frame
 // (frame4 is 1018×762, wide frames are 762×705)
-const FRAME_SIZES = {
+const FRAME_SIZES: Record<FrameSize, string> = {
 	// Squashed to 90% height (1229 × 0.9 ≈ 1106) - aspect-ratio rather than
 	// scale-y, so the layout box matches and labels sit right under it
 	tall: "w-[17vw] aspect-[800/1106]",
 	wide: "w-[20vw] mt-[0vh]",
 	"extra-wide": "w-[21vw] mt-[0vh]",
 };
-
-// Tall frames alternate with wide ones. `label` is shown under each frame
-const FRAMES: {
-	src: string;
-	size: keyof typeof FRAME_SIZES;
-	label: string;
-}[] = [
-	{ src: "/imgs/frame1.png", size: "tall", label: "Scream • 1893" },
-	{
-		src: "/imgs/frame3.png",
-		size: "wide",
-		label: "Sunflowers • 1887",
-	},
-	{
-		src: "/imgs/frame2.png",
-		size: "tall",
-		label: "Girl with a Pearl Earring • 1665",
-	},
-	{
-		src: "/imgs/frame4.png",
-		size: "extra-wide",
-		label: "The Starry Night • 1889",
-	},
-	{
-		src: "/imgs/frame5.png",
-		size: "tall",
-		label: "The Persistence of Memory • 1931",
-	},
-	{
-		src: "/imgs/frame6.png",
-		size: "wide",
-		label: "The Water Lily Pond • 1899",
-	},
-];
 
 type PageProps = {
 	nextPage: () => void;
@@ -68,6 +36,9 @@ export default function Page2({
 	});
 	const [step, setStep] = useState(0);
 
+	// Clicking a frame closes the curtains and opens its page
+	const { goTo } = useStage();
+
 	// Drop the doll, then the labels, in once the curtains have opened,
 	// then raise the Continue button
 	useEffect(() => {
@@ -76,7 +47,7 @@ export default function Page2({
 		const timers = [
 			[0, 1],
 			[400, 2],
-			[600, 3],
+			[800, 3],
 			[2000, 4],
 		].map(([ms, n]) => setTimeout(() => setStep((s) => Math.max(s, n)), ms));
 
@@ -130,7 +101,15 @@ export default function Page2({
 		};
 		tick();
 	};
-	useEffect(() => () => cancelAnimationFrame(speedFrame.current), []);
+	// Only slows down once the pointer has stayed on the marquee for 1s
+	const slowDownTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+	useEffect(
+		() => () => {
+			cancelAnimationFrame(speedFrame.current);
+			clearTimeout(slowDownTimer.current);
+		},
+		[],
+	);
 
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
@@ -174,10 +153,11 @@ export default function Page2({
 				ref={marqueeRef}
 				className="absolute top-[15vh] left-0 flex w-max marquee"
 				onMouseEnter={() => {
-					easeMarqueeTo(0.3);
+					slowDownTimer.current = setTimeout(() => easeMarqueeTo(0.3), 1000);
 					setHoveringArt(true);
 				}}
 				onMouseLeave={() => {
+					clearTimeout(slowDownTimer.current);
 					easeMarqueeTo(1);
 					setHoveringArt(false);
 				}}
@@ -188,8 +168,15 @@ export default function Page2({
 						className="flex items-center justify-center gap-[5vw] pr-[4vw] test-shadow"
 						aria-hidden={copy === 1}
 					>
-						{FRAMES.map(({ src, size, label }) => (
-							<div className="relative" key={src}>
+						{FRAMES.map(({ slug, src, size, label }) => (
+							<button
+								className="relative cursor-pointer"
+								key={src}
+								onClick={() => goTo(`/art-piece/${slug}`)}
+								aria-label={label}
+								// The second copy is only there for the loop
+								tabIndex={copy === 1 ? -1 : undefined}
+							>
 								<img
 									src="/imgs/popsicle.png"
 									className="absolute top-[30%] left-[50%] -translate-x-[50%] h-[80vh] min-w-[22vw] z-1"
@@ -201,10 +188,10 @@ export default function Page2({
 									alt=""
 								/>
 								{/* Label - sits right under the frame image */}
-								<p className="border-[0.2vh] bg-white px-[1vw] py-[1vh] text-[2vh] left-[50%] -translate-x-[50%] absolute top-full mt-[1vh] z-5 w-max max-w-[22vw] text-center">
+								<span className="border-[0.2vh] bg-white px-[1vw] py-[1vh] text-[2vh] left-[50%] -translate-x-[50%] absolute top-full mt-[1vh] z-5 w-max max-w-[22vw] text-center">
 									{label}
-								</p>
-							</div>
+								</span>
+							</button>
 						))}
 					</div>
 				))}

@@ -25,6 +25,10 @@
 	filter: drop-shadow(12px 12px 2px #28282857);
 }
 
+.test-shadow-darkest {
+	filter: drop-shadow(14px 14px 1px #000000c1);
+}
+
 .scene-shadow {
 	filter: drop-shadow(0px 18px 5px #7a797983);
 }
@@ -42,8 +46,29 @@
 	}
 }
 
+/* Ticket wiggles 1deg left, then right, then back over 0.6s, then rests for
+   1s (1.6s total, so 0.6s is 37.5% of it) */
+.ticket-shake {
+	animation: ticket-shake 1.6s ease-in-out infinite;
+}
+
+@keyframes ticket-shake {
+	0%,
+	37.5%,
+	100% {
+		transform: rotate(0deg);
+	}
+	12.5% {
+		transform: rotate(-1deg);
+	}
+	25% {
+		transform: rotate(1deg);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
-	.marquee {
+	.marquee,
+	.ticket-shake {
 		animation: none;
 	}
 }
