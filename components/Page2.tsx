@@ -1,3 +1,50 @@
+import PopsicleButton from "@/components/PopsicleButton";
+import { useEffect, useState } from "react";
+
+// Extra-wide is sized so it's the same height as a wide frame
+// (frame4 is 1018×762, wide frames are 762×705)
+const FRAME_SIZES = {
+	// Squashed to 90% height (1229 × 0.9 ≈ 1106) - aspect-ratio rather than
+	// scale-y, so the layout box matches and labels sit right under it
+	tall: "w-[19vw] aspect-[800/1106]",
+	wide: "w-[22vw] mt-[0vh]",
+	"extra-wide": "w-[23vw] mt-[0vh]",
+};
+
+// Tall frames alternate with wide ones. `label` is shown under each frame
+const FRAMES: {
+	src: string;
+	size: keyof typeof FRAME_SIZES;
+	label: string;
+}[] = [
+	{ src: "/imgs/frame1.png", size: "tall", label: "Scream • 1893" },
+	{
+		src: "/imgs/frame3.png",
+		size: "wide",
+		label: "Sunflowers • 1887",
+	},
+	{
+		src: "/imgs/frame2.png",
+		size: "tall",
+		label: "Girl with a Pearl Earring • 1665",
+	},
+	{
+		src: "/imgs/frame4.png",
+		size: "extra-wide",
+		label: "The Starry Night • 1889",
+	},
+	{
+		src: "/imgs/frame5.png",
+		size: "tall",
+		label: "The Persistence of Memory • 1931",
+	},
+	{
+		src: "/imgs/frame6.png",
+		size: "wide",
+		label: "The Water Lily Pond • 1899",
+	},
+];
+
 type PageProps = {
 	nextPage: () => void;
 	previousPage: () => void;
@@ -6,26 +53,106 @@ type PageProps = {
 	curtainsOpen: boolean;
 };
 
-export default function Page2({ nextPage, previousPage }: PageProps) {
+export default function Page2({
+	nextPage,
+	previousPage,
+	curtainsOpen,
+}: PageProps) {
+	const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
+	const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
+
+	const drop = (shown: boolean, ms = 800, easing = LABEL_DROP) => ({
+		transition: `top ${ms}ms ${easing}, transform ${ms}ms ${easing}`,
+		visibility: shown ? ("visible" as const) : ("hidden" as const),
+	});
+	const [step, setStep] = useState(0);
+
+	// Drop the doll, then the label, in once the curtains have opened
+	useEffect(() => {
+		if (!curtainsOpen) return;
+
+		const timers = [
+			[0, 1],
+			[400, 2],
+		].map(([ms, n]) => setTimeout(() => setStep((s) => Math.max(s, n)), ms));
+
+		return () => timers.forEach(clearTimeout);
+	}, [curtainsOpen]);
+
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
-			<h1 className="text-[3.5vh] pt-serif">This is page 2!</h1>
-
+			{/* Doll */}
 			<img
-				src="/imgs/popsicle.png"
+				src={"/imgs/wiggle.gif"}
+				className="h-[100vh] absolute top-[-27vh] left-[-8vw] test-shadow z-5"
+				style={{
+					...drop(step >= 1, 900, DOLL_DROP),
+					transform: step >= 1 ? "translateY(0)" : "translateY(-120vh)",
+				}}
 				alt=""
-				className="absolute w-[18vw] left-[-2vw] bottom-[-7vh] z-[-5]"
 			/>
-			<button
-				onClick={previousPage}
-				className="absolute bottom-[11vh] cursor-pointer left-[1vw] border-2 border-black px-6 py-2 z-20 bg-white border-2 border-black border-dashed px-[2vw] py-[1vh] text-[4vh]"
-			>
-				{/* <span className="w-[0.1vw] bg-black/60 h-[63vh] top-[-63vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[60vh] top-[-60vh] right-0 absolute"></span> */}
-				← Back
-			</button>
 
-			<img
+			<h1
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[-7vh] right-[25vw] bg-white border-2 border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				style={{
+					...drop(step >= 2),
+					transform: step >= 2 ? "translateY(0)" : "translateY(-60vh)",
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] right-0 absolute"></span>
+				Zhenya likes art
+			</h1>
+			<h2
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[1vh] right-[13vw] bg-white border-2 border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				style={{
+					...drop(step >= 2),
+					transform: step >= 2 ? "translateY(0)" : "translateY(-60vh)",
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] right-0 absolute"></span>
+				Click on some pieces
+			</h2>
+
+			{/* Picture frames - two copies of the set slide left by one set's width
+			    (-50%), so the loop is seamless */}
+			<div className="absolute top-[15vh] left-0 flex w-max marquee">
+				{[0, 1].map((copy) => (
+					<div
+						key={copy}
+						className="flex items-center justify-center gap-[4vw] pr-[4vw] test-shadow"
+						aria-hidden={copy === 1}
+					>
+						{FRAMES.map(({ src, size, label }) => (
+							<div className="relative" key={src}>
+								<img
+									src="/imgs/popsicle.png"
+									className="absolute top-[30%] left-[50%] -translate-x-[50%] h-[80vh] min-w-[22vw] z-1"
+									alt=""
+								/>
+								<img
+									src={src}
+									className={`${FRAME_SIZES[size]} relative z-2`}
+									alt=""
+								/>
+								{/* Label - sits right under the frame image */}
+								<p className="border-[0.2vh] bg-white px-[1vw] py-[1vh] text-[2vh] left-[50%] -translate-x-[50%] absolute top-full mt-[1vh] z-5 w-max max-w-[22vw] text-center">
+									{label}
+								</p>
+							</div>
+						))}
+					</div>
+				))}
+			</div>
+
+			{/* <div className="z-10">
+				<PopsicleButton onClick={previousPage} side="left">
+					{"<-"} Back
+				</PopsicleButton>
+			</div>
+ */}
+			{/* <img
 				src="/imgs/popsicle.png"
 				alt=""
 				className="absolute w-[15vw] mx-auto bottom-[-13vh] z-[-5]"
@@ -34,24 +161,10 @@ export default function Page2({ nextPage, previousPage }: PageProps) {
 				onClick={nextPage}
 				className="absolute bottom-[3vh] cursor-pointer mx-auto border-2 border-black px-6 py-2 z-20 bg-white border-2 border-black border-dashed px-[2vw] py-[1vh] text-[2.5vh]"
 			>
-				{/* <span className="w-[0.1vw] bg-black/60 h-[63vh] top-[-63vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[60vh] top-[-60vh] right-0 absolute"></span> */}
 				Inventory
-			</button>
+			</button> */}
 
-			<img
-				src="/imgs/popsicle.png"
-				alt=""
-				className="absolute w-[18vw] right-[0vw] bottom-[-7vh] z-[-5]"
-			/>
-			<button
-				onClick={nextPage}
-				className="absolute bottom-[11vh] cursor-pointer right-[1vw] border-2 border-black px-6 py-2 z-20 bg-white border-2 border-black border-dashed px-[2vw] py-[1vh] text-[4vh]"
-			>
-				{/* <span className="w-[0.1vw] bg-black/60 h-[63vh] top-[-63vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[60vh] top-[-60vh] right-0 absolute"></span> */}
-				Continue →
-			</button>
+			<PopsicleButton onClick={nextPage}>Continue {"->"}</PopsicleButton>
 		</div>
 	);
 }

@@ -127,11 +127,15 @@ export default function Home() {
 	const previousPage = () => goToPage(-1);
 
 	return (
-		<div className="relative min-h-screen">
+		<div className="relative h-screen overflow-clip">
+			<div className="fixed top-[0.5vh] right-[0.5vw] text-[4vh] font-extrabold cursor-pointer z-20 w-[3.5vw] h-[3.5vw] bg-white border-dashed border-[0.2vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60">
+				?
+			</div>
+
 			{/* Normal open state */}
 			<img
 				src="/imgs/open.png"
-				className="w-screen h-screen top-0 left-0 fixed z-10 pointer-events-none drop-shadow-xl drop-shadow-black/40"
+				className="w-screen h-screen top-0 left-0 fixed z-10 pointer-events-none scene-shadow"
 				style={{
 					visibility: animationStage === "idle" ? "visible" : "hidden",
 				}}
@@ -151,7 +155,7 @@ export default function Home() {
 			    idle) so a click only has to draw, not show/hide anything */}
 			<canvas
 				ref={canvasRef}
-				className="w-screen h-screen top-0 left-0 fixed z-30 pointer-events-none drop-shadow-xl drop-shadow-black/40"
+				className="w-screen h-screen top-0 left-0 fixed z-30 pointer-events-none scene-shadow"
 			/>
 
 			{/* Content - no z-index here, so it doesn't form a stacking context:
