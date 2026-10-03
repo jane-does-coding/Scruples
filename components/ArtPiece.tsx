@@ -36,20 +36,28 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			    taller (60vh) than the wide ones (50vh) */}
 			{/* Painting drops in from the top */}
 			<div
-				className={`absolute ${tall ? "top-[-6vh] left-[5vw] scale-y-90" : "top-[-2vh] left-0"}`}
+				className={`absolute ${tall ? "top-[-6vh] left-[50%] translate-x-[-50%] scale-y-90" : "top-[-2vh] left-[50%] translate-x-[-50%]"}`}
 				style={slideIn(shown, "top")}
 			>
 				<img
 					src={frame.src}
-					className={`${tall ? "max-h-[65vh]" : "max-h-[50vh]"} max-w-[40vw] test-shadow z-2 relative`}
-					alt=""
+					className={`${tall ? "max-h-[65vh] top-[-3vh]" : "max-h-[45vh]"} max-w-[40vw] test-shadow z-2 relative`}
+					alt={`${frame.label} by ${frame.artist}, in a picture frame`}
 				/>
 				<span className="w-[0.1vw] bg-black/60 h-[30vh] top-[-25vh] left-[3vw] absolute z-1"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[30vh] top-[-25vh] right-[3vw] absolute z-1"></span>
 			</div>
+
+			{/* Doll */}
+			{/* 	<img
+				src={"/imgs/doll2.png"}
+				className="h-[80vh] absolute top-[-30vh] right-[-6vw] test-shadow-darker z-5 -scale-x-[1]"
+				alt=""
+			/> */}
+
 			{/* Labels rise in from the bottom */}
 			<div
-				className="absolute bottom-[10vh] right-0 test-shadow"
+				className="absolute bottom-[6vh] right-[-3vw] test-shadow"
 				style={slideIn(shown, "bottom", 200)}
 			>
 				<h1 className="border-[0.2vh] bg-white px-[1.5vw] py-[1vh] text-[3vh] text-center relative z-2 w-fit mx-auto">
@@ -63,7 +71,7 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 				<img
 					src="/imgs/popsicle-stick.webp"
 					className="absolute w-[2.3vw] h-[38vh] max-w-none bottom-[-19vh] left-[50%] -translate-x-[50%] z-0"
-					alt=""
+					alt="Wooden popsicle stick holding up the labels"
 				/>
 			</div>
 

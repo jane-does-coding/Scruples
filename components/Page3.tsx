@@ -18,18 +18,18 @@ export default function Page3({ previousPage }: PageProps) {
 					...drop(step >= 1, 900, DOLL_DROP),
 					transform: step >= 1 ? "translateY(0)" : "translateY(-120vh)",
 				}} */
-				alt=""
+				alt="Zhenya, a marionette doll on strings"
 			/>
 
 			<img
 				src="/imgs/boxes.webp"
 				className="right-[-5vw] top-[5vh] absolute h-[60vh] w-[25vw]"
-				alt=""
+				alt="Stack of cardboard boxes"
 			/>
 			<img
 				src="/imgs/boxes.webp"
 				className="left-[-5vw] top-[5vh] absolute h-[60vh] w-[25vw] -scale-x-[1]"
-				alt=""
+				alt="Stack of cardboard boxes"
 			/>
 
 			<PopsicleButton onClick={previousPage} side="left">

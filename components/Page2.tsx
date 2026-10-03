@@ -121,7 +121,7 @@ export default function Page2({
 					...drop(step >= 1, 900, DOLL_DROP),
 					transform: step >= 1 ? "translateY(0)" : "translateY(-120vh)",
 				}}
-				alt=""
+				alt="Zhenya, a marionette doll on strings"
 			/>
 
 			<h1
@@ -180,12 +180,12 @@ export default function Page2({
 								<img
 									src="/imgs/popsicle.webp"
 									className="absolute top-[30%] left-[50%] -translate-x-[50%] h-[80vh] min-w-[22vw] z-1"
-									alt=""
+									alt="Wooden popsicle stick holding up the frame"
 								/>
 								<img
 									src={src}
 									className={`${FRAME_SIZES[size]} relative z-2`}
-									alt=""
+									alt={`${label}, painting in a picture frame`}
 								/>
 								{/* Label - sits right under the frame image */}
 								<span className="border-[0.2vh] bg-white px-[1vw] py-[1vh] text-[2vh] left-[50%] -translate-x-[50%] absolute top-full mt-[1vh] z-5 w-max max-w-[22vw] text-center">

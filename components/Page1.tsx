@@ -131,7 +131,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 					...drop(step >= 1, 900, DOLL_DROP),
 					transform: step >= 1 ? "translateY(0)" : "translateY(-120vh)",
 				}}
-				alt=""
+				alt="Zhenya, a marionette doll on strings"
 			/>
 
 			<PopsicleButton

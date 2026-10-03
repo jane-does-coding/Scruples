@@ -287,7 +287,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 						transform: navOpen ? "translateY(0)" : "translateY(-90vh)",
 					}}
 				>
-					<img src="/imgs/header.webp" className="w-screen block" alt="" />
+					<img src="/imgs/header.webp" className="w-screen block" alt="Theatre curtain valance" />
 
 					{/* Nav content - sits in the solid area above the curtain swags */}
 					<div className="absolute inset-x-0 bottom-[55%] flex flex-col items-center gap-[2vh] text-[3vh]">
@@ -315,7 +315,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					style={{
 						visibility: animationStage === "idle" ? "visible" : "hidden",
 					}}
-					alt=""
+					alt="Open theatre curtains"
 				/>
 
 				{/* Closed curtains until the ticket is clicked and the opening frames load */}
@@ -323,7 +323,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					<img
 						src="/imgs/closed.webp"
 						className="w-screen h-screen top-0 left-0 fixed z-30"
-						alt=""
+						alt="Closed theatre curtains"
 					/>
 				)}
 
@@ -341,7 +341,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 							style={{
 								visibility: ticket === "ripping" ? "hidden" : "visible",
 							}}
-							alt=""
+							alt="Admit one ticket"
 						/>
 						{/* Ripping frames are drawn here, over the same spot */}
 						<canvas
@@ -369,7 +369,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				<div className="-z-10 fixed top-0 left-0 h-screen w-screen">
 					<img
 						src="/imgs/paper-bg-2560.webp"
-						alt=""
+						alt="Paper texture background"
 						className="w-full h-full object-cover opacity-60"
 					/>
 				</div>

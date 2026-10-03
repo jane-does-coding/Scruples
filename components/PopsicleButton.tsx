@@ -55,7 +55,7 @@ export default function PopsicleButton({
 			>
 				<img
 					src="/imgs/popsicle.webp"
-					alt=""
+					alt="Wooden popsicle stick holding up the sign"
 					className="w-[18vw] max-w-none"
 					style={tilt("50% 100%")}
 					{...hoverProps}
