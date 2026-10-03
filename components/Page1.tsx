@@ -25,7 +25,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 	const [saidHi, setSaidHi] = useState(false);
 
 	// Controls the doll's current animation
-	const [dollImage, setDollImage] = useState("/imgs/doll3.png");
+	const [dollImage, setDollImage] = useState("/imgs/doll3.webp");
 	const isMoving = useRef(false);
 	const movingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -47,12 +47,12 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 			// Don't interrupt the moving animation
 			if (isMoving.current) return;
 
-			setDollImage("/imgs/blink.gif");
+			setDollImage("/imgs/blink.webp");
 
 			// Return to idle after blink animation, unless it started moving meanwhile
 			setTimeout(() => {
 				setDollImage((img) =>
-					img === "/imgs/blink.gif" ? "/imgs/doll3.png" : img,
+					img === "/imgs/blink.webp" ? "/imgs/doll3.webp" : img,
 				);
 			}, 1000);
 		}, 3000);
@@ -66,13 +66,13 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 		// Play moving animation
 		isMoving.current = true;
-		setDollImage("/imgs/moving.gif");
+		setDollImage("/imgs/moving.webp");
 
 		// Return to idle after 2 seconds
 		clearTimeout(movingTimer.current);
 		movingTimer.current = setTimeout(() => {
 			isMoving.current = false;
-			setDollImage("/imgs/doll3.png");
+			setDollImage("/imgs/doll3.webp");
 		}, 2000);
 	};
 

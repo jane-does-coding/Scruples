@@ -54,7 +54,7 @@ export default function PopsicleButton({
 				className={`absolute bottom-[-8vh] z-[-5] drop-shadow-md drop-shadow-black/40 ${right ? "left-[-2vw]" : "right-[-0vw]"}`}
 			>
 				<img
-					src="/imgs/popsicle.png"
+					src="/imgs/popsicle.webp"
 					alt=""
 					className="w-[18vw] max-w-none"
 					style={tilt("50% 100%")}

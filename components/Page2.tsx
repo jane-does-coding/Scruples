@@ -75,10 +75,10 @@ export default function Page2({
 		};
 	}, [hoveringArt]);
 	const dollImage = !hoveringArt
-		? "/imgs/wiggle.gif"
+		? "/imgs/wiggle.webp"
 		: blinking
-			? "/imgs/blink.gif"
-			: "/imgs/doll3.png";
+			? "/imgs/blink.webp"
+			: "/imgs/doll3.webp";
 
 	// Marquee eases down to 30% speed on hover. playbackRate is changed
 	// rather than the CSS duration, so the strip keeps its place instead of jumping
@@ -178,7 +178,7 @@ export default function Page2({
 								tabIndex={copy === 1 ? -1 : undefined}
 							>
 								<img
-									src="/imgs/popsicle.png"
+									src="/imgs/popsicle.webp"
 									className="absolute top-[30%] left-[50%] -translate-x-[50%] h-[80vh] min-w-[22vw] z-1"
 									alt=""
 								/>
@@ -204,7 +204,7 @@ export default function Page2({
 			</div>
  */}
 			{/* <img
-				src="/imgs/popsicle.png"
+				src="/imgs/popsicle.webp"
 				alt=""
 				className="absolute w-[15vw] mx-auto bottom-[-13vh] z-[-5]"
 			/>

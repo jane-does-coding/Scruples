@@ -35,14 +35,8 @@ const CURTAIN_DELAY_MS = 300;
 type StageContextValue = {
 	// True once the curtains have finished opening
 	curtainsOpen: boolean;
-	// Close the curtains, run `swap` while they're shut, then open them
-	changeScene: (swap: () => void) => void;
 	// Close the curtains, go to `href`, and open them once it has rendered
 	goTo: (href: string) => void;
-	// Which of the home page's pages (Page1/2/3) is showing. Kept here so it
-	// survives visiting another route and coming back
-	homePage: number;
-	setHomePage: (page: number) => void;
 };
 
 const StageContext = createContext<StageContextValue | null>(null);
@@ -58,7 +52,6 @@ export const useStage = () => {
 export default function Stage({ children }: { children: ReactNode }) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const [homePage, setHomePage] = useState(0);
 
 	// Starts "loading": closed curtains cover the page until the ticket is
 	// clicked and the opening frames are decoded, then they open
@@ -230,14 +223,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return true;
 	};
 
-	const changeScene = (swap: () => void) => {
-		closeCurtains(() => {
-			// Swap while closed, then open
-			swap();
-			openCurtains();
-		});
-	};
-
 	// Set when the curtains have closed for a route change; the pathname
 	// effect below opens them once the new route has rendered
 	const openOnNewRoute = useRef(false);
@@ -263,10 +248,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 		<StageContext.Provider
 			value={{
 				curtainsOpen: animationStage === "idle",
-				changeScene,
 				goTo,
-				homePage,
-				setHomePage,
 			}}
 		>
 			<div className="relative h-screen overflow-clip">
@@ -305,7 +287,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 						transform: navOpen ? "translateY(0)" : "translateY(-90vh)",
 					}}
 				>
-					<img src="/imgs/header.png" className="w-screen block" alt="" />
+					<img src="/imgs/header.webp" className="w-screen block" alt="" />
 
 					{/* Nav content - sits in the solid area above the curtain swags */}
 					<div className="absolute inset-x-0 bottom-[55%] flex flex-col items-center gap-[2vh] text-[3vh]">
@@ -328,7 +310,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 				{/* Normal open state */}
 				<img
-					src="/imgs/open.png"
+					src="/imgs/open.webp"
 					className="w-screen h-screen top-0 left-0 fixed z-10 pointer-events-none scene-shadow"
 					style={{
 						visibility: animationStage === "idle" ? "visible" : "hidden",
@@ -339,7 +321,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				{/* Closed curtains until the ticket is clicked and the opening frames load */}
 				{animationStage === "loading" && (
 					<img
-						src="/imgs/closed.png"
+						src="/imgs/closed.webp"
 						className="w-screen h-screen top-0 left-0 fixed z-30"
 						alt=""
 					/>
@@ -354,7 +336,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 						aria-label="Enter"
 					>
 						<img
-							src="/imgs/ticket2.png"
+							src="/imgs/ticket2.webp"
 							className="w-[50vw] block"
 							style={{
 								visibility: ticket === "ripping" ? "hidden" : "visible",
@@ -386,7 +368,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				{/* Background */}
 				<div className="-z-10 fixed top-0 left-0 h-screen w-screen">
 					<img
-						src="/imgs/paper-bg-2560.jpg"
+						src="/imgs/paper-bg-2560.webp"
 						alt=""
 						className="w-full h-full object-cover opacity-60"
 					/>
