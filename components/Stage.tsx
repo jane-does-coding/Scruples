@@ -32,6 +32,15 @@ const RIPPING_FRAME_MS = 30;
 // Curtains start opening this long after the ticket is clicked
 const CURTAIN_DELAY_MS = 300;
 
+// Where the top-left "<-" button goes from each route, or null to hide it
+const backHref = (pathname: string) => {
+	const page = pathname.match(/^\/page(\d+)$/);
+	if (page) return Number(page[1]) > 1 ? `/page${Number(page[1]) - 1}` : null;
+	// Paintings are opened from the marquee on Page 2
+	if (pathname.startsWith("/art-piece/")) return "/page2";
+	return null;
+};
+
 type StageContextValue = {
 	// True once the curtains have finished opening
 	curtainsOpen: boolean;
@@ -236,6 +245,15 @@ export default function Stage({ children }: { children: ReactNode }) {
 		if (!closing) router.push(href);
 	};
 
+	const back = backHref(pathname);
+	const goBack = () => {
+		// Only once the curtains are fully open (not mid-animation or behind
+		// the ticket), so it always goes through the curtains
+		if (!back || animationStage !== "idle") return;
+		setNavOpen(false);
+		goTo(back);
+	};
+
 	useEffect(() => {
 		if (!openOnNewRoute.current) return;
 		openOnNewRoute.current = false;
@@ -262,6 +280,17 @@ export default function Stage({ children }: { children: ReactNode }) {
 					?
 				</button>
 
+				{/* Back - same look as the "?", in the top-left corner */}
+				{back && (
+					<button
+						onClick={goBack}
+						aria-label="Back"
+						className="fixed top-[0.5vh] left-[0.5vw] text-[3.75vh] font-extrabold cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] bg-white border-dashed border-[0.2vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					>
+						{"<-"}
+					</button>
+				)}
+
 				{/* Backdrop behind the nav - fades in darker and slightly blurred,
 			    and closes the nav when clicked */}
 				<div
@@ -287,10 +316,19 @@ export default function Stage({ children }: { children: ReactNode }) {
 						transform: navOpen ? "translateY(0)" : "translateY(-90vh)",
 					}}
 				>
-					<img src="/imgs/header.webp" className="w-screen block" alt="Theatre curtain valance" />
+					<img
+						src="/imgs/header.webp"
+						className="w-screen block"
+						alt="Theatre curtain valance"
+					/>
 
 					{/* Nav content - sits in the solid area above the curtain swags */}
 					<div className="absolute inset-x-0 bottom-[55%] flex flex-col items-center gap-[2vh] text-[3vh]">
+						<img
+							src="/imgs/bag.png"
+							className="w-[18vw] absolute right-[8vw] top-[-9vh] test-shadow-darker"
+							alt=""
+						/>
 						<p className="pt-serif text-center max-w-[50vw]">
 							Some text about the site goes here.
 						</p>
