@@ -1,5 +1,5 @@
 import PopsicleButton from "@/components/PopsicleButton";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type PageProps = {
 	nextPage: () => void;
@@ -12,6 +12,12 @@ type PageProps = {
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 const BUTTON_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
+
+// wow.webp and wow-reverse.webp are both 18 frames × 60ms, the GIFs' speed
+const WOW_MS = 1080;
+const WOW_REVERSE_MS = 1080;
+// The Mona Lisa starts rising this long after it's picked (its transitionDelay)
+const MONA_DELAY_MS = 400;
 
 const drop = (shown: boolean, ms = 800, easing = LABEL_DROP) => ({
 	transition: `top ${ms}ms ${easing}, transform ${ms}ms ${easing}`,
@@ -46,6 +52,63 @@ export default function Page3({
 	const pensUp = entered && item === 1;
 	const notebookUp = entered && item === 2;
 	const monaUp = entered && item === 3;
+	// The doll's animation. On the Mona Lisa it plays "wow" once as the
+	// painting rises, then holds "wow-idle"; leaving the Mona Lisa (Next, Prev
+	// or Exit) plays "wow-reverse" once, then goes back to blinking
+	const [dollSrc, setDollSrc] = useState("/imgs/blink.webp");
+	const wowPlayed = useRef(false);
+
+	// A browser won't restart an animated image whose URL it has already
+	// shown, so the two one-shot animations are loaded once as blobs and get a
+	// fresh object URL each time they play
+	const wowBlobs = useRef<{ wow?: Blob; reverse?: Blob }>({});
+	const playingUrl = useRef<string | null>(null);
+	const freshUrl = (blob: Blob | undefined, fallback: string) => {
+		if (playingUrl.current) URL.revokeObjectURL(playingUrl.current);
+		playingUrl.current = blob ? URL.createObjectURL(blob) : null;
+		return playingUrl.current ?? fallback;
+	};
+	useEffect(() => {
+		fetch("/imgs/wow.webp")
+			.then((res) => res.blob())
+			.then((blob) => (wowBlobs.current.wow = blob));
+		fetch("/imgs/wow-reverse.webp")
+			.then((res) => res.blob())
+			.then((blob) => (wowBlobs.current.reverse = blob));
+		new Image().src = "/imgs/wow-idle.webp";
+		return () => {
+			if (playingUrl.current) URL.revokeObjectURL(playingUrl.current);
+		};
+	}, []);
+
+	useEffect(() => {
+		const timers: ReturnType<typeof setTimeout>[] = [];
+		if (monaUp) {
+			timers.push(
+				setTimeout(() => {
+					wowPlayed.current = true;
+					setDollSrc(freshUrl(wowBlobs.current.wow, "/imgs/wow.webp"));
+				}, MONA_DELAY_MS),
+				setTimeout(
+					() => setDollSrc("/imgs/wow-idle.webp"),
+					MONA_DELAY_MS + WOW_MS,
+				),
+			);
+		} else if (wowPlayed.current) {
+			wowPlayed.current = false;
+			timers.push(
+				setTimeout(() =>
+					setDollSrc(
+						freshUrl(wowBlobs.current.reverse, "/imgs/wow-reverse.webp"),
+					),
+				),
+				setTimeout(() => setDollSrc("/imgs/blink.webp"), WOW_REVERSE_MS),
+			);
+		}
+		// Leaving mid-"wow" cancels the switch to "wow-idle", and vice versa
+		return () => timers.forEach(clearTimeout);
+	}, [monaUp]);
+
 	// When leaving, the souvenir and "Click to enter" come back after the pins
 	// and labels have started moving away (the entrance in reverse)
 	const leaving = opened && !entered;
@@ -68,7 +131,7 @@ export default function Page3({
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
 			<img
-				src={"/imgs/blink.webp"}
+				src={dollSrc}
 				className="h-[100vh] absolute top-[-32.5vh] right-[-5vw] test-shadow-darker z-5 -scale-x-[1]"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
@@ -76,6 +139,35 @@ export default function Page3({
 				}}
 				alt="Zhenya, a marionette doll on strings"
 			/>
+
+			{/* Money - rises in from the bottom with the shop items as you enter
+			    (0.4s after the click), and sinks again on Exit */}
+			<div
+				className="absolute left-[35vw] bottom-[5vh] z-11 test-shadow-darker"
+				style={{
+					...drop(opened, 900, DOLL_DROP),
+					transitionDelay: entered ? "400ms" : "0ms",
+					transform: entered ? "translateY(0)" : "translateY(100vh)",
+				}}
+			>
+				{/* Stick first, so the money sits in front of it. Narrow, centred under
+				    the bills (they span 0-9vw), and poking out below them */}
+				<img
+					src="/imgs/popsicle-stick.webp"
+					className="h-[25vh] w-[2.5vw] max-w-none absolute bottom-[-18vh] left-[3.75vw]"
+					alt=""
+				/>
+				<img
+					src="/imgs/money.png"
+					className="absolute bottom-0 w-[6vw] max-w-none mb-[5vh]"
+					alt=""
+				/>
+				<img
+					src="/imgs/money.png"
+					className="absolute bottom-0 w-[6vw] max-w-none rotate-7 ml-[3vw]"
+					alt=""
+				/>
+			</div>
 
 			{/* "Click to enter" - lifts back up once clicked */}
 			<button
@@ -136,7 +228,7 @@ export default function Page3({
 				}}
 			>
 				<img
-					src="/imgs/buttons.webp"
+					src="/imgs/buttons2.png"
 					className="h-[60vh] z-5 relative"
 					alt="Art Gallery card of four button pins"
 				/>
@@ -293,7 +385,7 @@ export default function Page3({
 
 			{/* "Exit" - drops in on the left, 1.1s after the click */}
 			<h2
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59vh] left-[2vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif max-w-[70%] cursor-pointer mx-auto text-center scribbler absolute bottom-[59vh] left-[2vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				onClick={() => setEntered(!entered)}
 				style={{
 					...drop(opened),
