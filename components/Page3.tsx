@@ -312,8 +312,10 @@ export default function Page3({
 			</div>
 
 			{/* "Next item" - drops in 0.9s after the click */}
-			<h2
+			<button
 				onClick={() => setItem((i) => (i + 1) % ITEM_COUNT)}
+				// Off screen (and out of the Tab order) while the shop is closed
+				tabIndex={entered ? undefined : -1}
 				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59vh] left-[28vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				style={{
 					...drop(opened),
@@ -324,7 +326,7 @@ export default function Page3({
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
 				Next item
-			</h2>
+			</button>
 			{/* "Buy the buttons" - down while the pins are up, lifts away when
 			    another item comes up - moves in time with the pins */}
 			<h2
@@ -387,9 +389,11 @@ export default function Page3({
 			</h2>
 
 			{/* "Exit" - drops in on the left, 1.1s after the click */}
-			<h2
+			<button
 				className="text-[3vh] pt-serif max-w-[70%] cursor-pointer mx-auto text-center scribbler absolute bottom-[59vh] left-[2vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				onClick={() => setEntered(!entered)}
+				// Off screen (and out of the Tab order) while the shop is closed
+				tabIndex={entered ? undefined : -1}
 				style={{
 					...drop(opened),
 					transitionDelay: entered ? "1100ms" : "0ms",
@@ -399,12 +403,14 @@ export default function Page3({
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
 				Exit
-			</h2>
+			</button>
 
 			{/* "Prev item" - under "Exit", drops in 1.3s after the click */}
-			<h2
+			<button
 				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[51vh] left-[-1vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				onClick={() => setItem((i) => (i - 1 + ITEM_COUNT) % ITEM_COUNT)}
+				// Off screen (and out of the Tab order) while the shop is closed
+				tabIndex={entered ? undefined : -1}
 				style={{
 					...drop(opened),
 					transitionDelay: entered ? "1300ms" : "0ms",
@@ -414,7 +420,7 @@ export default function Page3({
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
 				Prev item
-			</h2>
+			</button>
 
 			<div className="z-10">
 				<PopsicleButton

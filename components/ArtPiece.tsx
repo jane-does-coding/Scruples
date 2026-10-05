@@ -63,9 +63,9 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 				<h1 className="border-[0.2vh] bg-white px-[1.5vw] py-[1vh] text-[3vh] text-center relative z-2 w-fit mx-auto">
 					{frame.label}
 				</h1>
-				<h1 className="border-[0.2vh] bg-white px-[1.5vw] py-[1vh] text-[3vh] text-center relative z-2 mt-[2vh] w-fit mx-auto">
+				<p className="border-[0.2vh] bg-white px-[1.5vw] py-[1vh] text-[3vh] text-center relative z-2 mt-[2vh] w-fit mx-auto">
 					by {frame.artist}
-				</h1>
+				</p>
 				{/* popsicle-stick.png is popsicle.png trimmed to just the stick, so
 				    w-/h- here are the stick's real size */}
 				<img

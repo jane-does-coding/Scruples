@@ -20,7 +20,9 @@ export default function useBlinkingDoll() {
 		let url: string | undefined;
 		let timer: ReturnType<typeof setTimeout>;
 
-		fetch(BLINK)
+		// Low priority - the first blink is at least 1s away, and until this
+		// arrives it just uses the plain URL
+		fetch(BLINK, { priority: "low" })
 			.then((res) => res.blob())
 			.then((b) => (blob = b));
 

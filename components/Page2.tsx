@@ -169,10 +169,19 @@ export default function Page2({
 						aria-hidden={copy === 1}
 					>
 						{FRAMES.map(({ slug, src, size, label }) => (
-							<button
-								className="relative cursor-pointer"
+							// A real link, so search engines can follow it and it can be
+							// opened in a new tab; a plain click still goes through the
+							// curtains instead of jumping straight there
+							<a
+								className="relative cursor-pointer text-center"
 								key={src}
-								onClick={() => goTo(`/art-piece/${slug}`)}
+								href={`/art-piece/${slug}`}
+								onClick={(e) => {
+									if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)
+										return;
+									e.preventDefault();
+									goTo(`/art-piece/${slug}`);
+								}}
 								aria-label={label}
 								// The second copy is only there for the loop
 								tabIndex={copy === 1 ? -1 : undefined}
@@ -191,7 +200,7 @@ export default function Page2({
 								<span className="border-[0.2vh] bg-white px-[1vw] py-[1vh] text-[2vh] left-[50%] -translate-x-[50%] absolute top-full mt-[1vh] z-5 w-max max-w-[22vw] text-center">
 									{label}
 								</span>
-							</button>
+							</a>
 						))}
 					</div>
 				))}

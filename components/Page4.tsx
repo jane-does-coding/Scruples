@@ -109,7 +109,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 				alt="Zhenya, a marionette doll on strings"
 			/>
 
-			<h2
+			<h1
 				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-2 border-black px-[1vw] py-[0.5vh] z-5 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					// Drops in at 0.4s. Once "Wow Cool!" is clicked it drops 48vh lower
@@ -125,10 +125,30 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
 				Now people post their art on social medias
-			</h2>
+			</h1>
 
 			{/* "Wow Cool!" - drops in at 0.8s; clicking it drops it and the label
 			    above down low */}
+			<button
+				onClick={() => setWowed(true)}
+				disabled={wowed}
+				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[58vh] left-[25vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-1 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				style={{
+					// Once clicked it drops 48vh lower: bottom-[58vh] → 10vh from the
+					// bottom of the page
+					...drop(step >= 3, 800, LABEL_DROP),
+					transform: wowed
+						? "translateY(25vh)"
+						: step >= 3
+							? "translateY(0)"
+							: "translateY(-60vh)",
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Wow Cool!
+			</button>
+
 			<button
 				onClick={() => setWowed(true)}
 				disabled={wowed}

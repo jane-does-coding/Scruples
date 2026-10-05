@@ -5,12 +5,15 @@
 }
 
 .pt-serif {
-	font-family: "PT Serif", serif;
+	/* --font-pt-serif is set by next/font in layout.tsx (self-hosted PT Serif) */
+	font-family: var(--font-pt-serif), "PT Serif", serif;
 }
 
 @font-face {
 	font-family: "scribbler";
-	src: url("/scribbler-font/scribbler.otf") format("opentype");
+	/* Capital S to match the file - Vercel's servers are case-sensitive, so
+	   "scribbler.otf" 404s there even though it works on a Mac */
+	src: url("/scribbler-font/Scribbler.otf") format("opentype");
 }
 
 .scribbler {
@@ -85,5 +88,13 @@
 	.marquee-up,
 	.ticket-shake {
 		animation: none;
+	}
+
+	/* Things still end up in the same place, they just don't slide there */
+	*,
+	*::before,
+	*::after {
+		transition-duration: 0.01ms !important;
+		transition-delay: 0ms !important;
 	}
 }

@@ -82,6 +82,21 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 	// Nav: header.png slides down from the top when "?" is clicked
 	const [navOpen, setNavOpen] = useState(false);
+
+	// Images that can't be seen until after the ticket is clicked (the menu
+	// header and bag, the open curtains, the paper background behind the closed
+	// curtains) are only added once the page has loaded, so they don't compete
+	// with the ticket and closed curtains for bandwidth
+	const [pageLoaded, setPageLoaded] = useState(false);
+	useEffect(() => {
+		const onLoad = () => setPageLoaded(true);
+		if (document.readyState === "complete") {
+			const timer = setTimeout(onLoad, 0);
+			return () => clearTimeout(timer);
+		}
+		window.addEventListener("load", onLoad, { once: true });
+		return () => window.removeEventListener("load", onLoad);
+	}, []);
 	useEffect(() => {
 		if (!navOpen) return;
 		const closeOnEscape = (e: KeyboardEvent) => {
@@ -194,10 +209,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 	};
 
 	useEffect(() => {
+		// Low priority, so they never hold up what's on screen
 		const decode = (srcs: string[]) =>
 			Promise.all(
 				srcs.map((src) =>
-					fetch(src)
+					fetch(src, { priority: "low" })
 						.then((res) => res.blob())
 						.then((blob) => createImageBitmap(blob)),
 				),
@@ -205,17 +221,34 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 		let cancelled = false;
 
-		decode(CLOSING_FRAMES).then((b) => (bitmaps.current.closing = b));
-		decode(OPENING_FRAMES).then((b) => {
-			bitmaps.current.opening = b;
-			if (cancelled) return;
-			// Ticket was clicked while the frames were still loading
-			if (enteredRef.current && curtainDelayDone.current) openCurtains();
-		});
-		decode(RIPPING_FRAMES).then((b) => (ripFrames.current = b));
+		// Waits until 1s after the visible page (closed curtains, ticket, fonts)
+		// has loaded, so the ticket is definitely on screen before these ~4MB
+		// start downloading. The opening and ripping frames are needed for the
+		// ticket click, so they come first; the closing frames are only needed
+		// when changing pages, so they load after
+		const loadFrames = () => {
+			const opening = decode(OPENING_FRAMES).then((b) => {
+				bitmaps.current.opening = b;
+				if (cancelled) return;
+				// Ticket was clicked while the frames were still loading
+				if (enteredRef.current && curtainDelayDone.current) openCurtains();
+			});
+			const ripping = decode(RIPPING_FRAMES).then(
+				(b) => (ripFrames.current = b),
+			);
+			Promise.all([opening, ripping]).then(() =>
+				decode(CLOSING_FRAMES).then((b) => (bitmaps.current.closing = b)),
+			);
+		};
+		let delay: ReturnType<typeof setTimeout>;
+		const afterLoad = () => (delay = setTimeout(loadFrames, 1000));
+		if (document.readyState === "complete") afterLoad();
+		else window.addEventListener("load", afterLoad, { once: true });
 
 		return () => {
 			cancelled = true;
+			clearTimeout(delay);
+			window.removeEventListener("load", afterLoad);
 			if (frameTimer.current) clearInterval(frameTimer.current);
 		};
 	}, []);
@@ -316,19 +349,25 @@ export default function Stage({ children }: { children: ReactNode }) {
 						transform: navOpen ? "translateY(0)" : "translateY(-90vh)",
 					}}
 				>
-					<img
-						src="/imgs/header.webp"
-						className="w-screen block"
-						alt="Theatre curtain valance"
-					/>
+					{pageLoaded && (
+						<img
+							src="/imgs/header.webp"
+							fetchPriority="low"
+							className="w-screen block"
+							alt="Theatre curtain valance"
+						/>
+					)}
 
 					{/* Nav content - sits in the solid area above the curtain swags */}
 					<div className="absolute inset-x-0 bottom-[55%] flex flex-col items-center gap-[2vh] text-[3vh]">
-						<img
-							src="/imgs/bag.png"
-							className="w-[18vw] absolute right-[8vw] top-[-9vh] test-shadow-darker"
-							alt=""
-						/>
+						{pageLoaded && (
+							<img
+								src="/imgs/bag.webp"
+								fetchPriority="low"
+								className="w-[18vw] absolute right-[8vw] top-[-9vh] test-shadow-darker"
+								alt=""
+							/>
+						)}
 						<p className="pt-serif text-center max-w-[50vw]">
 							Some text about the site goes here.
 						</p>
@@ -347,19 +386,26 @@ export default function Stage({ children }: { children: ReactNode }) {
 				</nav>
 
 				{/* Normal open state */}
-				<img
-					src="/imgs/open.webp"
-					className="w-screen h-screen top-0 left-0 fixed z-10 pointer-events-none scene-shadow"
-					style={{
-						visibility: animationStage === "idle" ? "visible" : "hidden",
-					}}
-					alt="Open theatre curtains"
-				/>
+				{pageLoaded && (
+					<img
+						src="/imgs/open.webp"
+						fetchPriority="low"
+						className="w-screen h-screen top-0 left-0 fixed z-10 pointer-events-none scene-shadow"
+						style={{
+							visibility: animationStage === "idle" ? "visible" : "hidden",
+						}}
+						alt="Open theatre curtains"
+					/>
+				)}
 
 				{/* Closed curtains until the ticket is clicked and the opening frames load */}
 				{animationStage === "loading" && (
 					<img
 						src="/imgs/closed.webp"
+						// Smaller screens get the 1200px version (147KB instead of 522KB)
+						srcSet="/imgs/closed-1200.webp 1200w, /imgs/closed.webp 2360w"
+						sizes="100vw"
+						fetchPriority="high"
 						className="w-screen h-screen top-0 left-0 fixed z-30"
 						alt="Closed theatre curtains"
 					/>
@@ -375,6 +421,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 					>
 						<img
 							src="/imgs/ticket2.webp"
+							// Shown at 50vw - smaller screens get the 700px version
+							srcSet="/imgs/ticket2-700.webp 700w, /imgs/ticket2.webp 1400w"
+							sizes="50vw"
+							fetchPriority="high"
 							className="w-[50vw] block"
 							style={{
 								visibility: ticket === "ripping" ? "hidden" : "visible",
@@ -399,17 +449,20 @@ export default function Stage({ children }: { children: ReactNode }) {
 				{/* Content - no z-index here, so it doesn't form a stacking context:
 			    curtains (z-10) sit above it, buttons (z-20) sit above curtains,
 			    and the animation (z-30) covers everything */}
-				<div className="bg-white/0 border-2 border-black/0 w-[65vw] h-[75vh] mx-auto top-[25vh] relative">
+				<main className="bg-white/0 border-2 border-black/0 w-[65vw] h-[75vh] mx-auto top-[25vh] relative">
 					{children}
-				</div>
+				</main>
 
 				{/* Background */}
 				<div className="-z-10 fixed top-0 left-0 h-screen w-screen">
-					<img
-						src="/imgs/paper-bg-2560.webp"
-						alt="Paper texture background"
-						className="w-full h-full object-cover opacity-60"
-					/>
+					{pageLoaded && (
+						<img
+							src="/imgs/paper-bg-2560.webp"
+							fetchPriority="low"
+							alt="Paper texture background"
+							className="w-full h-full object-cover opacity-60"
+						/>
+					)}
 				</div>
 			</div>
 		</StageContext.Provider>
