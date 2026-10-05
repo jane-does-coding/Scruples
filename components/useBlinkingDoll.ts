@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { asset } from "@/lib/asset";
 
-const IDLE = "/imgs/doll3.webp";
-const BLINK = "/imgs/blink.webp";
+const IDLE = asset("/imgs/doll3.webp");
+const BLINK = asset("/imgs/blink.webp");
 // blink.webp is one 700ms blink (it loops, so it's swapped out after one)
 const BLINK_MS = 700;
 // Each blink comes a random 1-3s after the last one

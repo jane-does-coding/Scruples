@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import { asset } from "@/lib/asset";
 
 type PageProps = {
 	nextPage: () => void;
@@ -22,20 +23,23 @@ const drop = (shown: boolean, ms = 800, easing = DOLL_DROP) => ({
 // Each post opens `href` in a new tab - replace the "#" placeholders
 const POSTS = [
 	{
-		src: "/imgs/insta1.webp",
+		src: asset("/imgs/insta1.webp"),
 		href: "https://www.instagram.com/p/Ddq5HoOCRNT/",
 	},
-	{ src: "/imgs/insta2.webp", href: "https://www.instagram.com/p/Dcb_GJZt2tD" },
 	{
-		src: "/imgs/insta3.webp",
+		src: asset("/imgs/insta2.webp"),
+		href: "https://www.instagram.com/p/Dcb_GJZt2tD",
+	},
+	{
+		src: asset("/imgs/insta3.webp"),
 		href: "https://www.instagram.com/p/DRXYq8PiGAC/",
 	},
 	{
-		src: "/imgs/insta4.webp",
+		src: asset("/imgs/insta4.webp"),
 		href: "https://www.instagram.com/p/Dd6tuMIEWhr/",
 	},
 	{
-		src: "/imgs/insta5.webp",
+		src: asset("/imgs/insta5.webp"),
 		href: "https://www.instagram.com/p/DZLF-KpEytA/",
 	},
 ];

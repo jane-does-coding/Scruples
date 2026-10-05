@@ -2,6 +2,7 @@ import PopsicleButton from "@/components/PopsicleButton";
 import { useEffect, useRef, useState } from "react";
 import { useStage } from "@/components/Stage";
 import { FRAMES, type FrameSize } from "@/lib/frames";
+import { asset } from "@/lib/asset";
 
 // Extra-wide is sized so it's the same height as a wide frame
 // (frame4 is 1018×762, wide frames are 762×705)
@@ -75,10 +76,10 @@ export default function Page2({
 		};
 	}, [hoveringArt]);
 	const dollImage = !hoveringArt
-		? "/imgs/wiggle.webp"
+		? asset("/imgs/wiggle.webp")
 		: blinking
-			? "/imgs/blink.webp"
-			: "/imgs/doll3.webp";
+			? asset("/imgs/blink.webp")
+			: asset("/imgs/doll3.webp");
 
 	// Marquee eases down to 30% speed on hover. playbackRate is changed
 	// rather than the CSS duration, so the strip keeps its place instead of jumping
@@ -187,7 +188,7 @@ export default function Page2({
 								tabIndex={copy === 1 ? -1 : undefined}
 							>
 								<img
-									src="/imgs/popsicle.webp"
+									src={asset("/imgs/popsicle.webp")}
 									className="absolute top-[30%] left-[50%] -translate-x-[50%] h-[80vh] min-w-[22vw] z-1"
 									alt="Wooden popsicle stick holding up the frame"
 								/>
@@ -213,7 +214,7 @@ export default function Page2({
 			</div>
  */}
 			{/* <img
-				src="/imgs/popsicle.webp"
+				src={asset("/imgs/popsicle.webp")}
 				alt=""
 				className="absolute w-[15vw] mx-auto bottom-[-13vh] z-[-5]"
 			/>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import { asset } from "@/lib/asset";
 
 type PageProps = {
 	nextPage: () => void;
@@ -104,7 +105,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Doll */}
 			<img
-				src={moving ? "/imgs/moving.webp" : blinkSrc}
+				src={moving ? asset("/imgs/moving.webp") : blinkSrc}
 				className="h-[100vh] absolute top-[-30vh] left-[-5vw] test-shadow"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),

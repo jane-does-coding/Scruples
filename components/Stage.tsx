@@ -10,6 +10,7 @@ import {
 	type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { asset, srcSet } from "@/lib/asset";
 
 const ANIMATION_MS = 700;
 // Opening on a new route is a bit slower, and waits a moment first so the
@@ -20,7 +21,7 @@ const ROUTE_OPEN_DELAY_MS = 150;
 const frames = (name: string, count: number) =>
 	Array.from(
 		{ length: count },
-		(_, i) => `/imgs/${name}/${String(i).padStart(2, "0")}.webp`,
+		(_, i) => asset(`/imgs/${name}/${String(i).padStart(2, "0")}.webp`),
 	);
 
 const CLOSING_FRAMES = frames("closing", 10);
@@ -351,7 +352,13 @@ export default function Stage({ children }: { children: ReactNode }) {
 				>
 					{pageLoaded && (
 						<img
-							src="/imgs/header.webp"
+							src={asset("/imgs/header.webp")}
+							srcSet={srcSet([
+								["/imgs/header-1200.webp", 1200],
+								["/imgs/header-1600.webp", 1600],
+								["/imgs/header.webp", 2360],
+							])}
+							sizes="100vw"
 							fetchPriority="low"
 							className="w-screen block"
 							alt="Theatre curtain valance"
@@ -362,7 +369,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 					<div className="absolute inset-x-0 bottom-[55%] flex flex-col items-center gap-[2vh] text-[3vh]">
 						{pageLoaded && (
 							<img
-								src="/imgs/bag.webp"
+								src={asset("/imgs/bag.webp")}
+								srcSet={srcSet([
+									["/imgs/bag-450.webp", 450],
+									["/imgs/bag.webp", 900],
+								])}
+								sizes="18vw"
 								fetchPriority="low"
 								className="w-[18vw] absolute right-[8vw] top-[-9vh] test-shadow-darker"
 								alt=""
@@ -388,7 +400,13 @@ export default function Stage({ children }: { children: ReactNode }) {
 				{/* Normal open state */}
 				{pageLoaded && (
 					<img
-						src="/imgs/open.webp"
+						src={asset("/imgs/open.webp")}
+						srcSet={srcSet([
+							["/imgs/open-1200.webp", 1200],
+							["/imgs/open-1600.webp", 1600],
+							["/imgs/open.webp", 2360],
+						])}
+						sizes="100vw"
 						fetchPriority="low"
 						className="w-screen h-screen top-0 left-0 fixed z-10 pointer-events-none scene-shadow"
 						style={{
@@ -401,9 +419,13 @@ export default function Stage({ children }: { children: ReactNode }) {
 				{/* Closed curtains until the ticket is clicked and the opening frames load */}
 				{animationStage === "loading" && (
 					<img
-						src="/imgs/closed.webp"
-						// Smaller screens get the 1200px version (147KB instead of 522KB)
-						srcSet="/imgs/closed-1200.webp 1200w, /imgs/closed.webp 2360w"
+						src={asset("/imgs/closed.webp")}
+						// Smaller screens get a smaller copy (147KB at 1200px vs 522KB)
+						srcSet={srcSet([
+							["/imgs/closed-1200.webp", 1200],
+							["/imgs/closed-1600.webp", 1600],
+							["/imgs/closed.webp", 2360],
+						])}
 						sizes="100vw"
 						fetchPriority="high"
 						className="w-screen h-screen top-0 left-0 fixed z-30"
@@ -420,9 +442,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 						aria-label="Enter"
 					>
 						<img
-							src="/imgs/ticket2.webp"
+							src={asset("/imgs/ticket2.webp")}
 							// Shown at 50vw - smaller screens get the 700px version
-							srcSet="/imgs/ticket2-700.webp 700w, /imgs/ticket2.webp 1400w"
+							srcSet={srcSet([
+								["/imgs/ticket2-700.webp", 700],
+								["/imgs/ticket2.webp", 1400],
+							])}
 							sizes="50vw"
 							fetchPriority="high"
 							className="w-[50vw] block"
@@ -457,7 +482,13 @@ export default function Stage({ children }: { children: ReactNode }) {
 				<div className="-z-10 fixed top-0 left-0 h-screen w-screen">
 					{pageLoaded && (
 						<img
-							src="/imgs/paper-bg-2560.webp"
+							src={asset("/imgs/paper-bg-2560.webp")}
+							srcSet={srcSet([
+								["/imgs/paper-bg-1280.webp", 1280],
+								["/imgs/paper-bg-1920.webp", 1920],
+								["/imgs/paper-bg-2560.webp", 2560],
+							])}
+							sizes="100vw"
 							fetchPriority="low"
 							alt="Paper texture background"
 							className="w-full h-full object-cover opacity-60"

@@ -1,6 +1,7 @@
 import PopsicleButton from "@/components/PopsicleButton";
 import { useEffect, useRef, useState } from "react";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import { asset } from "@/lib/asset";
 
 type PageProps = {
 	nextPage: () => void;
@@ -72,13 +73,13 @@ export default function Page3({
 		return playingUrl.current ?? fallback;
 	};
 	useEffect(() => {
-		fetch("/imgs/wow.webp")
+		fetch(asset("/imgs/wow.webp"))
 			.then((res) => res.blob())
 			.then((blob) => (wowBlobs.current.wow = blob));
-		fetch("/imgs/wow-reverse.webp")
+		fetch(asset("/imgs/wow-reverse.webp"))
 			.then((res) => res.blob())
 			.then((blob) => (wowBlobs.current.reverse = blob));
-		new Image().src = "/imgs/wow-idle.webp";
+		new Image().src = asset("/imgs/wow-idle.webp");
 		return () => {
 			if (playingUrl.current) URL.revokeObjectURL(playingUrl.current);
 		};
@@ -90,10 +91,10 @@ export default function Page3({
 			timers.push(
 				setTimeout(() => {
 					wowPlayed.current = true;
-					setDollSrc(freshUrl(wowBlobs.current.wow, "/imgs/wow.webp"));
+					setDollSrc(freshUrl(wowBlobs.current.wow, asset("/imgs/wow.webp")));
 				}, MONA_DELAY_MS),
 				setTimeout(
-					() => setDollSrc("/imgs/wow-idle.webp"),
+					() => setDollSrc(asset("/imgs/wow-idle.webp")),
 					MONA_DELAY_MS + WOW_MS,
 				),
 			);
@@ -102,7 +103,7 @@ export default function Page3({
 			timers.push(
 				setTimeout(() =>
 					setDollSrc(
-						freshUrl(wowBlobs.current.reverse, "/imgs/wow-reverse.webp"),
+						freshUrl(wowBlobs.current.reverse, asset("/imgs/wow-reverse.webp")),
 					),
 				),
 				setTimeout(() => setDollSrc(null), WOW_REVERSE_MS),
@@ -156,17 +157,17 @@ export default function Page3({
 				{/* Stick first, so the money sits in front of it. Narrow, centred under
 				    the bills (they span 0-9vw), and poking out below them */}
 				<img
-					src="/imgs/popsicle-stick.webp"
+					src={asset("/imgs/popsicle-stick.webp")}
 					className="h-[25vh] w-[2.5vw] max-w-none absolute bottom-[-18vh] left-[3.75vw]"
 					alt=""
 				/>
 				<img
-					src="/imgs/money.png"
+					src={asset("/imgs/money.png")}
 					className="absolute bottom-0 w-[6vw] max-w-none mb-[5vh]"
 					alt=""
 				/>
 				<img
-					src="/imgs/money.png"
+					src={asset("/imgs/money.png")}
 					className="absolute bottom-0 w-[6vw] max-w-none rotate-7 ml-[3vw]"
 					alt=""
 				/>
@@ -204,17 +205,17 @@ export default function Page3({
 				}}
 			>
 				<img
-					src="/imgs/souvenir.webp"
+					src={asset("/imgs/souvenir.webp")}
 					className="h-[70vh] z-5 relative"
 					alt="Souvenir shop"
 				/>
 				<img
-					src="/imgs/popsicle.webp"
+					src={asset("/imgs/popsicle.webp")}
 					className="absolute top-[50%] left-[-8vw] h-[60vh] min-w-[22vw] z-1"
 					alt="Wooden popsicle stick holding up the souvenir"
 				/>
 				<img
-					src="/imgs/popsicle.webp"
+					src={asset("/imgs/popsicle.webp")}
 					className="absolute top-[50%] right-[-10vw] h-[60vh] min-w-[22vw] z-1"
 					alt="Wooden popsicle stick holding up the souvenir"
 				/>
@@ -231,17 +232,17 @@ export default function Page3({
 				}}
 			>
 				<img
-					src="/imgs/buttons2.png"
+					src={asset("/imgs/buttons2.png")}
 					className="h-[60vh] z-5 relative"
 					alt="Art Gallery card of four button pins"
 				/>
 				<img
-					src="/imgs/popsicle.webp"
+					src={asset("/imgs/popsicle.webp")}
 					className="absolute top-[50%] left-[-10vw] h-[60vh] min-w-[22vw] z-1"
 					alt="Wooden popsicle stick holding up the button pins"
 				/>
 				<img
-					src="/imgs/popsicle.webp"
+					src={asset("/imgs/popsicle.webp")}
 					className="absolute top-[50%] right-[-10vw] h-[60vh] min-w-[22vw] z-1"
 					alt="Wooden popsicle stick holding up the button pins"
 				/>
@@ -258,12 +259,12 @@ export default function Page3({
 				}}
 			>
 				<img
-					src="/imgs/pens.webp"
+					src={asset("/imgs/pens.webp")}
 					className="h-[70vh] z-5 relative"
 					alt="Pack of six Micron pens"
 				/>
 				<img
-					src="/imgs/popsicle.webp"
+					src={asset("/imgs/popsicle.webp")}
 					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60vh] min-w-[22vw] z-1"
 					alt="Wooden popsicle stick holding up the pens"
 				/>
@@ -279,12 +280,12 @@ export default function Page3({
 				}}
 			>
 				<img
-					src="/imgs/mona_lisa.webp"
+					src={asset("/imgs/mona_lisa.webp")}
 					className="h-[60vh] z-5 relative"
 					alt="The Mona Lisa in a picture frame"
 				/>
 				<img
-					src="/imgs/popsicle.webp"
+					src={asset("/imgs/popsicle.webp")}
 					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60vh] min-w-[22vw] z-1"
 					alt="Wooden popsicle stick holding up the Mona Lisa"
 				/>
@@ -300,12 +301,12 @@ export default function Page3({
 				}}
 			>
 				<img
-					src="/imgs/notebook.webp"
+					src={asset("/imgs/notebook.webp")}
 					className="h-[60vh] z-5 relative"
 					alt="Ruled notebook"
 				/>
 				<img
-					src="/imgs/popsicle.webp"
+					src={asset("/imgs/popsicle.webp")}
 					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60vh] min-w-[22vw] z-1"
 					alt="Wooden popsicle stick holding up the notebook"
 				/>

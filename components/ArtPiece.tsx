@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import type { Frame } from "@/lib/frames";
+import { asset } from "@/lib/asset";
 
 const DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 
@@ -50,7 +51,7 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 
 			{/* Doll */}
 			{/* 	<img
-				src={"/imgs/doll2.png"}
+				src={asset("/imgs/doll2.png")}
 				className="h-[80vh] absolute top-[-30vh] right-[-6vw] test-shadow-darker z-5 -scale-x-[1]"
 				alt=""
 			/> */}
@@ -69,7 +70,7 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 				{/* popsicle-stick.png is popsicle.png trimmed to just the stick, so
 				    w-/h- here are the stick's real size */}
 				<img
-					src="/imgs/popsicle-stick.webp"
+					src={asset("/imgs/popsicle-stick.webp")}
 					className="absolute w-[2.3vw] h-[38vh] max-w-none bottom-[-19vh] left-[50%] -translate-x-[50%] z-0"
 					alt="Wooden popsicle stick holding up the labels"
 				/>

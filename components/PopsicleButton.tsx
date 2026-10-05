@@ -1,4 +1,5 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
+import { asset } from "@/lib/asset";
 
 type PopsicleButtonProps = {
 	onClick: () => void;
@@ -54,7 +55,7 @@ export default function PopsicleButton({
 				className={`absolute bottom-[-8vh] z-[-5] drop-shadow-md drop-shadow-black/40 ${right ? "left-[-2vw]" : "right-[-0vw]"}`}
 			>
 				<img
-					src="/imgs/popsicle.webp"
+					src={asset("/imgs/popsicle.webp")}
 					alt="Wooden popsicle stick holding up the sign"
 					className="w-[18vw] max-w-none"
 					style={tilt("50% 100%")}
