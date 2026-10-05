@@ -46,6 +46,20 @@
 	}
 }
 
+/* Vertical version for Page 4's posts - scrolls up */
+.marquee-up {
+	animation: marquee-up 40s linear infinite;
+}
+
+@keyframes marquee-up {
+	from {
+		transform: translateY(0);
+	}
+	to {
+		transform: translateY(-50%);
+	}
+}
+
 /* Ticket wiggles 1deg left, then right, then back over 0.6s, then rests for
    1s (1.6s total, so 0.6s is 37.5% of it) */
 .ticket-shake {
@@ -68,6 +82,7 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.marquee,
+	.marquee-up,
 	.ticket-shake {
 		animation: none;
 	}

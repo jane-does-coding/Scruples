@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
+import useBlinkingDoll from "@/components/useBlinkingDoll";
 
 type PageProps = {
 	nextPage: () => void;
@@ -24,9 +25,10 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 	// Controls whether the "Hi" response/buttons have appeared
 	const [saidHi, setSaidHi] = useState(false);
 
-	// Controls the doll's current animation
-	const [dollImage, setDollImage] = useState("/imgs/doll3.webp");
-	const isMoving = useRef(false);
+	// The doll: idle and blinking every 1-3s, except while it's doing the
+	// "moving" animation after "Say Hi"
+	const blinkSrc = useBlinkingDoll();
+	const [moving, setMoving] = useState(false);
 	const movingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
 	useEffect(() => {
@@ -41,39 +43,16 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 		return () => timers.forEach(clearTimeout);
 	}, [curtainsOpen]);
 
-	// Blink every 3 seconds
-	useEffect(() => {
-		const interval = setInterval(() => {
-			// Don't interrupt the moving animation
-			if (isMoving.current) return;
-
-			setDollImage("/imgs/blink.webp");
-
-			// Return to idle after blink animation, unless it started moving meanwhile
-			setTimeout(() => {
-				setDollImage((img) =>
-					img === "/imgs/blink.webp" ? "/imgs/doll3.webp" : img,
-				);
-			}, 1000);
-		}, 3000);
-
-		return () => clearInterval(interval);
-	}, []);
-
 	const handleSayHi = () => {
 		// Show the "Hi" response and buttons
 		setSaidHi(true);
 
 		// Play moving animation
-		isMoving.current = true;
-		setDollImage("/imgs/moving.webp");
+		setMoving(true);
 
-		// Return to idle after 2 seconds
+		// Return to idle (and blinking) after 2 seconds
 		clearTimeout(movingTimer.current);
-		movingTimer.current = setTimeout(() => {
-			isMoving.current = false;
-			setDollImage("/imgs/doll3.webp");
-		}, 2000);
+		movingTimer.current = setTimeout(() => setMoving(false), 2000);
 	};
 
 	return (
@@ -125,7 +104,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Doll */}
 			<img
-				src={dollImage}
+				src={moving ? "/imgs/moving.webp" : blinkSrc}
 				className="h-[100vh] absolute top-[-30vh] left-[-5vw] test-shadow"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),

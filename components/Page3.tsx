@@ -1,5 +1,6 @@
 import PopsicleButton from "@/components/PopsicleButton";
 import { useEffect, useRef, useState } from "react";
+import useBlinkingDoll from "@/components/useBlinkingDoll";
 
 type PageProps = {
 	nextPage: () => void;
@@ -54,8 +55,10 @@ export default function Page3({
 	const monaUp = entered && item === 3;
 	// The doll's animation. On the Mona Lisa it plays "wow" once as the
 	// painting rises, then holds "wow-idle"; leaving the Mona Lisa (Next, Prev
-	// or Exit) plays "wow-reverse" once, then goes back to blinking
-	const [dollSrc, setDollSrc] = useState("/imgs/blink.webp");
+	// or Exit) plays "wow-reverse" once, then goes back to blinking.
+	// null = the idle doll, blinking every 1-3s like on Page 1
+	const blinkSrc = useBlinkingDoll();
+	const [dollSrc, setDollSrc] = useState<string | null>(null);
 	const wowPlayed = useRef(false);
 
 	// A browser won't restart an animated image whose URL it has already
@@ -102,7 +105,7 @@ export default function Page3({
 						freshUrl(wowBlobs.current.reverse, "/imgs/wow-reverse.webp"),
 					),
 				),
-				setTimeout(() => setDollSrc("/imgs/blink.webp"), WOW_REVERSE_MS),
+				setTimeout(() => setDollSrc(null), WOW_REVERSE_MS),
 			);
 		}
 		// Leaving mid-"wow" cancels the switch to "wow-idle", and vice versa
@@ -131,7 +134,7 @@ export default function Page3({
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
 			<img
-				src={dollSrc}
+				src={dollSrc ?? blinkSrc}
 				className="h-[100vh] absolute top-[-32.5vh] right-[-5vw] test-shadow-darker z-5 -scale-x-[1]"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
