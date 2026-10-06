@@ -14,6 +14,9 @@ type PageProps = {
 const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const BUTTON_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
+// How long the labels take to lift away after "So what?" (their 800ms
+// transition) - the posts only start sliding over once they're gone
+const LABELS_UP_MS = 800;
 
 const drop = (shown: boolean, ms = 800, easing = DOLL_DROP) => ({
 	transition: `top ${ms}ms ${easing}, transform ${ms}ms ${easing}`,
@@ -53,14 +56,21 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 	// "digital and traditional art" label drops in up high
 	const [wowed, setWowed] = useState(false);
 
-	// The Continue button rises once the "digital and traditional art" label
-	// has dropped in (it starts 0.4s after the click and takes 0.8s)
+	// Clicking "So what?" sends every label back up, slides the posts to the
+	// left, and drops in the "It opens a way…" label on the right
+	const [soWhat, setSoWhat] = useState(false);
+
+	// The Continue button rises once the last label ("It opens a way…") has
+	// dropped in (it starts 1.4s after "So what?" is clicked and takes 0.8s)
 	const [showContinue, setShowContinue] = useState(false);
 	useEffect(() => {
-		if (!wowed) return;
-		const timer = setTimeout(() => setShowContinue(true), 1200);
+		if (!soWhat) return;
+		const timer = setTimeout(
+			() => setShowContinue(true),
+			LABELS_UP_MS + 600 + 800,
+		);
 		return () => clearTimeout(timer);
-	}, [wowed]);
+	}, [soWhat]);
 
 	// Marquee eases down to 30% speed on hover (without stopping) and back up
 	// when the pointer leaves. playbackRate is changed rather than the CSS
@@ -119,11 +129,14 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 					// Drops in at 0.4s. Once "Wow Cool!" is clicked it drops 48vh lower
 					// with it (bottom-[67vh] → 19vh from the bottom)
 					...drop(step >= 2, 800, LABEL_DROP),
-					transform: wowed
-						? "translateY(25vh)"
-						: step >= 2
-							? "translateY(0)"
-							: "translateY(-60vh)",
+					// …and lifts off the top once "So what?" is clicked
+					transform: soWhat
+						? "translateY(-100vh)"
+						: wowed
+							? "translateY(25vh)"
+							: step >= 2
+								? "translateY(0)"
+								: "translateY(-60vh)",
 				}}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
@@ -141,11 +154,14 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 					// Once clicked it drops 48vh lower: bottom-[58vh] → 10vh from the
 					// bottom of the page
 					...drop(step >= 3, 800, LABEL_DROP),
-					transform: wowed
-						? "translateY(25vh)"
-						: step >= 3
-							? "translateY(0)"
-							: "translateY(-60vh)",
+					// …and lifts off the top once "So what?" is clicked
+					transform: soWhat
+						? "translateY(-100vh)"
+						: wowed
+							? "translateY(25vh)"
+							: step >= 3
+								? "translateY(0)"
+								: "translateY(-60vh)",
 				}}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
@@ -153,24 +169,23 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 				Wow Cool!
 			</button>
 
+			{/* "So what?" - drops in just after the "digital and traditional art"
+			    label (0.8s after "Wow Cool!"); clicking it sends every label back up */}
 			<button
-				onClick={() => setWowed(true)}
-				disabled={wowed}
-				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[58vh] left-[25vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-1 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				onClick={() => setSoWhat(true)}
+				disabled={!wowed || soWhat}
+				// Off screen (and out of the Tab order) until it has dropped in
+				tabIndex={wowed && !soWhat ? undefined : -1}
+				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[22vh] left-[27vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
-					// Once clicked it drops 48vh lower: bottom-[58vh] → 10vh from the
-					// bottom of the page
-					...drop(step >= 3, 800, LABEL_DROP),
-					transform: wowed
-						? "translateY(25vh)"
-						: step >= 3
-							? "translateY(0)"
-							: "translateY(-60vh)",
+					...drop(wowed, 800, LABEL_DROP),
+					transitionDelay: wowed && !soWhat ? "800ms" : "0ms",
+					transform: wowed && !soWhat ? "translateY(0)" : "translateY(-100vh)",
 				}}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
-				Wow Cool!
+				So what?
 			</button>
 
 			<h2
@@ -178,14 +193,31 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 				style={{
 					// Drops in from above 0.4s after "Wow Cool!" is clicked. Starts
 					// 100vh up so its long strings are off screen too
+					// …and lifts back off the top once "So what?" is clicked
 					...drop(wowed),
-					transitionDelay: wowed ? "400ms" : "0ms",
-					transform: wowed ? "translateY(0)" : "translateY(-100vh)",
+					transitionDelay: wowed && !soWhat ? "400ms" : "0ms",
+					transform: wowed && !soWhat ? "translateY(0)" : "translateY(-100vh)",
 				}}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[70vh] top-[-70vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[70vh] top-[-70vh] right-0 absolute"></span>
 				There is digital and traditional art, that people post.
+			</h2>
+
+			{/* "It opens a way…" - drops in on the right, 0.6s after the posts
+			    start sliding over (1.4s after "So what?" is clicked) */}
+			<h2
+				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[40vh] right-[0vw] bg-white border-2 border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={{
+					...drop(soWhat, 800, LABEL_DROP),
+					transitionDelay: soWhat ? `${LABELS_UP_MS + 600}ms` : "0ms",
+					transform: soWhat ? "translateY(0)" : "translateY(-100vh)",
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				It opens a way for people to share their work, while also opening a huge
+				portal for comparison to other artists.
 			</h2>
 
 			{/* Posts - a vertical marquee on the right that scrolls up forever.
@@ -197,41 +229,55 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			    inside it moves with it, even "fixed"), and before it so they sit
 			    behind the posts. Same spot and width as a post (60vh tall at
 			    944×1302 is 60 × 944 / 1302 ≈ 43.5vh wide) */}
-			<div className="absolute top-[-25vh] right-[0vw] h-[100vh] w-[43.5vh] test-shadow-darker">
-				<span className="w-[0.1vw] bg-black/60 h-full top-0 left-[2vw] absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-full top-0 right-[2vw] absolute"></span>
-			</div>
-
+			{/* Slides the posts (and their two lines) to the left once "So what?"
+			    is clicked. A wrapper, because the marquee's own transform is busy
+			    scrolling it. pointer-events-none so the empty part of it doesn't
+			    block clicks; the lines and posts turn them back on */}
 			<div
-				ref={marqueeRef}
-				className="absolute top-[-25vh] right-[0vw] flex flex-col marquee-up test-shadow-darker"
-				onMouseEnter={() => easeMarqueeTo(0.3)}
-				onMouseLeave={() => easeMarqueeTo(1)}
+				className="absolute inset-0 pointer-events-none"
+				style={{
+					transition: `transform 900ms ${DOLL_DROP}`,
+					// Waits for the labels to finish lifting away (0.8s) first
+					transitionDelay: soWhat ? `${LABELS_UP_MS}ms` : "0ms",
+					transform: soWhat ? "translateX(-21vw)" : "translateX(0)",
+				}}
 			>
-				{[0, 1].map((copy) => (
-					<div
-						key={copy}
-						className="flex flex-col gap-[4vh] pb-[4vh]"
-						aria-hidden={copy === 1}
-					>
-						{POSTS.map(({ src, href }, i) => (
-							<a
-								key={src}
-								href={href}
-								target="_blank"
-								rel="noopener noreferrer"
-								// The second copy is only there for the loop
-								tabIndex={copy === 1 ? -1 : undefined}
-							>
-								<img
-									src={src}
-									className="h-[60vh] w-auto max-w-none"
-									alt={`Instagram-style art post ${i + 1}`}
-								/>
-							</a>
-						))}
-					</div>
-				))}
+				<div className="absolute top-[-25vh] right-[0vw] h-[100vh] w-[43.5vh] test-shadow-darker pointer-events-auto">
+					<span className="w-[0.1vw] bg-black/60 h-full top-0 left-[2vw] absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-full top-0 right-[2vw] absolute"></span>
+				</div>
+
+				<div
+					ref={marqueeRef}
+					className="absolute top-[-25vh] right-[0vw] flex flex-col marquee-up test-shadow-darker pointer-events-auto"
+					onMouseEnter={() => easeMarqueeTo(0.3)}
+					onMouseLeave={() => easeMarqueeTo(1)}
+				>
+					{[0, 1].map((copy) => (
+						<div
+							key={copy}
+							className="flex flex-col gap-[4vh] pb-[4vh]"
+							aria-hidden={copy === 1}
+						>
+							{POSTS.map(({ src, href }, i) => (
+								<a
+									key={src}
+									href={href}
+									target="_blank"
+									rel="noopener noreferrer"
+									// The second copy is only there for the loop
+									tabIndex={copy === 1 ? -1 : undefined}
+								>
+									<img
+										src={src}
+										className="h-[60vh] w-auto max-w-none"
+										alt={`Instagram-style art post ${i + 1}`}
+									/>
+								</a>
+							))}
+						</div>
+					))}
+				</div>
 			</div>
 
 			{/* Continue - rises in once the last label has dropped in. After the
