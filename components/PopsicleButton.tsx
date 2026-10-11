@@ -69,7 +69,7 @@ export default function PopsicleButton({
 			>
 				<button
 					onClick={onClick}
-					className="cursor-pointer bg-white border-2 border-black border-dashed px-[2vw] py-[1vh] text-[4vh] flex whitespace-nowrap"
+					className="cursor-pointer bg-white border-[0.3vh] border-black border-dashed px-[2vw] py-[1vh] text-[4vh] flex whitespace-nowrap"
 					style={tilt(BUTTON_PIVOT[side])}
 					{...hoverProps}
 				>

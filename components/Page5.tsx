@@ -1,0 +1,767 @@
+import { useEffect, useRef, useState } from "react";
+import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
+import useWowDoll from "@/components/useWowDoll";
+import { asset } from "@/lib/asset";
+import { useStage } from "@/components/Stage";
+import useLeaving from "@/components/useLeaving";
+
+type PageProps = {
+	nextPage: () => void;
+	previousPage: () => void;
+	currentPage: number;
+	totalPages: number;
+	curtainsOpen: boolean;
+};
+
+const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
+const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
+// The magic button's tilt: it waits until its 800ms drop is almost done
+// (550ms in), then swings to 6deg over 450ms with a light bounce. Used as
+// "<property> ${TILT}", so the delay applies to each property it's used for
+const TILT = "450ms cubic-bezier(0.34, 1.4, 0.64, 1) 550ms";
+
+// What happens after MAGIC BUTTON is clicked (ms after the click): the
+// spiral drops in (900ms) and spins for 2s, then it's pulled back up while
+// the empty frame sinks; frame 3 rises in its place and the doll goes "wow";
+// once the wow has played, "Aww cute!" drops in
+const SPIRAL_GONE_MS = 900 + 2000;
+const FRAME3_MS = SPIRAL_GONE_MS + 500;
+const AWW_MS = FRAME3_MS + 1100;
+
+// After "Aww cute!" (ms after the click): Zhenya flips (0.6s), then Daphne
+// walks in from the right (WALK_MS). Half a second after she
+// stops, the labels drop in between the two dolls, a second apart so each
+// lands before the next one starts
+const DAPHNE_WALK_START_MS = 600;
+const WALK_MS = 4000;
+const DAPHNE_ARRIVED_MS = DAPHNE_WALK_START_MS + WALK_MS;
+const THIS_IS_DAPHNE_MS = DAPHNE_ARRIVED_MS + 500;
+const LIKES_TO_DRAW_MS = THIS_IS_DAPHNE_MS + 1000;
+const ASK_MS = LIKES_TO_DRAW_MS + 1000;
+
+// After the ask button (ms after the click): each piece comes in once the
+// one before has landed
+const FRAME2_DELAY_MS = 300;
+const MONEY_DELAY_MS = 1100;
+const PRICE_DELAY_MS = 1900;
+const CANCEL_DELAY_MS = 2700;
+const BUY_DELAY_MS = 3100;
+
+// After "Buy" (ms after the click): the spiral drops in (900ms, after a 0.4s
+// pause for the money to start sinking), spins for 2s, then goes back up as
+// the empty frame sinks, and the smile drawing rises in its place
+const SPIRAL2_IN_DELAY_MS = 400;
+const SPIRAL2_GONE_MS = SPIRAL2_IN_DELAY_MS + 900 + 2000;
+const SMILE_MS = SPIRAL2_GONE_MS + 500;
+
+// Daphne while she draws: paint-out brings out her palette (13 frames ×
+// 70ms), then she holds it (its last frame) until the drawing is done, then
+// paint-away puts it back and she returns to idle blinking
+const PAINT_OUT = asset("/imgs/paint-out.webp");
+const PAINT_AWAY = asset("/imgs/paint-away.webp");
+const HOLDING_PALETTE = asset("/imgs/daphne-palette.webp");
+const PAINT_MS = 910;
+
+// After the drawing appears: "I love it!" / "I dislike it..." pop up near
+// Zhenya once it has risen
+const CHOICES_MS = SMILE_MS + 1200;
+
+// After "Really? Why?", the chat's rows lift away one after another, top to
+// bottom, this far apart; Daphne's answer starts once the last one is gone
+const CHAT_EXIT_STAGGER_MS = 100;
+const CHAT_ROWS = 5;
+const ANSWER_START_MS = (CHAT_ROWS - 1) * CHAT_EXIT_STAGGER_MS + 800;
+
+// Daphne's long answer, a line at a time ("next ->" swaps to the next one)
+const DAPHNE_ANSWER = [
+	"Well, art is not just a representation of the world,",
+	"but also how I see it,",
+	"and I'm able to use art to share it with others.",
+	"I truly feel a connection with the world and the people who I share my art with,",
+	"since I'm letting them take a peek into my mind and soul,",
+	"and share a part of myself with them.",
+];
+
+// Hangs or stands something in place, or sends it off the top/bottom.
+// `everShown` keeps it visible while it leaves; `delay` applies on the way in
+// and `exitDelay` on the way out
+const hang = (
+	everShown: boolean,
+	inPlace: boolean,
+	from: "top" | "bottom",
+	{ ms = 800, easing = LABEL_DROP, delay = 0, exitDelay = 0 } = {},
+) => ({
+	visibility: everShown ? ("visible" as const) : ("hidden" as const),
+	transition: `transform ${ms}ms ${easing} ${inPlace ? delay : exitDelay}ms`,
+	transform: inPlace
+		? "translateY(0)"
+		: `translateY(${from === "top" ? "-100vh" : "100vh"})`,
+});
+
+const drop = (shown: boolean, ms = 800, easing = DOLL_DROP) => ({
+	transition: `top ${ms}ms ${easing}, transform ${ms}ms ${easing}`,
+	visibility: shown ? ("visible" as const) : ("hidden" as const),
+});
+
+export default function Page5({ curtainsOpen }: PageProps) {
+	const [step, setStep] = useState(0);
+	// Clicking "MAGIC BUTTON" drops the spiral drawing into the empty frame
+	const [magic, setMagic] = useState(false);
+	// …then the spiral goes back up and the empty frame sinks
+	const [spiralGone, setSpiralGone] = useState(false);
+	// …then frame 3 rises in its place
+	const [frame3, setFrame3] = useState(false);
+	// …then "Aww cute!" drops in
+	const [aww, setAww] = useState(false);
+	// Clicking "Aww cute!" sends everything off screen and the doll turns
+	// round and walks over to the left
+	const [done, setDone] = useState(false);
+
+	// --- Daphne's scene, after "Aww cute!" ---
+	// Daphne walks in from the left (bobbing while `walking`) and stops on
+	// the right
+	const [daphneIn, setDaphneIn] = useState(false);
+	const [walking, setWalking] = useState(false);
+	// 1 = "This is Daphne", 2 = "Daphne likes to draw", 3 = the ask button
+	const [daphneStep, setDaphneStep] = useState(0);
+	// Clicking the ask button: labels go, the empty frame, money, price and
+	// Cancel / Buy come in
+	const [asked, setAsked] = useState(false);
+	// Clicking Buy: price and buttons go, money sinks, the spiral spins in
+	// the frame…
+	const [bought, setBought] = useState(false);
+	// …then the spiral goes up, the empty frame sinks and the smile drawing
+	// rises
+	const [spiral2Gone, setSpiral2Gone] = useState(false);
+	const [smile, setSmile] = useState(false);
+	// Daphne's painting animation while she draws; null = idle blinking
+	const [daphnePaint, setDaphnePaint] = useState<string | null>(null);
+
+	// Paying Daphne goes through the inventory (the "?" menu): the drawing
+	// costs $10 and is added to it. Too little money → a short message
+	const { buy: buyItem } = useStage();
+	const [buyNote, setBuyNote] = useState<string | null>(null);
+
+	// --- The conversation after the drawing appears ---
+	// It builds up like a chat, top to bottom, Zhenya on the left and Daphne
+	// on the right. Zhenya's lines are buttons. zhenyaStage:
+	// 1 = "I love it!" / "I dislike it..." up, 2 = answered, 3 = "Why won't
+	// you just use the magic button?" up, 4 = asked, 5 = "Really? Why?" up,
+	// 6 = asked - then the whole chat lifts away and Daphne's long answer
+	// starts
+	const [zhenyaStage, setZhenyaStage] = useState(0);
+	const [choice, setChoice] = useState<"love" | "dislike" | null>(null);
+	// Daphne's reply to the choice ("Thanks!" / "Oh...") is up
+	const [replied, setReplied] = useState(false);
+	const chatCleared = zhenyaStage >= 6;
+	// Which line of DAPHNE_ANSWER is showing (after the chat has cleared)
+	const [answerLine, setAnswerLine] = useState<number | null>(null);
+	const daphneSays = answerLine !== null ? DAPHNE_ANSWER[answerLine] : null;
+	// Daphne's previous answer line, while it lifts away
+	const daphneSaid = useLeaving(daphneSays);
+	const nextUp = answerLine !== null && answerLine < DAPHNE_ANSWER.length - 1;
+
+	// Idle doll, blinking every 1-3s like on the other pages, unless it's
+	// doing its "wow"
+	const blinkSrc = useBlinkingDoll();
+	// Daphne idles and blinks the same way, with her own images
+	const daphneBlinkSrc = useBlinkingDoll(DAPHNE);
+	const daphneSrc = daphnePaint ?? daphneBlinkSrc;
+	const wow = useWowDoll();
+	const dollSrc = wow.src ?? blinkSrc;
+
+	// Once the curtains have opened: the doll drops in, then "Click this
+	// magic button…" (and the empty frame rises), then "MAGIC BUTTON" 0.6s
+	// later, tilting near the end of its drop
+	useEffect(() => {
+		if (!curtainsOpen) return;
+
+		const timers = [
+			[0, 1],
+			[400, 2],
+			[1000, 3],
+		].map(([ms, n]) => setTimeout(() => setStep((s) => Math.max(s, n)), ms));
+
+		return () => timers.forEach(clearTimeout);
+	}, [curtainsOpen]);
+
+	// The magic sequence's timers, cleared if the page goes away mid-way
+	const magicTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+	useEffect(() => () => magicTimers.current.forEach(clearTimeout), []);
+
+	const startMagic = () => {
+		setMagic(true);
+		magicTimers.current.push(
+			setTimeout(() => setSpiralGone(true), SPIRAL_GONE_MS),
+			setTimeout(() => {
+				setFrame3(true);
+				wow.playWow();
+			}, FRAME3_MS),
+			setTimeout(() => setAww(true), AWW_MS),
+		);
+	};
+
+	const later = (ms: number, fn: () => void) =>
+		magicTimers.current.push(setTimeout(fn, ms));
+
+	const finish = () => {
+		setDone(true);
+		wow.playWowReverse();
+		later(DAPHNE_WALK_START_MS, () => {
+			setDaphneIn(true);
+			setWalking(true);
+		});
+		later(DAPHNE_ARRIVED_MS, () => setWalking(false));
+		later(THIS_IS_DAPHNE_MS, () => setDaphneStep(1));
+		later(LIKES_TO_DRAW_MS, () => setDaphneStep(2));
+		later(ASK_MS, () => setDaphneStep(3));
+	};
+
+	const ask = () => {
+		setAsked(true);
+		// Get Daphne's painting animations ready, so they play straight away
+		// if Buy is clicked
+		for (const src of [PAINT_OUT, HOLDING_PALETTE, PAINT_AWAY])
+			new Image().src = src;
+	};
+
+	const buy = () => {
+		const result = buyItem("daphne-drawing");
+		if (result !== "bought") {
+			setBuyNote(
+				result === "not-enough-money"
+					? "Not enough money!"
+					: "You already have one!",
+			);
+			later(1500, () => setBuyNote(null));
+			return;
+		}
+		setBought(true);
+		// Daphne gets her palette out and holds it while she draws…
+		setDaphnePaint(PAINT_OUT);
+		later(PAINT_MS, () => setDaphnePaint(HOLDING_PALETTE));
+		later(SPIRAL2_GONE_MS, () => setSpiral2Gone(true));
+		// …and once the drawing is up, puts it away and goes back to idle
+		later(SMILE_MS, () => {
+			setSmile(true);
+			setDaphnePaint(PAINT_AWAY);
+		});
+		later(SMILE_MS + PAINT_MS, () => setDaphnePaint(null));
+		later(CHOICES_MS, () => setZhenyaStage(1));
+	};
+
+	// Zhenya likes or dislikes it: the drawing leaves, Daphne answers, then
+	// Zhenya asks about the magic button
+	// Zhenya likes or dislikes it: the other choice lifts away, the drawing
+	// leaves, Daphne replies, then Zhenya asks about the magic button
+	const choose = (c: "love" | "dislike") => {
+		setChoice(c);
+		setZhenyaStage(2);
+		later(900, () => setReplied(true));
+		later(2000, () => setZhenyaStage(3));
+	};
+
+	const askMagic = () => {
+		setZhenyaStage(4);
+		later(1500, () => setZhenyaStage(5));
+	};
+
+	// The chat lifts away row by row, then Daphne starts her long answer
+	const askWhy = () => {
+		setZhenyaStage(6);
+		later(ANSWER_START_MS, () => setAnswerLine(0));
+	};
+	// How long a chat row waits before lifting away, once it's being cleared
+	const rowExit = (row: number) =>
+		chatCleared ? row * CHAT_EXIT_STAGGER_MS : 0;
+
+	return (
+		<div className="h-full flex flex-col items-center justify-center">
+			{/* The page's title, for screen readers and search engines */}
+			<h1 className="sr-only">Zhenya</h1>
+
+			{/* "Click this magic button…" - drops in at 0.4s; lifts away once
+			    "Aww cute!" is clicked */}
+			<p
+				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[64vh] left-[4vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={{
+					...drop(step >= 2, 800, LABEL_DROP),
+					transform:
+						step >= 2 && !done ? "translateY(0)" : "translateY(-100vh)",
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Click this magic button to get a cute drawing
+			</p>
+
+			{/* "MAGIC BUTTON" - drops in at 1.0s and, just before it lands, tilts
+			    to 6deg, settling with a light bounce. The tilt uses the CSS rotate
+			    property, separate from the drop's transform. Its strings turn the
+			    other way (and shift) at the same time so they keep hanging
+			    straight down. Lifts away once "Aww cute!" is clicked */}
+			<button
+				onClick={startMagic}
+				disabled={step < 3 || magic}
+				className="text-[4vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[50vh] left-[2vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				style={{
+					visibility: step >= 3 ? "visible" : "hidden",
+					transition: `transform 800ms ${LABEL_DROP}, rotate ${TILT}`,
+					transform:
+						step >= 3 && !done ? "translateY(0)" : "translateY(-100vh)",
+					rotate: step >= 3 ? "6deg" : "0deg",
+				}}
+			>
+				<span
+					className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] absolute"
+					style={{
+						transition: `rotate ${TILT}, left ${TILT}`,
+						rotate: step >= 3 ? "-6deg" : "0deg",
+						left: step >= 3 ? "-2.8vw" : "0",
+					}}
+				></span>
+				<span
+					className="w-[0.1vw] bg-black/60 h-[100vh] absolute"
+					style={{
+						transition: `rotate ${TILT}, right ${TILT}, top ${TILT}`,
+						rotate: step >= 3 ? "-6deg" : "0deg",
+						right: step >= 3 ? "3vw" : "0",
+						top: step >= 3 ? "-99.7vh" : "-100vh",
+					}}
+				></span>
+				MAGIC BUTTON
+			</button>
+
+			{/* Empty frame - rises from the bottom on a popsicle stick at 0.4s,
+			    under MAGIC BUTTON (which sits at bottom-[50vh] left-[2vw]). Sinks
+			    back down once the spiral has had its 2s. z-5 so the labels (z-6)
+			    sit in front of the spiral's string */}
+			<div
+				className="absolute bottom-[6vh] left-[2vw] z-5 test-shadow-darker"
+				style={{
+					...drop(step >= 2, 900),
+					transform:
+						step >= 2 && !spiralGone ? "translateY(0)" : "translateY(100vh)",
+				}}
+			>
+				{/* popsicle-stick.webp is just the stick, so w-/h- are its real size */}
+				<img
+					src={asset("/imgs/popsicle-stick.webp")}
+					className="absolute w-[2vw] h-[35vh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					alt="Wooden popsicle stick holding up the frame"
+				/>
+				<img
+					src={asset("/imgs/empty_square_frame.webp")}
+					className="h-[38vh] w-auto max-w-none relative z-1"
+					alt="An empty picture frame"
+				/>
+			</div>
+
+			{/* Spiral - sits exactly over the empty frame (same spot, same size:
+			    38vh tall at 705×762 is 35.2vh wide), but separate from it, so it
+			    can be pulled back up while the frame sinks. Drops in from the top
+			    on one string into the middle of the frame, spins for 2s, then
+			    goes back up. The string ends at the centre of the drawing, drawn
+			    in front so the spiral looks pinned there. Only the drawing spins
+			    (.spiral-spin); the string hangs from a holder that doesn't
+			    rotate */}
+			<div className="absolute bottom-[6vh] left-[2vw] h-[38vh] w-[35.2vh] z-5 pointer-events-none">
+				<div
+					className="absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]"
+					style={{
+						visibility: magic ? "visible" : "hidden",
+						transition: `transform 900ms ${LABEL_DROP}`,
+						transform:
+							magic && !spiralGone ? "translateY(0)" : "translateY(-120vh)",
+					}}
+				>
+					<span className="w-[0.1vw] bg-black/60 h-[100vh] bottom-[50%] left-[50%] -translate-x-[50%] absolute z-1"></span>
+					<img
+						src={asset("/imgs/spiral.webp")}
+						className="h-[16vh] w-auto max-w-none spiral-spin"
+						alt="A cute spiral drawing"
+					/>
+				</div>
+			</div>
+
+			{/* Frame 3 - rises on its popsicle stick where the empty frame was,
+			    once the empty frame has gone; sinks again once "Aww cute!" is
+			    clicked */}
+			<div
+				className="absolute bottom-[6vh] left-[2vw] z-5 test-shadow-darker"
+				style={{
+					...drop(frame3, 900),
+					transform: frame3 && !done ? "translateY(0)" : "translateY(100vh)",
+				}}
+			>
+				<img
+					src={asset("/imgs/popsicle-stick.webp")}
+					className="absolute w-[2vw] h-[35vh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					alt="Wooden popsicle stick holding up the frame"
+				/>
+				<img
+					src={asset("/imgs/drawing-lilies.webp")}
+					className="h-[38vh] w-auto max-w-none relative z-1"
+					alt="A drawing of lilies, in a picture frame"
+				/>
+			</div>
+
+			{/* "Aww cute!" - drops in at the top right once the doll's "wow" has
+			    played; clicking it sends everything off screen */}
+			<button
+				onClick={finish}
+				disabled={!aww || done}
+				// Off screen (and out of the Tab order) until it has dropped in
+				tabIndex={aww && !done ? undefined : -1}
+				className="text-[4vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[62vh] right-[2vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				style={{
+					...drop(aww, 800, LABEL_DROP),
+					transform: aww && !done ? "translateY(0)" : "translateY(-100vh)",
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Aww cute!
+			</button>
+
+			{/* Doll - mirrored (scale -1) on the right. Once "Aww cute!" is
+			    clicked it turns to face the other way (the scale flips through 0,
+			    like turning a cut-out round) and walks over to the left, playing
+			    wow-reverse and then going back to idle blinking */}
+			<img
+				src={dollSrc}
+				className="h-[100vh] absolute top-[-28vh] -translate-x-[50%] test-shadow-darker z-5"
+				style={{
+					visibility: step >= 1 ? "visible" : "hidden",
+					transition: `top 900ms ${DOLL_DROP}, transform 900ms ${DOLL_DROP}, left 1200ms ease-in-out, scale 600ms ease-in-out`,
+					transform: step >= 1 ? "translateY(0)" : "translateY(-120vh)",
+					left: done ? "8%" : "60%",
+					scale: done ? "1 1" : "-1 1",
+				}}
+				alt="Zhenya, a marionette doll on strings"
+			/>
+
+			{/* ---------- Daphne's scene, after "Aww cute!" ---------- */}
+
+			{/* Daphne - same size as Zhenya, mirrored (-scale-x-[1]) so she faces
+			    her. Walks in from off the right edge and stops on the right side
+			    (her left slides from 160% to 82% over WALK_MS), stepping gently
+			    (.walk-bob) until she stops */}
+			<div
+				className="absolute top-[-28vh] h-[100vh] -translate-x-[50%] -scale-x-[1] z-4"
+				style={{
+					visibility: daphneIn ? "visible" : "hidden",
+					transition: `left ${WALK_MS}ms cubic-bezier(0.25, 0.1, 0.45, 1)`,
+					left: daphneIn ? "88%" : "160%",
+				}}
+			>
+				<img
+					src={daphneSrc}
+					className={`h-full w-auto max-w-none test-shadow-darker ${walking ? "walk-bob" : ""}`}
+					alt="Daphne, another marionette doll on strings"
+				/>
+			</div>
+
+			{/* "This is Daphne" - drops in between the two dolls; lifts away
+			    once the ask button is clicked */}
+			<p
+				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[56vh] left-[46%] -translate-x-[50%] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={hang(daphneStep >= 1, daphneStep >= 1 && !asked, "top")}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				This is Daphne
+			</p>
+
+			{/* "Daphne likes to draw" - a second later */}
+			<p
+				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[46vh] left-[46%] -translate-x-[50%] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={hang(daphneStep >= 2, daphneStep >= 2 && !asked, "top")}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Daphne likes to draw
+			</p>
+
+			{/* Ask button (dashed) - a second later; clicking it clears the labels
+			    and brings in the frame, money, price and Cancel / Buy */}
+			<button
+				onClick={ask}
+				disabled={daphneStep < 3 || asked}
+				tabIndex={daphneStep >= 3 && !asked ? undefined : -1}
+				className="text-[3vh] pt-serif w-[24vw] mx-auto text-center scribbler absolute bottom-[27vh] left-[46%] -translate-x-[50%] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				style={hang(daphneStep >= 3, daphneStep >= 3 && !asked, "top")}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Daphne could you please draw me something?
+			</button>
+
+			{/* Empty frame (2) - rises in the middle just after asking; sinks
+			    once the spiral has had its 2s */}
+			<div
+				className="absolute bottom-[6vh] left-[50%] -translate-x-[50%] z-5 test-shadow-darker"
+				style={hang(asked, asked && !spiral2Gone, "bottom", {
+					ms: 900,
+					easing: DOLL_DROP,
+					delay: FRAME2_DELAY_MS,
+				})}
+			>
+				<img
+					src={asset("/imgs/popsicle-stick.webp")}
+					className="absolute w-[2vw] h-[35vh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					alt="Wooden popsicle stick holding up the frame"
+				/>
+				<img
+					src={asset("/imgs/empty_square_frame.webp")}
+					className="h-[38vh] w-auto max-w-none relative z-1"
+					alt="An empty picture frame"
+				/>
+			</div>
+
+			{/* Spiral (2) - over the middle frame, same as the first one: drops
+			    in on one string after Buy, spins for 2s, then goes back up */}
+			<div className="absolute bottom-[6vh] left-[50%] -translate-x-[50%] h-[38vh] w-[35.2vh] z-5 pointer-events-none">
+				<div
+					className="absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]"
+					style={hang(bought, bought && !spiral2Gone, "top", {
+						ms: 900,
+						delay: SPIRAL2_IN_DELAY_MS,
+					})}
+				>
+					<span className="w-[0.1vw] bg-black/60 h-[100vh] bottom-[50%] left-[50%] -translate-x-[50%] absolute z-1"></span>
+					<img
+						src={asset("/imgs/spiral.webp")}
+						className="h-[16vh] w-auto max-w-none spiral-spin"
+						alt="A spiral, Daphne drawing"
+					/>
+				</div>
+			</div>
+
+			{/* Smile drawing - rises in the middle frame's place once the spiral
+			    has gone */}
+			<div
+				className="absolute bottom-[6vh] left-[46%] -translate-x-[50%] z-5 test-shadow-darker"
+				// Leaves once Zhenya says whether they like it
+				style={hang(smile, smile && !choice, "bottom", {
+					ms: 900,
+					easing: DOLL_DROP,
+				})}
+			>
+				<img
+					src={asset("/imgs/popsicle-stick.webp")}
+					className="absolute w-[2vw] h-[35vh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					alt="Wooden popsicle stick holding up the drawing"
+				/>
+				<img
+					src={asset("/imgs/drawing-smile.webp")}
+					className="h-[38vh] w-auto max-w-none relative z-1"
+					alt="Daphne's drawing of a smiley face on an easel, in a picture frame"
+				/>
+			</div>
+
+			{/* Money - the popsicle with money from the souvenir shop. Rises next
+			    to the frame once it has landed; sinks once Buy is clicked */}
+			<div
+				className="absolute left-[20%] bottom-[12vh] z-6 test-shadow-darker"
+				style={hang(asked, asked && !bought, "bottom", {
+					ms: 900,
+					easing: DOLL_DROP,
+					delay: MONEY_DELAY_MS,
+				})}
+			>
+				{/* Stick first, so the money sits in front of it */}
+				<img
+					src={asset("/imgs/popsicle-stick.webp")}
+					className="h-[25vh] w-[2.5vw] max-w-none absolute bottom-[-18vh] left-[3.75vw]"
+					alt="Wooden popsicle stick holding up the money"
+				/>
+				<img
+					src={asset("/imgs/money.webp")}
+					className="absolute bottom-0 w-[6vw] max-w-none mb-[5vh]"
+					alt="A banknote"
+				/>
+				<img
+					src={asset("/imgs/money.webp")}
+					className="absolute bottom-0 w-[6vw] max-w-none rotate-7 ml-[3vw]"
+					alt="A banknote"
+				/>
+			</div>
+
+			{/* "Daphne charges $10 per drawing" - after the money; lifts away
+			    once Buy is clicked */}
+			<p
+				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[60vh] left-[50%] -translate-x-[50%] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-7 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={hang(asked, asked && !bought, "top", { delay: PRICE_DELAY_MS })}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Daphne charges $10 per drawing
+			</p>
+
+			{/* Cancel - after the price. Does nothing for now */}
+			<button
+				onClick={() => {}}
+				disabled={!asked || bought}
+				tabIndex={asked && !bought ? undefined : -1}
+				className="text-[3vh] pt-serif mx-auto text-center scribbler absolute bottom-[50vh] left-[43%] -translate-x-[50%] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				style={hang(asked, asked && !bought, "top", { delay: CANCEL_DELAY_MS })}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Cancel
+			</button>
+
+			{/* Buy - just after Cancel: money out, spiral in, then the drawing */}
+			<button
+				onClick={buy}
+				disabled={!asked || bought}
+				tabIndex={asked && !bought ? undefined : -1}
+				className="text-[3vh] pt-serif mx-auto text-center scribbler absolute bottom-[50vh] left-[60%] -translate-x-[50%] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				style={hang(asked, asked && !bought, "top", { delay: BUY_DELAY_MS })}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				{buyNote ?? "Buy"}
+			</button>
+
+			{/* ---------- The conversation, after the drawing appears ----------
+			    A chat that builds up top to bottom: Zhenya's lines (buttons) on
+			    the left at 30%, Daphne's on the right at 60%. Each row has its
+			    own height, so nothing overlaps. Earlier rows sit in front (higher
+			    z) so the later rows' strings pass behind them. Clicking
+			    "Really? Why?" lifts the chat away row by row, top to bottom */}
+
+			{/* Row 1 - Zhenya: "I love it!" / "I dislike it..." side by side.
+			    The one not picked lifts away; the picked one stays */}
+			<div className="absolute top-[6vh] left-[40%] -translate-x-[50%] flex gap-[1.5vw] z-[15]">
+				<button
+					onClick={() => choose("love")}
+					disabled={zhenyaStage !== 1}
+					tabIndex={zhenyaStage === 1 ? undefined : -1}
+					className="w-max relative text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+					style={hang(
+						zhenyaStage >= 1,
+						zhenyaStage >= 1 && choice !== "dislike" && !chatCleared,
+						"top",
+						{ exitDelay: rowExit(0) },
+					)}
+				>
+					<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+					I love it!
+				</button>
+				<button
+					onClick={() => choose("dislike")}
+					disabled={zhenyaStage !== 1}
+					tabIndex={zhenyaStage === 1 ? undefined : -1}
+					className="w-max relative text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+					style={hang(
+						zhenyaStage >= 1,
+						zhenyaStage >= 1 && choice !== "love" && !chatCleared,
+						"top",
+						{ exitDelay: rowExit(0) },
+					)}
+				>
+					<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+					I dislike it...
+				</button>
+			</div>
+
+			{/* Row 2 - Daphne: "Thanks!" / "Oh..." */}
+			<p
+				className="absolute top-[12vh] left-[65%] -translate-x-[50%] w-max z-[14] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={hang(replied, replied && !chatCleared, "top", {
+					exitDelay: rowExit(1),
+				})}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				{choice === "dislike" ? "Oh..." : "Thanks!"}
+			</p>
+
+			{/* Row 3 - Zhenya: "Why won't you just use the magic button?" */}
+			<button
+				onClick={askMagic}
+				disabled={zhenyaStage !== 3}
+				tabIndex={zhenyaStage === 3 ? undefined : -1}
+				className="absolute top-[21vh] left-[42%] -translate-x-[50%] w-[18vw] z-[13] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				style={hang(zhenyaStage >= 3, zhenyaStage >= 3 && !chatCleared, "top", {
+					exitDelay: rowExit(2),
+				})}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Why won&apos;t you just use the magic button?
+			</button>
+
+			{/* Row 4 - Daphne: "I enjoy the process of creating art…" */}
+			<p
+				className="absolute top-[37vh] left-[53%] -translate-x-[50%] w-[20vw] z-[12] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={hang(zhenyaStage >= 4, zhenyaStage >= 4 && !chatCleared, "top", {
+					exitDelay: rowExit(3),
+				})}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				I enjoy the process of creating art, it is part of me
+			</p>
+
+			{/* Row 5 - Zhenya: "Really? Why?" - clicking it clears the chat */}
+			<button
+				onClick={askWhy}
+				disabled={zhenyaStage !== 5}
+				tabIndex={zhenyaStage === 5 ? undefined : -1}
+				className="absolute top-[56vh] left-[44%] -translate-x-[50%] w-max z-[11] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				style={hang(zhenyaStage >= 5, zhenyaStage >= 5 && !chatCleared, "top", {
+					exitDelay: rowExit(4),
+				})}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Really? Why?
+			</button>
+
+			{/* Daphne's long answer - after the chat has cleared, one line at a
+			    time near Daphne. A new line hangs in (.hang-in) while the
+			    previous one lifts away (.hang-out), staying in front (z-2) like
+			    it was until it's gone. "next ->" sits under it, then
+			    lifts away after the last line */}
+			<div className="absolute top-[13vh] left-[50%] -translate-x-[50%] w-[24vw] z-6">
+				{daphneSaid && (
+					<p
+						key={`was-${daphneSaid}`}
+						aria-hidden
+						className="hang-out absolute top-0 left-[50%] -translate-x-[50%] w-max max-w-[24vw] z-2 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+					>
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+						{daphneSaid}
+					</p>
+				)}
+				{daphneSays && (
+					<p
+						key={daphneSays}
+						className="hang-in absolute top-0 left-[50%] -translate-x-[50%] w-max max-w-[24vw] z-1 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+					>
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+						{daphneSays}
+					</p>
+				)}
+				<button
+					onClick={() => setAnswerLine((line) => (line ?? 0) + 1)}
+					disabled={!nextUp}
+					tabIndex={nextUp ? undefined : -1}
+					className="absolute top-[18vh] left-[80%] -translate-x-[50%] w-max text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+					style={hang(answerLine !== null, nextUp, "top", { delay: 400 })}
+				>
+					<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+					next {"->"}
+				</button>
+			</div>
+		</div>
+	);
+}

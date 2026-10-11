@@ -1,6 +1,8 @@
 import PopsicleButton from "@/components/PopsicleButton";
 import { useEffect, useRef, useState } from "react";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import { useStage } from "@/components/Stage";
+import type { ItemId } from "@/lib/shop";
 import { asset } from "@/lib/asset";
 
 type PageProps = {
@@ -43,6 +45,26 @@ export default function Page3({
 	// Which item is up while in the shop: 0 = button pins, 1 = pens,
 	// 2 = notebook, 3 = Mona Lisa.
 	// "Next item" and "Prev item" cycle through them
+	// Buying from the shop. The "Buy…" labels are buttons: clicking one buys
+	// the item into your inventory (the "?" menu) if you can afford it, or
+	// says "Not enough money!" for a moment if you can't
+	const { buy, owned } = useStage();
+	const [tooPoor, setTooPoor] = useState<ItemId | null>(null);
+	const tooPoorTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+	useEffect(() => () => clearTimeout(tooPoorTimer.current), []);
+	const tryBuy = (item: ItemId) => {
+		if (buy(item) !== "not-enough-money") return;
+		setTooPoor(item);
+		clearTimeout(tooPoorTimer.current);
+		tooPoorTimer.current = setTimeout(() => setTooPoor(null), 1500);
+	};
+	const buyText = (item: ItemId, text: string, boughtText: string) =>
+		owned.includes(item)
+			? boughtText
+			: tooPoor === item
+				? "Not enough money!"
+				: text;
+
 	const [item, setItem] = useState(0);
 	const ITEM_COUNT = 4;
 	const enter = () => {
@@ -134,6 +156,10 @@ export default function Page3({
 
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
+			{/* The page's title, for screen readers and search engines - the shop
+			    itself shows it visually */}
+			<h1 className="sr-only">Zhenya&apos;s souvenir shop</h1>
+
 			<img
 				src={dollSrc ?? blinkSrc}
 				className="h-[100vh] absolute top-[-32.5vh] right-[-5vw] test-shadow-darker z-5 -scale-x-[1]"
@@ -177,7 +203,7 @@ export default function Page3({
 			<button
 				onClick={enter}
 				disabled={entered}
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59vh] left-[28vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59vh] left-[28vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					...drop(step >= 2),
 					transitionDelay: leaving ? "900ms" : "0ms",
@@ -317,7 +343,7 @@ export default function Page3({
 				onClick={() => setItem((i) => (i + 1) % ITEM_COUNT)}
 				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59vh] left-[28vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59vh] left-[28vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				style={{
 					...drop(opened),
 					transitionDelay: entered ? "900ms" : "0ms",
@@ -330,8 +356,11 @@ export default function Page3({
 			</button>
 			{/* "Buy the buttons" - down while the pins are up, lifts away when
 			    another item comes up - moves in time with the pins */}
-			<h2
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[22vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+			<button
+				onClick={() => tryBuy("pins")}
+				disabled={!pinsUp}
+				tabIndex={pinsUp ? undefined : -1}
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[22vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
@@ -341,12 +370,15 @@ export default function Page3({
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
-				Buy the buttons for $10
-			</h2>
+				{buyText("pins", "Buy the buttons for $10", "You bought the buttons!")}
+			</button>
 
 			{/* "Buy the pens" - same, for the pens */}
-			<h2
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[22vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+			<button
+				onClick={() => tryBuy("pens")}
+				disabled={!pensUp}
+				tabIndex={pensUp ? undefined : -1}
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[22vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
@@ -356,12 +388,15 @@ export default function Page3({
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
-				Buy the pens for $15
-			</h2>
+				{buyText("pens", "Buy the pens for $16", "You bought the pens!")}
+			</button>
 
 			{/* "Buy the Mona Lisa" - same, for the Mona Lisa */}
-			<h2
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+			<button
+				onClick={() => tryBuy("mona-lisa")}
+				disabled={!monaUp}
+				tabIndex={monaUp ? undefined : -1}
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
@@ -371,12 +406,19 @@ export default function Page3({
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
-				Buy the Mona Lisa for $1,000,000,000
-			</h2>
+				{buyText(
+					"mona-lisa",
+					"Buy the Mona Lisa for $1,000,000,000",
+					"You bought the Mona Lisa!",
+				)}
+			</button>
 
 			{/* "Buy the notebook" - same, for the notebook */}
-			<h2
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+			<button
+				onClick={() => tryBuy("notebook")}
+				disabled={!notebookUp}
+				tabIndex={notebookUp ? undefined : -1}
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
@@ -386,12 +428,16 @@ export default function Page3({
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
-				Buy the notebook for $7
-			</h2>
+				{buyText(
+					"notebook",
+					"Buy the notebook for $8",
+					"You bought the notebook!",
+				)}
+			</button>
 
 			{/* "Exit" - drops in on the left, 1.1s after the click */}
 			<button
-				className="text-[3vh] pt-serif max-w-[70%] cursor-pointer mx-auto text-center scribbler absolute bottom-[59vh] left-[2vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif max-w-[70%] cursor-pointer mx-auto text-center scribbler absolute bottom-[59vh] left-[2vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				onClick={() => setEntered(!entered)}
 				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
@@ -408,7 +454,7 @@ export default function Page3({
 
 			{/* "Prev item" - under "Exit", drops in 1.3s after the click */}
 			<button
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[51vh] left-[-1vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[51vh] left-[-1vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				onClick={() => setItem((i) => (i - 1 + ITEM_COUNT) % ITEM_COUNT)}
 				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}

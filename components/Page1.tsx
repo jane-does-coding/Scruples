@@ -60,7 +60,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 		<div className="h-full flex flex-col items-center justify-center relative">
 			{/* Title */}
 			<h1
-				className="text-[4vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-0 right-[10vw] bg-white border-2 border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[4vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-0 right-[10vw] bg-white border-[0.3vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 2),
 					transform: step >= 2 ? "translateY(0)" : "translateY(-60vh)",
@@ -84,15 +84,15 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 				<button
 					onClick={handleSayHi}
-					className="text-[4vh] pt-serif text-center scribbler relative bg-white border-2 border-black border-dashed px-[2vw] py-[1vh] z-20 cursor-pointer"
+					className="text-[4vh] pt-serif text-center scribbler relative bg-white border-[0.3vh] border-black border-dashed px-[2vw] py-[1vh] z-20 cursor-pointer"
 				>
 					Say &quot;Hi&quot; to Zhenya!
 				</button>
 			</div>
 
 			{/* Hi response */}
-			<h3
-				className="text-[4vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute right-[22vw] bg-white border-2 border-black px-[2vw] py-[1vh] z-0 drop-shadow-md drop-shadow-black/40 test-shadow"
+			<p
+				className="text-[4vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute right-[22vw] bg-white border-[0.3vh] border-black px-[2vw] py-[1vh] z-0 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(saidHi),
 					top: saidHi ? "35vh" : "-60vh",
@@ -101,7 +101,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 				<span className="w-[0.1vw] bg-black/60 h-[50vh] top-[-50vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[50vh] top-[-50vh] right-0 absolute"></span>
 				&quot;Hi&quot;
-			</h3>
+			</p>
 
 			{/* Doll */}
 			<img

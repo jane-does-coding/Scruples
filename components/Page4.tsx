@@ -61,13 +61,14 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 	const [soWhat, setSoWhat] = useState(false);
 
 	// The Continue button rises once the last label ("It opens a way…") has
-	// dropped in (it starts 1.4s after "So what?" is clicked and takes 0.8s)
+	// dropped in (the second one starts 1.8s after "So what?" and takes 0.8s)
 	const [showContinue, setShowContinue] = useState(false);
 	useEffect(() => {
 		if (!soWhat) return;
 		const timer = setTimeout(
 			() => setShowContinue(true),
-			LABELS_UP_MS + 600 + 800,
+			// after the second "opens" label (0.4s behind the first) lands
+			LABELS_UP_MS + 1000 + 800,
 		);
 		return () => clearTimeout(timer);
 	}, [soWhat]);
@@ -124,7 +125,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			/>
 
 			<h1
-				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-2 border-black px-[1vw] py-[0.5vh] z-5 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-5 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					// Drops in at 0.4s. Once "Wow Cool!" is clicked it drops 48vh lower
 					// with it (bottom-[67vh] → 19vh from the bottom)
@@ -149,7 +150,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			<button
 				onClick={() => setWowed(true)}
 				disabled={wowed}
-				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[58vh] left-[25vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-1 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[58vh] left-[25vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-1 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Once clicked it drops 48vh lower: bottom-[58vh] → 10vh from the
 					// bottom of the page
@@ -176,7 +177,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 				disabled={!wowed || soWhat}
 				// Off screen (and out of the Tab order) until it has dropped in
 				tabIndex={wowed && !soWhat ? undefined : -1}
-				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[22vh] left-[27vw] bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[22vh] left-[27vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					...drop(wowed, 800, LABEL_DROP),
 					transitionDelay: wowed && !soWhat ? "800ms" : "0ms",
@@ -188,8 +189,8 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 				So what?
 			</button>
 
-			<h2
-				className="text-[3vh] pt-serif max-w-[17vw] mx-auto text-center scribbler absolute bottom-[60vh] left-[20vw] bg-white border-2 border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+			<p
+				className="text-[3vh] pt-serif max-w-[17vw] mx-auto text-center scribbler absolute bottom-[60vh] left-[20vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					// Drops in from above 0.4s after "Wow Cool!" is clicked. Starts
 					// 100vh up so its long strings are off screen too
@@ -202,12 +203,13 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 				<span className="w-[0.1vw] bg-black/60 h-[70vh] top-[-70vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[70vh] top-[-70vh] right-0 absolute"></span>
 				There is digital and traditional art, that people post.
-			</h2>
+			</p>
 
 			{/* "It opens a way…" - drops in on the right, 0.6s after the posts
-			    start sliding over (1.4s after "So what?" is clicked) */}
-			<h2
-				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[40vh] right-[0vw] bg-white border-2 border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+			    start sliding over (1.4s after "So what?" is clicked), and
+			    "…while also opening a huge portal…" follows 0.4s later */}
+			<p
+				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[49vh] right-[0vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					...drop(soWhat, 800, LABEL_DROP),
 					transitionDelay: soWhat ? `${LABELS_UP_MS + 600}ms` : "0ms",
@@ -216,9 +218,20 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
-				It opens a way for people to share their work, while also opening a huge
-				portal for comparison to other artists.
-			</h2>
+				It opens a way for people to share their work with the whole world
+			</p>
+			<p
+				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[30vh] right-[-3vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={{
+					...drop(soWhat, 800, LABEL_DROP),
+					transitionDelay: soWhat ? `${LABELS_UP_MS + 1000}ms` : "0ms",
+					transform: soWhat ? "translateY(0)" : "translateY(-100vh)",
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				while also opening a huge portal for comparison to other artists
+			</p>
 
 			{/* Posts - a vertical marquee on the right that scrolls up forever.
 			    It starts at the top of the screen (the content area starts 25vh

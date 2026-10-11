@@ -126,7 +126,7 @@ export default function Page2({
 			/>
 
 			<h1
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[-7vh] right-[25vw] bg-white border-2 border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[-7vh] right-[25vw] bg-white border-[0.3vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 2),
 					transform: step >= 2 ? "translateY(0)" : "translateY(-60vh)",
@@ -136,8 +136,8 @@ export default function Page2({
 				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] right-0 absolute"></span>
 				Zhenya likes art
 			</h1>
-			<h2
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[1vh] right-[13vw] bg-white border-2 border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+			<p
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[1vh] right-[13vw] bg-white border-[0.3vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 3),
 					transform: step >= 3 ? "translateY(0)" : "translateY(-60vh)",
@@ -146,7 +146,7 @@ export default function Page2({
 				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] right-0 absolute"></span>
 				Click on some pieces
-			</h2>
+			</p>
 
 			{/* Picture frames - two copies of the set slide left by one set's width
 			    (-50%), so the loop is seamless */}
@@ -220,7 +220,7 @@ export default function Page2({
 			/>
 			<button
 				onClick={nextPage}
-				className="absolute bottom-[3vh] cursor-pointer mx-auto border-2 border-black px-6 py-2 z-20 bg-white border-2 border-black border-dashed px-[2vw] py-[1vh] text-[2.5vh]"
+				className="absolute bottom-[3vh] cursor-pointer mx-auto border-[0.3vh] border-black px-6 py-2 z-20 bg-white border-[0.3vh] border-black border-dashed px-[2vw] py-[1vh] text-[2.5vh]"
 			>
 				Inventory
 			</button> */}
