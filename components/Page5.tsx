@@ -3,6 +3,7 @@ import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
 import useWowDoll from "@/components/useWowDoll";
 import { asset } from "@/lib/asset";
+import MoneyStick from "@/components/MoneyStick";
 import { useStage } from "@/components/Stage";
 import useLeaving from "@/components/useLeaving";
 
@@ -214,6 +215,8 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			setTimeout(() => {
 				setFrame3(true);
 				wow.playWow();
+				// The magic button's drawing goes into the inventory
+				give("magic-drawing");
 			}, FRAME3_MS),
 			setTimeout(() => setAww(true), AWW_MS),
 		);
@@ -327,7 +330,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* "Click this magic button…" - drops in at 0.4s; lifts away once
 			    "Aww cute!" is clicked */}
 			<p
-				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[64vh] left-[4vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[64vh] left-[4vw] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					...drop(step >= 2, 800, LABEL_DROP),
 					transform:
@@ -509,7 +512,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* "This is Daphne" - drops in between the two dolls; lifts away
 			    once the ask button is clicked */}
 			<p
-				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[56vh] left-[46%] -translate-x-[50%] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[56vh] left-[46%] -translate-x-[50%] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(daphneStep >= 1, daphneStep >= 1 && !asked, "top")}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
@@ -519,7 +522,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* "Daphne likes to draw" - a second later */}
 			<p
-				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[46vh] left-[46%] -translate-x-[50%] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[46vh] left-[46%] -translate-x-[50%] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(daphneStep >= 2, daphneStep >= 2 && !asked, "top")}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
@@ -614,28 +617,13 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					delay: MONEY_DELAY_MS,
 				})}
 			>
-				{/* Stick first, so the money sits in front of it */}
-				<img
-					src={asset("/imgs/popsicle-stick.webp")}
-					className="h-[25vh] w-[2.5vw] max-w-none absolute bottom-[-18vh] left-[3.75vw]"
-					alt="Wooden popsicle stick holding up the money"
-				/>
-				<img
-					src={asset("/imgs/money.webp")}
-					className="absolute bottom-0 w-[6vw] max-w-none mb-[5vh]"
-					alt="A banknote"
-				/>
-				<img
-					src={asset("/imgs/money.webp")}
-					className="absolute bottom-0 w-[6vw] max-w-none rotate-7 ml-[3vw]"
-					alt="A banknote"
-				/>
+				<MoneyStick />
 			</div>
 
 			{/* "Daphne charges $10 per drawing" - after the money; lifts away
 			    once Buy is clicked */}
 			<p
-				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[60vh] left-[50%] -translate-x-[50%] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-7 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[60vh] left-[50%] -translate-x-[50%] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-7 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(asked, asked && !decided, "top", { delay: PRICE_DELAY_MS })}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
@@ -672,7 +660,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* Daphne's plea - where the price was, once Buy fails (not enough
 			    money) or Cancel is clicked; lifts away as she starts drawing */}
 			<p
-				className="absolute bottom-[60vh] left-[50%] -translate-x-[50%] w-max max-w-[26vw] z-7 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute bottom-[60vh] left-[50%] -translate-x-[50%] w-max max-w-[26vw] z-7 text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(plea !== null, plea !== null && !pleaDone, "top", {
 					delay: 400,
 				})}
@@ -702,7 +690,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* The donation ask - after a free drawing is up. Amounts depend on
 			    Zhenya's money; picking one (or none) starts the chat */}
 			<p
-				className="absolute top-[8vh] left-[62%] -translate-x-[50%] w-max max-w-[26vw] z-7 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute top-[8vh] left-[62%] -translate-x-[50%] w-max max-w-[26vw] z-7 text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(
 					donateOptions !== null,
 					donateOptions !== null && !donated,
@@ -728,7 +716,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						onClick={() => giveDonation(amount)}
 						disabled={donateOptions === null || donated}
 						tabIndex={donateOptions !== null && !donated ? undefined : -1}
-						className="relative w-max text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
+						className="relative w-max text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
 					>
 						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
@@ -789,7 +777,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Row 2 - Daphne: "Thanks!" / "Oh..." */}
 			<p
-				className="absolute top-[12vh] left-[65%] -translate-x-[50%] w-max z-[14] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute top-[12vh] left-[65%] -translate-x-[50%] w-max z-[14] text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(replied, replied && !chatCleared, "top", {
 					exitDelay: rowExit(1),
 				})}
@@ -816,7 +804,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Row 4 - Daphne: "I enjoy the process of creating art…" */}
 			<p
-				className="absolute top-[37vh] left-[53%] -translate-x-[50%] w-[20vw] z-[12] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute top-[37vh] left-[53%] -translate-x-[50%] w-[20vw] z-[12] text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(zhenyaStage >= 4, zhenyaStage >= 4 && !chatCleared, "top", {
 					exitDelay: rowExit(3),
 				})}
@@ -851,7 +839,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					<p
 						key={`was-${daphneSaid}`}
 						aria-hidden
-						className="hang-out absolute top-0 left-[50%] -translate-x-[50%] w-max max-w-[24vw] z-2 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+						className="hang-out absolute top-0 left-[50%] -translate-x-[50%] w-max max-w-[24vw] z-2 text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 					>
 						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
@@ -861,7 +849,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				{daphneSays && (
 					<p
 						key={daphneSays}
-						className="hang-in absolute top-0 left-[50%] -translate-x-[50%] w-max max-w-[24vw] z-1 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+						className="hang-in absolute top-0 left-[50%] -translate-x-[50%] w-max max-w-[24vw] z-1 text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 					>
 						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>

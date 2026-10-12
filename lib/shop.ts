@@ -1,7 +1,8 @@
 import { asset } from "@/lib/asset";
 
 // Everything that can be bought, and what it costs. Bought items show up in
-// the inventory (the "?" menu)
+// the inventory (the "?" menu). `art` = a picture, which can be viewed big
+// from the inventory
 export const ITEMS = {
 	pins: {
 		name: "Art Gallery button pins",
@@ -26,6 +27,7 @@ export const ITEMS = {
 	},
 	"mona-lisa": {
 		name: "The Mona Lisa",
+		art: true,
 		price: 1_000_000_000,
 		image: asset("/imgs/mona_lisa.webp"),
 		description:
@@ -33,10 +35,21 @@ export const ITEMS = {
 	},
 	"daphne-drawing": {
 		name: "Daphne's drawing",
+		art: true,
 		price: 10,
 		image: asset("/imgs/drawing-smile.webp"),
 		description:
 			"A smiley face on an easel that Daphne drew for Zhenya, one stroke at a time.",
+	},
+	// Not for sale - it's what the magic button makes on Page 5. Price 0 means
+	// it can't be sold
+	"magic-drawing": {
+		name: "The magic button's drawing",
+		art: true,
+		price: 0,
+		image: asset("/imgs/drawing-lilies.webp"),
+		description:
+			"A drawing of lilies in a frame. The magic button made it in a second - nobody drew it.",
 	},
 } as const;
 

@@ -126,7 +126,7 @@ export default function Page2({
 			/>
 
 			<h1
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[-7vh] right-[25vw] bg-white border-[0.3vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[-7vh] right-[25vw] bg-white border-[0.2vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 2),
 					transform: step >= 2 ? "translateY(0)" : "translateY(-60vh)",
@@ -137,7 +137,7 @@ export default function Page2({
 				Zhenya likes art
 			</h1>
 			<p
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[1vh] right-[13vw] bg-white border-[0.3vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[1vh] right-[13vw] bg-white border-[0.2vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 3),
 					transform: step >= 3 ? "translateY(0)" : "translateY(-60vh)",

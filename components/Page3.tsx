@@ -1,6 +1,7 @@
 import PopsicleButton from "@/components/PopsicleButton";
 import { useEffect, useRef, useState } from "react";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import MoneyStick from "@/components/MoneyStick";
 import { useStage } from "@/components/Stage";
 import type { ItemId } from "@/lib/shop";
 import { asset } from "@/lib/asset";
@@ -180,23 +181,7 @@ export default function Page3({
 					transform: entered ? "translateY(0)" : "translateY(100vh)",
 				}}
 			>
-				{/* Stick first, so the money sits in front of it. Narrow, centred under
-				    the bills (they span 0-9vw), and poking out below them */}
-				<img
-					src={asset("/imgs/popsicle-stick.webp")}
-					className="h-[25vh] w-[2.5vw] max-w-none absolute bottom-[-18vh] left-[3.75vw]"
-					alt=""
-				/>
-				<img
-					src={asset("/imgs/money.png")}
-					className="absolute bottom-0 w-[6vw] max-w-none mb-[5vh]"
-					alt=""
-				/>
-				<img
-					src={asset("/imgs/money.png")}
-					className="absolute bottom-0 w-[6vw] max-w-none rotate-7 ml-[3vw]"
-					alt=""
-				/>
+				<MoneyStick />
 			</div>
 
 			{/* "Click to enter" - lifts back up once clicked */}

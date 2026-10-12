@@ -125,7 +125,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			/>
 
 			<h1
-				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-5 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-5 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					// Drops in at 0.4s. Once "Wow Cool!" is clicked it drops 48vh lower
 					// with it (bottom-[67vh] → 19vh from the bottom)
@@ -190,7 +190,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			</button>
 
 			<p
-				className="text-[3vh] pt-serif max-w-[17vw] mx-auto text-center scribbler absolute bottom-[60vh] left-[20vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif max-w-[17vw] mx-auto text-center scribbler absolute bottom-[60vh] left-[20vw] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					// Drops in from above 0.4s after "Wow Cool!" is clicked. Starts
 					// 100vh up so its long strings are off screen too
@@ -209,7 +209,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			    start sliding over (1.4s after "So what?" is clicked), and
 			    "…while also opening a huge portal…" follows 0.4s later */}
 			<p
-				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[49vh] right-[0vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif max-w-[18vw] mx-auto text-center scribbler absolute bottom-[49vh] right-[0vw] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					...drop(soWhat, 800, LABEL_DROP),
 					transitionDelay: soWhat ? `${LABELS_UP_MS + 600}ms` : "0ms",
@@ -221,7 +221,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 				It opens a way for people to share their work with the whole world
 			</p>
 			<p
-				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[30vh] right-[-3vw] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[30vh] right-[-3vw] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					...drop(soWhat, 800, LABEL_DROP),
 					transitionDelay: soWhat ? `${LABELS_UP_MS + 1000}ms` : "0ms",

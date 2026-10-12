@@ -49,6 +49,39 @@ const GALLERY_STAGGER_MS = 150;
 // image: 14.7-84.8% across, 16.9-82.4% down. The canvas sits just inside it
 const CANVAS_BOX = "absolute left-[15.2%] top-[17.4%] w-[69.1%] h-[64.5%]";
 
+// Puts a drawing into the empty frame, as one image (PNG data URL): the
+// paper and drawing in the frame's window (where CANVAS_BOX sits), the frame
+// over the top
+const framed = (drawing: string) =>
+	new Promise<string>((resolve) => {
+		const frame = new Image();
+		const art = new Image();
+		let loaded = 0;
+		const draw = () => {
+			if (++loaded < 2) return;
+			const canvas = document.createElement("canvas");
+			canvas.width = frame.naturalWidth;
+			canvas.height = frame.naturalHeight;
+			const ctx = canvas.getContext("2d")!;
+			const box = [
+				0.152 * canvas.width,
+				0.174 * canvas.height,
+				0.691 * canvas.width,
+				0.645 * canvas.height,
+			] as const;
+			ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+			ctx.fillRect(...box);
+			ctx.drawImage(art, ...box);
+			ctx.drawImage(frame, 0, 0);
+			resolve(canvas.toDataURL("image/png"));
+		};
+		frame.onload = art.onload = draw;
+		// Without the frame, keep the drawing as it is
+		frame.onerror = () => resolve(drawing);
+		frame.src = asset("/imgs/empty_square_frame.webp");
+		art.src = drawing;
+	});
+
 // The colors to draw with, in the row above the frame. Brown is picked to
 // start with
 const COLORS = [
@@ -80,8 +113,8 @@ const hang = (
 });
 
 const LABEL =
-	"text-[3vh] pt-serif text-center scribbler bg-white border-2 border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
-const BUTTON = `${LABEL} border-dashed cursor-pointer disabled:cursor-default`;
+	"text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
+const BUTTON = `${LABEL.replace("border-[0.2vh]", "border-[0.3vh]")} border-dashed cursor-pointer disabled:cursor-default`;
 
 // A label's two hanging strings
 const Strings = () => (
@@ -116,7 +149,7 @@ const YourArt = ({
 );
 
 export default function Page6({ nextPage, curtainsOpen }: PageProps) {
-	const { owned } = useStage();
+	const { owned, keepDrawing } = useStage();
 	// Zhenya's tools: whatever you bought in the souvenir shop, if anything
 	const tools = (["notebook", "pens"] as const).filter((item) =>
 		owned.includes(item),
@@ -274,7 +307,20 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 	// Done: keep the picture, put the tools away, and Zhenya has a think
 	const done = () => {
-		setDrawingUrl(canvasRef.current?.toDataURL("image/png") ?? null);
+		const url = canvasRef.current?.toDataURL("image/png") ?? null;
+		setDrawingUrl(url);
+		// Your drawing goes into the inventory - in its frame, like it hangs
+		// on the stage - and a bigger frame goes back to its normal size
+		if (url)
+			framed(url).then((image) =>
+				keepDrawing({
+					name: "Your drawing",
+					image,
+					description:
+						"The first thing Zhenya drew, in the frame on the stage. Every artist starts somewhere.",
+				}),
+			);
+		setBig(false);
 		setStage(2);
 		setPenDown(false);
 		setToolsUp(false);
@@ -447,36 +493,10 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 					>
 						<Strings />
 						<span
-							className="block w-[7vh] h-[3vh]"
+							className="block w-[6vh] h-[3vh]"
 							style={{ background: c.value }}
 						/>
 					</button>
-				))}
-			</div>
-
-			{/* Zhenya's tools - the notebook and/or pens from the souvenir shop,
-			    on popsicle sticks next to Zhenya. (Without them, Daphne lends
-			    her palette instead) */}
-			<div
-				className="absolute bottom-[8vh] left-[28%] -translate-x-[50%] flex gap-[1.5vw] items-end z-6 pointer-events-none"
-				style={hang(toolsUp, toolsUp, "bottom", {
-					ms: 900,
-					easing: DOLL_DROP,
-				})}
-			>
-				{tools.map((item) => (
-					<div key={item} className="relative test-shadow-darker">
-						<img
-							src={asset("/imgs/popsicle-stick.webp")}
-							className="absolute w-[1.5vw] h-[25vh] max-w-none left-[50%] -translate-x-[50%] top-[70%] z-0"
-							alt=""
-						/>
-						<img
-							src={ITEMS[item].image}
-							className="h-[16vh] w-auto max-w-none relative z-1"
-							alt={ITEMS[item].name}
-						/>
-					</div>
 				))}
 			</div>
 
