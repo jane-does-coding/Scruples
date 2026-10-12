@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
 import useWowDoll from "@/components/useWowDoll";
 import { asset } from "@/lib/asset";
@@ -103,7 +104,7 @@ const drop = (shown: boolean, ms = 800, easing = DOLL_DROP) => ({
 	visibility: shown ? ("visible" as const) : ("hidden" as const),
 });
 
-export default function Page5({ curtainsOpen }: PageProps) {
+export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	const [step, setStep] = useState(0);
 	// Clicking "MAGIC BUTTON" drops the spiral drawing into the empty frame
 	const [magic, setMagic] = useState(false);
@@ -139,8 +140,23 @@ export default function Page5({ curtainsOpen }: PageProps) {
 
 	// Paying Daphne goes through the inventory (the "?" menu): the drawing
 	// costs $10 and is added to it. Too little money → a short message
-	const { buy: buyItem } = useStage();
+	const { buy: buyItem, give, donate, money } = useStage();
 	const [buyNote, setBuyNote] = useState<string | null>(null);
+	// Can't pay ("poor") or clicked Cancel ("please"): Daphne asks to draw
+	// anyway, for free, and asks for a donation once it's done.
+	// pleaDone = her line lifts away as she starts drawing
+	const [plea, setPlea] = useState<"poor" | "please" | null>(null);
+	const [pleaDone, setPleaDone] = useState(false);
+	// The donation ask after a free drawing: the amounts offered (based on
+	// the money Zhenya has then), and whether one has been picked
+	const [donateOptions, setDonateOptions] = useState<number[] | null>(null);
+	const [donated, setDonated] = useState(false);
+	const moneyRef = useRef(money);
+	useEffect(() => {
+		moneyRef.current = money;
+	}, [money]);
+	// Nothing to pick from Cancel / Buy any more
+	const decided = bought || plea !== null;
 
 	// --- The conversation after the drawing appears ---
 	// It builds up like a chat, top to bottom, Zhenya on the left and Daphne
@@ -160,6 +176,8 @@ export default function Page5({ curtainsOpen }: PageProps) {
 	// Daphne's previous answer line, while it lifts away
 	const daphneSaid = useLeaving(daphneSays);
 	const nextUp = answerLine !== null && answerLine < DAPHNE_ANSWER.length - 1;
+	// Once her last line is up, the Continue button rises
+	const answerDone = answerLine === DAPHNE_ANSWER.length - 1;
 
 	// Idle doll, blinking every 1-3s like on the other pages, unless it's
 	// doing its "wow"
@@ -227,15 +245,27 @@ export default function Page5({ curtainsOpen }: PageProps) {
 
 	const buy = () => {
 		const result = buyItem("daphne-drawing");
+		if (result === "not-enough-money") {
+			// "Aww man, any donation would help" - then she draws anyway
+			setPlea("poor");
+			later(2200, () => draw(true));
+			return;
+		}
 		if (result !== "bought") {
-			setBuyNote(
-				result === "not-enough-money"
-					? "Not enough money!"
-					: "You already have one!",
-			);
+			setBuyNote("You already have one!");
 			later(1500, () => setBuyNote(null));
 			return;
 		}
+		draw(false);
+	};
+
+	// Cancel: "Pleeease can I draw for you?" - and the only answer is Yes
+	const cancel = () => setPlea("please");
+
+	// Daphne draws. `free` = she wasn't paid: the drawing is given to Zhenya
+	// once it's up, and she asks for a donation before the chat starts
+	const draw = (free: boolean) => {
+		setPleaDone(true);
 		setBought(true);
 		// Daphne gets her palette out and holds it while she draws…
 		setDaphnePaint(PAINT_OUT);
@@ -245,9 +275,23 @@ export default function Page5({ curtainsOpen }: PageProps) {
 		later(SMILE_MS, () => {
 			setSmile(true);
 			setDaphnePaint(PAINT_AWAY);
+			if (free) give("daphne-drawing");
 		});
 		later(SMILE_MS + PAINT_MS, () => setDaphnePaint(null));
-		later(CHOICES_MS, () => setZhenyaStage(1));
+		later(CHOICES_MS, () => {
+			if (!free) return setZhenyaStage(1);
+			// A few amounts up to everything Zhenya has
+			const m = moneyRef.current;
+			const amounts = [1, 2, 5, 10].filter((a) => a < m);
+			setDonateOptions(m > 0 ? [...amounts.slice(-3), m] : []);
+		});
+	};
+
+	// A donation (or none): the ask lifts away, then the chat starts
+	const giveDonation = (amount: number) => {
+		setDonated(true);
+		donate(amount);
+		later(900, () => setZhenyaStage(1));
 	};
 
 	// Zhenya likes or dislikes it: the drawing leaves, Daphne answers, then
@@ -564,7 +608,7 @@ export default function Page5({ curtainsOpen }: PageProps) {
 			    to the frame once it has landed; sinks once Buy is clicked */}
 			<div
 				className="absolute left-[20%] bottom-[12vh] z-6 test-shadow-darker"
-				style={hang(asked, asked && !bought, "bottom", {
+				style={hang(asked, asked && !decided, "bottom", {
 					ms: 900,
 					easing: DOLL_DROP,
 					delay: MONEY_DELAY_MS,
@@ -592,20 +636,20 @@ export default function Page5({ curtainsOpen }: PageProps) {
 			    once Buy is clicked */}
 			<p
 				className="text-[3vh] pt-serif max-w-[22vw] mx-auto text-center scribbler absolute bottom-[60vh] left-[50%] -translate-x-[50%] bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] z-7 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
-				style={hang(asked, asked && !bought, "top", { delay: PRICE_DELAY_MS })}
+				style={hang(asked, asked && !decided, "top", { delay: PRICE_DELAY_MS })}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
 				Daphne charges $10 per drawing
 			</p>
 
-			{/* Cancel - after the price. Does nothing for now */}
+			{/* Cancel - after the price. Daphne begs to draw anyway */}
 			<button
-				onClick={() => {}}
-				disabled={!asked || bought}
-				tabIndex={asked && !bought ? undefined : -1}
+				onClick={cancel}
+				disabled={!asked || decided}
+				tabIndex={asked && !decided ? undefined : -1}
 				className="text-[3vh] pt-serif mx-auto text-center scribbler absolute bottom-[50vh] left-[43%] -translate-x-[50%] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
-				style={hang(asked, asked && !bought, "top", { delay: CANCEL_DELAY_MS })}
+				style={hang(asked, asked && !decided, "top", { delay: CANCEL_DELAY_MS })}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
@@ -615,15 +659,89 @@ export default function Page5({ curtainsOpen }: PageProps) {
 			{/* Buy - just after Cancel: money out, spiral in, then the drawing */}
 			<button
 				onClick={buy}
-				disabled={!asked || bought}
-				tabIndex={asked && !bought ? undefined : -1}
+				disabled={!asked || decided}
+				tabIndex={asked && !decided ? undefined : -1}
 				className="text-[3vh] pt-serif mx-auto text-center scribbler absolute bottom-[50vh] left-[60%] -translate-x-[50%] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
-				style={hang(asked, asked && !bought, "top", { delay: BUY_DELAY_MS })}
+				style={hang(asked, asked && !decided, "top", { delay: BUY_DELAY_MS })}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
 				{buyNote ?? "Buy"}
 			</button>
+
+			{/* Daphne's plea - where the price was, once Buy fails (not enough
+			    money) or Cancel is clicked; lifts away as she starts drawing */}
+			<p
+				className="absolute bottom-[60vh] left-[50%] -translate-x-[50%] w-max max-w-[26vw] z-7 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={hang(plea !== null, plea !== null && !pleaDone, "top", {
+					delay: 400,
+				})}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				{plea === "please"
+					? "Pleeease can I draw for you?"
+					: "Aww man, any donation would help"}
+			</p>
+
+			{/* After Cancel, the only answer: Yes. She draws for free */}
+			<button
+				onClick={() => draw(true)}
+				disabled={plea !== "please" || pleaDone}
+				tabIndex={plea === "please" && !pleaDone ? undefined : -1}
+				className="absolute bottom-[50vh] left-[50%] -translate-x-[50%] w-max z-6 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
+				style={hang(plea === "please", plea === "please" && !pleaDone, "top", {
+					delay: 1000,
+				})}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Yes
+			</button>
+
+			{/* The donation ask - after a free drawing is up. Amounts depend on
+			    Zhenya's money; picking one (or none) starts the chat */}
+			<p
+				className="absolute top-[8vh] left-[62%] -translate-x-[50%] w-max max-w-[26vw] z-7 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				style={hang(
+					donateOptions !== null,
+					donateOptions !== null && !donated,
+					"top",
+				)}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+				Would you like to donate? Anything helps!
+			</p>
+			<div
+				className="absolute top-[20vh] left-[40%] -translate-x-[50%] flex gap-[1.5vw] z-6"
+				style={hang(
+					donateOptions !== null,
+					donateOptions !== null && !donated,
+					"top",
+					{ delay: 600 },
+				)}
+			>
+				{[...(donateOptions ?? []), 0].map((amount, i, all) => (
+					<button
+						key={amount}
+						onClick={() => giveDonation(amount)}
+						disabled={donateOptions === null || donated}
+						tabIndex={donateOptions !== null && !donated ? undefined : -1}
+						className="relative w-max text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
+					>
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+						{amount === 0
+							? all.length === 1
+								? "Sorry, I have nothing..."
+								: "No, sorry"
+							: i === all.length - 2 && all.length > 2
+								? `All $${amount}`
+								: `$${amount}`}
+					</button>
+				))}
+			</div>
 
 			{/* ---------- The conversation, after the drawing appears ----------
 			    A chat that builds up top to bottom: Zhenya's lines (buttons) on
@@ -762,6 +880,31 @@ export default function Page5({ curtainsOpen }: PageProps) {
 					next {"->"}
 				</button>
 			</div>
+
+			{/* Continue - rises 1s after Daphne's last line ("and share a part
+			    of myself with them."), and goes to the next page. Same spot and
+			    look as on Page 4 */}
+			<PopsicleButton
+				onClick={nextPage}
+				style={{
+					...hang(answerDone, answerDone, "bottom", {
+						ms: 900,
+						easing: DOLL_DROP,
+						delay: 1000,
+					}),
+					// Inline so these beat the component's right-0, bottom-0 and
+					// test-shadow-darker: further right, lower, and a darker shadow
+					right: "-5vw",
+					bottom: "-2vh",
+					filter: "drop-shadow(12px 12px 2px #000000a0)",
+					// In front of everything on the page (labels, chat, dolls and
+					// the curtains at z-10), but still under the menu, its
+					// backdrop and the curtain animation (z-21 and up)
+					zIndex: 20,
+				}}
+			>
+				Continue {"->"}
+			</PopsicleButton>
 		</div>
 	);
 }

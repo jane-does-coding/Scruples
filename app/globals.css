@@ -118,6 +118,34 @@
 	}
 }
 
+/* Page 6's gallery - each frame swings gently like a pendulum, pivoting high
+   up its string */
+.sway {
+	animation: sway 3s ease-in-out infinite alternate;
+	transform-origin: 50% -60vh;
+}
+
+@keyframes sway {
+	from {
+		rotate: -1deg;
+	}
+	to {
+		rotate: 1deg;
+	}
+}
+
+/* The inventory pop-up next to the "?" - slides down into view */
+.note-pop {
+	animation: note-pop 400ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+@keyframes note-pop {
+	from {
+		transform: translateY(-150%);
+		opacity: 0;
+	}
+}
+
 /* Vertical version for Page 4's posts - scrolls up */
 .marquee-up {
 	animation: marquee-up 40s linear infinite;
@@ -159,7 +187,9 @@
 	.spiral-spin,
 	.walk-bob,
 	.hang-in,
-	.hang-out {
+	.hang-out,
+	.sway,
+	.note-pop {
 		animation: none;
 	}
 

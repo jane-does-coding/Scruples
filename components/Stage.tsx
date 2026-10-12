@@ -67,6 +67,10 @@ type StageContextValue = {
 	money: number;
 	owned: ItemId[];
 	buy: (item: ItemId) => BuyResult;
+	// Adds an item without paying for it (e.g. Daphne drawing for free)
+	give: (item: ItemId) => void;
+	// Gives money to Daphne
+	donate: (amount: number) => void;
 };
 
 const StageContext = createContext<StageContextValue | null>(null);
@@ -108,15 +112,61 @@ export default function Stage({ children }: { children: ReactNode }) {
 	// Inventory - money left and items bought
 	const [money, setMoney] = useState(STARTING_MONEY);
 	const [owned, setOwned] = useState<ItemId[]>([]);
+	// Every change to the inventory pops up a note next to the "?" button
+	// (see notify)
+	const [note, setNote] = useState<{ text: string; id: number } | null>(
+		null,
+	);
+	const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const notify = (text: string) => {
+		setNote((n) => ({ text, id: (n?.id ?? 0) + 1 }));
+		clearTimeout(noteTimer.current);
+		noteTimer.current = setTimeout(() => setNote(null), 5000);
+	};
 	const buy = (item: ItemId): BuyResult => {
 		if (owned.includes(item)) return "already-owned";
 		const { price } = ITEMS[item];
 		if (price > money) return "not-enough-money";
 		setMoney(money - price);
 		setOwned([...owned, item]);
+		notify(`${ITEMS[item].name} was added to inventory`);
 		return "bought";
 	};
+	const give = (item: ItemId) => {
+		if (owned.includes(item)) return;
+		setOwned([...owned, item]);
+		notify(`${ITEMS[item].name} was added to inventory`);
+	};
+	const donate = (amount: number) => {
+		if (amount <= 0) return;
+		setMoney((m) => m - amount);
+		notify(`You gave Daphne $${amount}`);
+	};
+	const sell = (item: ItemId) => {
+		setOwned(owned.filter((i) => i !== item));
+		setMoney(money + ITEMS[item].price);
+		notify(`${ITEMS[item].name} was sold for $${ITEMS[item].price}`);
+		closeItem();
+	};
 	const bills = billsFor(money);
+
+	// Clicking an item in the inventory opens it: the other slots fade out and
+	// its slot stretches across the whole row with a description and Sell.
+	// `openItem` is which one; `itemOpen` turns on a moment later so the slot
+	// can grow from where it was
+	const [openItem, setOpenItem] = useState<{
+		item: ItemId;
+		slot: number;
+	} | null>(null);
+	const [itemOpen, setItemOpen] = useState(false);
+	const showItem = (item: ItemId, slot: number) => {
+		setOpenItem({ item, slot });
+		setTimeout(() => setItemOpen(true), 20);
+	};
+	const closeItem = () => {
+		setItemOpen(false);
+		setTimeout(() => setOpenItem(null), 400);
+	};
 
 	// Images that can't be seen until after the ticket is clicked (the menu
 	// header and bag, the open curtains, the paper background behind the closed
@@ -374,6 +424,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 				money,
 				owned,
 				buy,
+				give,
+				donate,
 			}}
 		>
 			<div className="relative h-screen overflow-clip">
@@ -386,6 +438,21 @@ export default function Stage({ children }: { children: ReactNode }) {
 				>
 					?
 				</button>
+
+				{/* Inventory pop-up - just left of the "?", whenever something is
+				    added, sold or given. Clicking it opens the inventory */}
+				{note && (
+					<button
+						key={note.id}
+						onClick={() => {
+							setNote(null);
+							setNavOpen(true);
+						}}
+						className="note-pop fixed top-[1vh] right-[4.8vw] z-[23] max-w-[40vw] text-[2.5vh] text-left scribbler bg-white border-2 border-black border-dashed px-[1vw] py-[0.5vh] cursor-pointer drop-shadow-lg drop-shadow-black/60"
+					>
+						{note.text}, click to view {"->"}
+					</button>
+				)}
 
 				{/* Back - same look as the "?", in the top-left corner */}
 				{back && (
@@ -502,9 +569,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 							</div>
 						</div>
 						<h2 className="text-[4vh]">Inventory</h2>
-						<ul className="grid grid-cols-4 gap-[1.5vw]">
+						<ul className="relative grid grid-cols-4 gap-[1.5vw]">
 							<li
-								className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed"
+								className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed transition-opacity duration-300"
+								style={{ opacity: itemOpen ? 0 : 1 }}
 								aria-label={`$${money} - ${bills.fives} $5 bills and ${bills.ones} $1 bills`}
 							>
 								{[
@@ -533,19 +601,72 @@ export default function Stage({ children }: { children: ReactNode }) {
 							{Array.from({ length: 3 }, (_, i) => owned[i]).map((item, i) => (
 								<li
 									key={item ?? `empty-${i}`}
-									className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed flex items-center justify-center"
-									aria-label={item ? ITEMS[item].name : "Empty slot"}
+									className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed flex items-center justify-center transition-opacity duration-300"
+									style={{ opacity: itemOpen ? 0 : 1 }}
+									aria-label={item ? undefined : "Empty slot"}
 								>
 									{item && (
-										<img
-											src={ITEMS[item].image}
-											className="max-h-[90%] max-w-[90%] w-auto h-auto test-shadow-darker"
-											alt={ITEMS[item].name}
-											title={ITEMS[item].name}
-										/>
+										<button
+											onClick={() => showItem(item, i + 1)}
+											className="w-full h-full flex items-center justify-center cursor-pointer"
+											aria-label={`${ITEMS[item].name} - details`}
+										>
+											<img
+												src={ITEMS[item].image}
+												className="max-h-[90%] max-w-[90%] w-auto h-auto test-shadow-darker"
+												alt={ITEMS[item].name}
+												title={ITEMS[item].name}
+											/>
+										</button>
 									)}
 								</li>
 							))}
+
+							{/* An opened item - starts exactly over its slot, then
+							    stretches across the whole row while the other slots
+							    fade out */}
+							{openItem && (
+								<li
+									className="absolute top-0 h-[22vh] bg-white/80 border-[0.3vh] border-black border-dashed flex items-center gap-[2vw] px-[2vh] overflow-hidden"
+									style={{
+										transition:
+											"left 400ms cubic-bezier(0.34, 1.1, 0.64, 1), width 400ms cubic-bezier(0.34, 1.1, 0.64, 1)",
+										left: itemOpen
+											? "0"
+											: `calc(${openItem.slot} * (22vh + 1.5vw))`,
+										width: itemOpen ? "100%" : "22vh",
+									}}
+								>
+									<img
+										src={ITEMS[openItem.item].image}
+										className="h-[18vh] w-auto max-w-[18vh] object-contain test-shadow-darker"
+										alt={ITEMS[openItem.item].name}
+									/>
+									<div
+										className="flex flex-col gap-[1vh] text-left transition-opacity duration-300"
+										style={{ opacity: itemOpen ? 1 : 0 }}
+									>
+										<h3 className="text-[3vh]">{ITEMS[openItem.item].name}</h3>
+										<p className="text-[2.2vh] leading-snug max-w-[45vw]">
+											{ITEMS[openItem.item].description}
+										</p>
+										<div className="flex gap-[1vw]">
+											<button
+												onClick={() => sell(openItem.item)}
+												className="text-[2.5vh] bg-white border-2 border-black border-dashed px-[1vw] cursor-pointer"
+											>
+												Sell for ${ITEMS[openItem.item].price}
+											</button>
+											<button
+												onClick={closeItem}
+												className="text-[2.5vh] bg-white border-2 border-black border-dashed px-[1vw] cursor-pointer"
+											>
+												Close
+											</button>
+										</div>
+									</div>
+								</li>
+							)}
 						</ul>
 					</div>
 				</nav>
