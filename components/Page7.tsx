@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 
 type PageProps = {
@@ -19,6 +20,64 @@ const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 // switches on
 const SPOTLIGHT_MS = 900;
 
+const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
+const BUTTON_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
+
+const hang = (
+	everShown: boolean,
+	inPlace: boolean,
+	from: "top" | "bottom",
+	{ ms = 800, easing = LABEL_DROP, delay = 0, exitDelay = 0 } = {},
+) => ({
+	visibility: everShown ? ("visible" as const) : ("hidden" as const),
+	transition: `transform ${ms}ms ${easing} ${inPlace ? delay : exitDelay}ms`,
+	transform: inPlace
+		? "translateY(0)"
+		: `translateY(${from === "top" ? "-100vh" : "100vh"})`,
+});
+
+// A label's face, without its shadow (the shadow goes on the whole hanging
+// label, so it doesn't flip with it)
+const FACE =
+	"pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh]";
+
+const LABEL =
+	" pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darkest";
+const BUTTON = `${LABEL.replace("border-[0.2vh]", "border-[0.3vh]")} border-dashed cursor-pointer disabled:cursor-default`;
+
+// A label's two hanging strings
+const Strings = () => (
+	<>
+		<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+	</>
+);
+
+// The labels around Zhenya, in the order they drop in (and leave)
+const LABELS = [
+	{ text: "Magic Button is Horrible!", top: "-2vh", left: "20%" },
+	{ text: "Did YOU ever use it?", top: "3.5vh", left: "80%" },
+	{ text: "It DESTROYS creativity", top: "17vh", left: "7%" },
+	{ text: "Magic Button isn't real art!", top: "19vh", left: "92%" },
+	{ text: "F*ck Magic Button!", top: "34vh", left: "7%" },
+	{ text: "Art is human.", top: "33vh", left: "92%" },
+	{ text: "Magic button is Soulless", top: "48vh", left: "90%" },
+	{ text: "Human art is REAL art", top: "52vh", left: "15%" },
+];
+// How far apart they drop in, and lift away
+const LABEL_STAGGER_MS = 250;
+const LABEL_EXIT_STAGGER_MS = 50;
+// After the spotlight comes on (ms): the last label has landed (each drop
+// takes 800ms), then 2s with them all on screen, then they all flip to "But
+// why?" (FLIP_MS long), and "Whaaa-" rises 0.5s after the flip
+const LABELS_IN_MS = (LABELS.length - 1) * LABEL_STAGGER_MS + 800;
+const FLIP_AT_MS = LABELS_IN_MS + 2000;
+const FLIP_MS = 700;
+const WHAAA_MS = FLIP_AT_MS + FLIP_MS + 500;
+// After "Whaaa-", the spotlight goes off once the last label has lifted away
+// (each takes 800ms)
+const SPOTLIGHT_OFF_MS = (LABELS.length - 1) * LABEL_EXIT_STAGGER_MS + 800;
+
 export default function Page7({ curtainsOpen }: PageProps) {
 	const [step, setStep] = useState(0);
 	const blinkSrc = useBlinkingDoll();
@@ -34,6 +93,20 @@ export default function Page7({ curtainsOpen }: PageProps) {
 		return () => timers.forEach(clearTimeout);
 	}, [curtainsOpen]);
 
+	const [stage, setStage] = useState(0);
+
+	// The labels all flip over to "But why?" together, 2s after the last
+	// one has landed
+	const [flipped, setFlipped] = useState(false);
+	useEffect(() => {
+		if (step < 2) return;
+		const timer = setTimeout(
+			() => setFlipped(true),
+			FLIP_AT_MS,
+		);
+		return () => clearTimeout(timer);
+	}, [step]);
+
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
 			{/* The page's title, for screen readers and search engines */}
@@ -46,23 +119,104 @@ export default function Page7({ curtainsOpen }: PageProps) {
 				aria-hidden
 				className="fixed inset-0 z-[11] pointer-events-none"
 				style={{
-					opacity: step >= 2 ? 1 : 0,
+					// Switches on quickly (a quarter of a second, not instantly),
+					// and off the same way after "Whaaa-", once the labels have
+					// gone
+					opacity: step >= 2 && stage < 2 ? 1 : 0,
+					transition: "opacity 250ms ease-out",
 					background:
 						"radial-gradient(circle at 50% 60%, transparent 0, transparent 33vh, rgba(0, 0, 0, 0.72) 34vh)",
 				}}
 			/>
+
+			{/* The labels - drop in one by one once the spotlight is on; lift
+			    away one by one, in the same order, after "Whaaa-" */}
+			{/* 2s after the last one has landed, they all flip over
+			    together (like cards on their strings) - the backs say "But
+			    why?" */}
+			{LABELS.map(({ text, top, left }, i) => (
+				<div
+					key={text}
+					className="absolute -translate-x-[50%] text-[4vh] w-max z-20 drop-shadow-md drop-shadow-black/40 test-shadow-darkest perspective-[100vh]"
+					style={{
+						top,
+						left,
+						...hang(step >= 2, step >= 2 && stage < 1, "top", {
+							delay: i * LABEL_STAGGER_MS,
+							exitDelay: i * LABEL_EXIT_STAGGER_MS,
+						}),
+					}}
+				>
+					<Strings />
+					<div
+						className="relative transform-3d"
+						style={{
+							transition: `transform ${FLIP_MS}ms cubic-bezier(0.34, 1.2, 0.64, 1)`,
+							transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+						}}
+					>
+						<p className={`${FACE} backface-hidden`}>{text}</p>
+						<p
+							aria-hidden={!flipped}
+							className={`${FACE} backface-hidden absolute inset-0 flex items-center justify-center rotate-y-180`}
+						>
+							But why?
+						</p>
+					</div>
+				</div>
+			))}
+
+			{/* "Whaaa-" - on a popsicle like Continue, but lower and a little
+			    smaller. Rises 0.5s after the labels flip; clicking it sends the
+			    labels away, then turns the spotlight off */}
+			<PopsicleButton
+				onClick={() => {
+					if (stage > 0) return;
+					setStage(1);
+					setTimeout(() => setStage(2), SPOTLIGHT_OFF_MS);
+				}}
+				style={{
+					...hang(step >= 2, step >= 2 && stage < 1, "bottom", {
+						ms: 900,
+						easing: BUTTON_DROP,
+						delay: WHAAA_MS,
+					}),
+					right: "-4vw",
+					bottom: "-4vh",
+					scale: "0.85",
+					transformOrigin: "100% 100%",
+					filter: "drop-shadow(12px 12px 2px #000000a0)",
+					// Above the spotlight's dark (z-11)
+					zIndex: 20,
+				}}
+			>
+				Whaaa-
+			</PopsicleButton>
 
 			{/* Zhenya - drops into the middle, under the curtains (z-10) like on
 			    the other pages, with an extra dark shadow. Whatever of her is
 			    outside the spotlight (the strings at the top) is in the dark */}
 			<img
 				src={blinkSrc}
-				className="h-[100vh] w-auto max-w-none absolute top-[-28vh] left-[50%] -translate-x-[50%] z-[9]"
+				className="h-[100vh] w-auto max-w-none absolute top-[-28vh] -translate-x-[50%] z-[9]"
 				style={{
-					filter: "drop-shadow(20px 30px 3px #000000e6)",
+					// Once the spotlight is off: her shadow goes back to the usual
+					// one, she's pulled up a little, turns round (the scale flips
+					// through 0, like a cut-out) and goes over to the right
+					filter:
+						stage >= 2
+							? "drop-shadow(12px 12px 2px #28282857)"
+							: "drop-shadow(20px 30px 3px #000000e6)",
 					visibility: step >= 1 ? "visible" : "hidden",
-					transition: `transform 900ms ${DOLL_DROP}`,
-					transform: step >= 1 ? "translateY(0)" : "translateY(-120vh)",
+					transition: `transform 900ms ${DOLL_DROP}, filter 600ms ease, scale 600ms ease-in-out 300ms, left 1200ms ease-in-out 600ms`,
+					transform:
+						step < 1
+							? "translateY(-120vh)"
+							: stage >= 2
+								? "translateY(-4vh)"
+								: "translateY(0)",
+					scale: stage >= 2 ? "-1 1" : "1 1",
+					left: stage >= 2 ? "78%" : "50%",
 				}}
 				alt="Zhenya, a marionette doll on strings, standing in a spotlight"
 			/>

@@ -79,7 +79,12 @@ type StageContextValue = {
 };
 
 // A drawing in the inventory that isn't from the shop
-type Drawing = { key: string; name: string; image: string; description: string };
+type Drawing = {
+	key: string;
+	name: string;
+	image: string;
+	description: string;
+};
 
 // The inventory shows 3 items next to the money, or 7 (two rows) with
 // "View all items"
@@ -131,9 +136,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 	const [owned, setOwned] = useState<ItemId[]>([]);
 	// Every change to the inventory pops up a note next to the "?" button
 	// (see notify)
-	const [note, setNote] = useState<{ text: string; id: number } | null>(
-		null,
-	);
+	const [note, setNote] = useState<{ text: string; id: number } | null>(null);
 	const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const notify = (text: string) => {
 		setNote((n) => ({ text, id: (n?.id ?? 0) + 1 }));
@@ -147,12 +150,14 @@ export default function Stage({ children }: { children: ReactNode }) {
 		setMoney(money - price);
 		setOwned([...owned, item]);
 		notify(`${ITEMS[item].name} was added to inventory`);
+		itemAdded();
 		return "bought";
 	};
 	const give = (item: ItemId) => {
 		if (owned.includes(item)) return;
 		setOwned([...owned, item]);
 		notify(`${ITEMS[item].name} was added to inventory`);
+		itemAdded();
 	};
 	const donate = (amount: number) => {
 		if (amount <= 0) return;
@@ -166,11 +171,17 @@ export default function Stage({ children }: { children: ReactNode }) {
 		closeItem();
 	};
 	const bills = billsFor(money);
+	// One image per bill, $5s first - fanned out in the money slot
+	const moneyBills = [
+		...Array.from({ length: bills.fives }, () => BILL_IMAGES.five),
+		...Array.from({ length: bills.ones }, () => BILL_IMAGES.one),
+	];
 
 	const [drawings, setDrawings] = useState<Drawing[]>([]);
 	const keepDrawing = (drawing: Omit<Drawing, "key">) => {
 		setDrawings((d) => [...d, { ...drawing, key: `drawing-${d.length}` }]);
 		notify(`${drawing.name} was added to inventory`);
+		itemAdded();
 	};
 	// Everything in the inventory, shop items first, in one shape
 	const entries = [
@@ -183,13 +194,34 @@ export default function Stage({ children }: { children: ReactNode }) {
 		...drawings.map((d) => ({ ...d, item: null, price: 0, art: true })),
 	];
 	// "View all items": the menu drops further down to show a second row
-	const [allItems, setAllItems] = useState(false);
+	// It's a toggle that stays as you left it (kept in this browser too), and
+	// turns itself on once there are more items than one row can show
+	const [allItems, setAllItemsState] = useState(false);
+	const setAllItems = (on: boolean) => {
+		setAllItemsState(on);
+		try {
+			localStorage.setItem("scruples-view-all", on ? "1" : "0");
+		} catch {}
+	};
+	useEffect(() => {
+		let on = false;
+		try {
+			on = localStorage.getItem("scruples-view-all") === "1";
+		} catch {}
+		const timer = setTimeout(() => setAllItemsState(on), 0);
+		return () => clearTimeout(timer);
+	}, []);
+	// Called after something is added: one more than there was
+	const itemAdded = () => {
+		if (owned.length + drawings.length + 1 > SLOTS) setAllItems(true);
+	};
 	// The notebook, opened with "Use"
 	const [notebookOpen, setNotebookOpen] = useState(false);
 	// A piece of art being viewed big, opened with "View"
-	const [viewing, setViewing] = useState<{ image: string; name: string } | null>(
-		null,
-	);
+	const [viewing, setViewing] = useState<{
+		image: string;
+		name: string;
+	} | null>(null);
 
 	// Clicking an item in the inventory opens it: the other slots fade out and
 	// its slot stretches across the whole row with a description and Sell.
@@ -200,7 +232,19 @@ export default function Stage({ children }: { children: ReactNode }) {
 		slot: number;
 	} | null>(null);
 	const [itemOpen, setItemOpen] = useState(false);
-	const opened = openItem && entries.find((e) => e.key === openItem.key);
+	const opened =
+		openItem &&
+		(openItem.key === "money"
+			? {
+					key: "money",
+					item: null,
+					art: false,
+					price: 0,
+					name: `Money - $${money}`,
+					image: BILL_IMAGES.five,
+					description: `${bills.fives} $5 bill${bills.fives === 1 ? "" : "s"} and ${bills.ones} $1 bill${bills.ones === 1 ? "" : "s"}. Spend it on souvenirs in the gallery shop or on a drawing from Daphne - and if you run low, you can sell things from here to get some back.`,
+				}
+			: entries.find((e) => e.key === openItem.key));
 	const showItem = (key: string, slot: number) => {
 		setOpenItem({ key, slot });
 		setTimeout(() => setItemOpen(true), 20);
@@ -588,9 +632,14 @@ export default function Stage({ children }: { children: ReactNode }) {
 						<img
 							src={asset("/imgs/hidden-scribble.webp")}
 							fetchPriority="low"
-							className="absolute bottom-[90vh] left-0 w-screen h-[8vh] max-w-none pointer-events-none transition-opacity duration-300"
-							// Hidden while it's dropped further for "View all items"
-							style={{ opacity: allItems ? 0 : 1 }}
+							className="absolute bottom-[90vh] left-0 w-screen h-[8vh] max-w-none pointer-events-none"
+							// Gone at once while it's dropped further for "View all" -
+							// and only back once the menu has moved back up (the
+							// length of .nav-bounce), so it's never seen then
+							style={{
+								opacity: allItems ? 0 : 1,
+								transition: allItems ? "none" : "opacity 0s 1100ms",
+							}}
 							alt=""
 							aria-hidden
 						/>
@@ -616,7 +665,15 @@ export default function Stage({ children }: { children: ReactNode }) {
 					)}
 
 					{/* Nav content - sits in the solid area above the curtain swags */}
-					<div className="absolute inset-x-0 bottom-[45%] flex flex-col items-center gap-[2vh] text-[3vh] pt-[3vh]">
+					{/* With "View all", the menu drops a row but this moves back up
+					    by the same amount, with the same spring, so everything here
+					    stays still while the second row fades in below */}
+					<div
+						className="nav-bounce absolute inset-x-0 bottom-[45%] flex flex-col items-center gap-[2vh] text-[3vh] pt-[3vh]"
+						style={{
+							transform: allItems ? `translateY(calc(-1 * ${ROW}))` : "none",
+						}}
+					>
 						{/* 	{pageLoaded && (
 							<img
 								src={asset("/imgs/bag.webp")}
@@ -642,68 +699,73 @@ export default function Stage({ children }: { children: ReactNode }) {
 						</h2>
 						<div className="p-[3vh] absolute left-[12%] top-[16.2vh] bg-white/20 border-[0.3vh] border-black border-dashed">
 							<div className="grid grid-cols-3 gap-[1.5vh]">
-								{Array.from({ length: PAGE_COUNT }, (_, i) => i + 1).map((n) => {
-									const here = pathname === `/page${n}`;
-									return (
-										<button
-											key={n}
-											onClick={() => {
-												setNavOpen(false);
-												if (!here) goTo(`/page${n}`);
-											}}
-											aria-label={`Page ${n}`}
-											aria-current={here ? "page" : undefined}
-											title={`Page ${n}`}
-											className="h-[1.25vh] w-[1.25vh] flex items-center justify-center cursor-pointer group"
-										>
-											<span
-												className={`block rounded-full transition-transform duration-200 group-hover:scale-150 ${here ? "h-[1.25vh] w-[1.25vh] bg-black scale-150" : "h-[1.25vh] w-[1.25vh] bg-neutral-600"}`}
-											/>
-										</button>
-									);
-								})}
+								{Array.from({ length: PAGE_COUNT }, (_, i) => i + 1).map(
+									(n) => {
+										const here = pathname === `/page${n}`;
+										return (
+											<button
+												key={n}
+												onClick={() => {
+													setNavOpen(false);
+													if (!here) goTo(`/page${n}`);
+												}}
+												aria-label={`Page ${n}`}
+												aria-current={here ? "page" : undefined}
+												title={`Page ${n}`}
+												className="h-[1.25vh] w-[1.25vh] flex items-center justify-center cursor-pointer group"
+											>
+												<span
+													className={`block rounded-full transition-transform duration-200 group-hover:scale-150 ${here ? "h-[1.25vh] w-[1.25vh] bg-black scale-150" : "h-[1.25vh] w-[1.25vh] bg-neutral-600"}`}
+												/>
+											</button>
+										);
+									},
+								)}
 							</div>
 						</div>
 
-						{/* View all items - drops the menu further down to show a
-						    second row of the inventory (and back) */}
+						{/* View all - a switch: on, the menu drops further down and the
+						    inventory shows a second row. Stays how you left it */}
 						<button
 							onClick={() => {
-								setAllItems((a) => !a);
+								setAllItems(!allItems);
 								if (openItem) closeItem();
 							}}
-							aria-pressed={allItems}
+							role="switch"
+							aria-checked={allItems}
 							className="absolute right-[9%] top-[9.9vh] flex flex-col items-center gap-[1.5vh] cursor-pointer"
 						>
-							<span className="text-[4vh]">
-								{allItems ? "View less" : "View all"}
-							</span>
-							<span className="p-[3vh] bg-white/20 border-[0.3vh] border-black border-dashed">
-								<span className="grid grid-cols-3 gap-[1.5vh]">
-									{Array.from({ length: 9 }, (_, i) => (
-										<span
-											key={i}
-											className="h-[1.25vh] w-[1.25vh] rounded-full bg-neutral-600"
-										/>
-									))}
+							<span className="text-[4vh]">View all</span>
+							<span className="p-[2vh] bg-white/20 border-[0.3vh] border-black border-dashed">
+								<span
+									className="relative block w-[7vh] h-[3.5vh] rounded-full border-[0.3vh] border-black transition-colors duration-300"
+									style={{ background: allItems ? "#525252" : "white" }}
+								>
+									<span
+										className="absolute top-[50%] -translate-y-[50%] h-[2.3vh] w-[2.3vh] rounded-full border-[0.2vh] border-black bg-white transition-[left] duration-300"
+										style={{ left: allItems ? "calc(100% - 2.7vh)" : "0.3vh" }}
+									/>
 								</span>
 							</span>
 						</button>
 
 						<h2 className="text-[4vh]">Inventory</h2>
-						<ul className="relative grid grid-cols-4 gap-[1.5vw]">
+						{/* One row tall: the second row hangs below it, fading in and
+						    out with "View all" */}
+						<ul className="relative grid grid-cols-4 auto-rows-[22vh] h-[22vh] gap-[1.5vw]">
+							{/* Money - click it to see what it's for */}
 							<li
-								className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed transition-opacity duration-300"
+								className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
 								style={{ opacity: itemOpen ? 0 : 1 }}
-								aria-label={`$${money} - ${bills.fives} $5 bills and ${bills.ones} $1 bills`}
+								onClick={() => showItem("money", 0)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter" || e.key === " ") showItem("money", 0);
+								}}
+								role="button"
+								tabIndex={0}
+								aria-label={`$${money} - ${bills.fives} $5 bills and ${bills.ones} $1 bills - details`}
 							>
-								{[
-									...Array.from(
-										{ length: bills.fives },
-										() => BILL_IMAGES.five,
-									),
-									...Array.from({ length: bills.ones }, () => BILL_IMAGES.one),
-								].map((src, i, all) => (
+								{moneyBills.map((src, i, all) => (
 									<img
 										key={i}
 										src={src}
@@ -720,32 +782,40 @@ export default function Stage({ children }: { children: ReactNode }) {
 									${money}
 								</span>
 							</li>
-							{Array.from(
-								{ length: allItems ? ALL_SLOTS : SLOTS },
-								(_, i) => entries[i],
-							).map((entry, i) => (
-								<li
-									key={entry?.key ?? `empty-${i}`}
-									className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed flex items-center justify-center transition-opacity duration-300"
-									style={{ opacity: itemOpen ? 0 : 1 }}
-									aria-label={entry ? undefined : "Empty slot"}
-								>
-									{entry && (
-										<button
-											onClick={() => showItem(entry.key, i + 1)}
-											className="w-full h-full flex items-center justify-center cursor-pointer"
-											aria-label={`${entry.name} - details`}
+							{Array.from({ length: ALL_SLOTS }, (_, i) => entries[i]).map(
+								(entry, i) => {
+									const hidden = i >= SLOTS && !allItems;
+									return (
+										<li
+											key={entry?.key ?? `empty-${i}`}
+											inert={hidden}
+											className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed flex items-center justify-center"
+											style={{
+												opacity: itemOpen || hidden ? 0 : 1,
+												// The second row fades in after the menu has started
+												// dropping, and out quickly
+												transition: `opacity ${hidden ? 200 : 500}ms ease ${i >= SLOTS && !hidden && !itemOpen ? 300 : 0}ms`,
+											}}
+											aria-label={entry ? undefined : "Empty slot"}
 										>
-											<img
-												src={entry.image}
-												className="max-h-[90%] max-w-[90%] w-auto h-auto test-shadow-darker"
-												alt={entry.name}
-												title={entry.name}
-											/>
-										</button>
-									)}
-								</li>
-							))}
+											{entry && (
+												<button
+													onClick={() => showItem(entry.key, i + 1)}
+													className="w-full h-full flex items-center justify-center cursor-pointer"
+													aria-label={`${entry.name} - details`}
+												>
+													<img
+														src={entry.image}
+														className="max-h-[90%] max-w-[90%] w-auto h-auto test-shadow-darker"
+														alt={entry.name}
+														title={entry.name}
+													/>
+												</button>
+											)}
+										</li>
+									);
+								},
+							)}
 
 							{/* An opened item - starts exactly over its slot, then
 							    stretches across the whole row while the other slots
@@ -764,21 +834,44 @@ export default function Stage({ children }: { children: ReactNode }) {
 										width: itemOpen ? "100%" : "22vh",
 									}}
 								>
+									{/* Money shows its bills fanned out, like in its slot */}
+									{opened.key === "money" ? (
+										<div className="relative h-[18vh] w-[18vh] shrink-0">
+											{moneyBills.map((src, i, all) => (
+												<img
+													key={i}
+													src={src}
+													className="absolute top-[50%] h-[15vh] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
+													style={{
+														left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
+														rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
+													}}
+													alt=""
+												/>
+											))}
+										</div>
+									) : (
+										<>
 									{/* Art can be clicked to view it big */}
-									<img
-										src={opened.image}
-										onClick={
-											opened.art
-												? () => {
-														closeItem();
-														setNavOpen(false);
-														setViewing({ image: opened.image, name: opened.name });
-													}
-												: undefined
-										}
-										className={`h-[18vh] w-auto max-w-[18vh] object-contain test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
-										alt={opened.name}
-									/>
+										<img
+											src={opened.image}
+											onClick={
+												opened.art
+													? () => {
+															closeItem();
+															setNavOpen(false);
+															setViewing({
+																image: opened.image,
+																name: opened.name,
+															});
+														}
+													: undefined
+											}
+											className={`h-[18vh] w-auto max-w-[18vh] object-contain test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
+											alt={opened.name}
+										/>
+										</>
+									)}
 									<div
 										className="flex flex-col gap-[1vh] text-left transition-opacity duration-300"
 										style={{ opacity: itemOpen ? 1 : 0 }}
@@ -805,7 +898,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 													onClick={() => {
 														closeItem();
 														setNavOpen(false);
-														setViewing({ image: opened.image, name: opened.name });
+														setViewing({
+															image: opened.image,
+															name: opened.name,
+														});
 													}}
 													className="text-[2.5vh] bg-white border-[0.3vh] border-black border-dashed px-[1vw] cursor-pointer"
 												>
@@ -834,12 +930,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 					</div>
 				</nav>
 
-				{notebookOpen && (
-					<Notebook onClose={() => setNotebookOpen(false)} />
-				)}
-				{viewing && (
-					<ArtViewer {...viewing} onClose={() => setViewing(null)} />
-				)}
+				{notebookOpen && <Notebook onClose={() => setNotebookOpen(false)} />}
+				{viewing && <ArtViewer {...viewing} onClose={() => setViewing(null)} />}
 
 				{/* Normal open state */}
 				{pageLoaded && (

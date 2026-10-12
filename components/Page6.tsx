@@ -69,7 +69,7 @@ const framed = (drawing: string) =>
 				0.691 * canvas.width,
 				0.645 * canvas.height,
 			] as const;
-			ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+			ctx.fillStyle = "white";
 			ctx.fillRect(...box);
 			ctx.drawImage(art, ...box);
 			ctx.drawImage(frame, 0, 0);
@@ -136,7 +136,7 @@ const YourArt = ({
 		{drawingUrl && (
 			<img
 				src={drawingUrl}
-				className={`${CANVAS_BOX} bg-white/90`}
+				className={`${CANVAS_BOX} bg-white`}
 				alt="Your drawing"
 			/>
 		)}
@@ -458,7 +458,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 					onPointerUp={onPointerUp}
 					onPointerCancel={onPointerUp}
 					aria-label="Drawing area - draw with your mouse, finger or pen"
-					className={`${CANVAS_BOX} z-1 bg-white/90 touch-none ${stage === 1 && canDraw ? "cursor-crosshair" : ""}`}
+					className={`${CANVAS_BOX} z-1 bg-white touch-none ${stage === 1 && canDraw ? "cursor-crosshair" : ""}`}
 				/>
 				<img
 					src={asset("/imgs/empty_square_frame.webp")}
