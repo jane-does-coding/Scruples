@@ -9,10 +9,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		changeFrequency: "monthly" as const,
 		priority: n === 1 ? 1 : 0.8,
 	}));
+	const ending = ["/lastpage", "/gallery"].map((path) => ({
+		url: `${SITE_URL}${path}`,
+		changeFrequency: "weekly" as const,
+		priority: 0.7,
+	}));
 	const paintings = FRAMES.map(({ slug }) => ({
 		url: `${SITE_URL}/art-piece/${slug}`,
 		changeFrequency: "yearly" as const,
 		priority: 0.6,
 	}));
-	return [...pages, ...paintings];
+	return [...pages, ...ending, ...paintings];
 }

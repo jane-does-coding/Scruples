@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
+import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import usePortrait from "@/components/usePortrait";
 import * as sound from "@/lib/sound";
@@ -82,6 +83,9 @@ const LABELS_OUT_MS = FLIP_MS + 2000;
 const SPOTLIGHT_OFF_MS = (LABELS.length - 1) * LABEL_EXIT_STAGGER_MS + 800;
 
 export default function Page7({ curtainsOpen }: PageProps) {
+	// For Continue, which goes on to the last page (for now - more pages are
+	// coming before it)
+	const { goTo } = useStage();
 	const [step, setStep] = useState(0);
 	const blinkSrc = useBlinkingDoll();
 
@@ -215,6 +219,26 @@ export default function Page7({ curtainsOpen }: PageProps) {
 				}}
 			>
 				Whaaa-
+			</PopsicleButton>
+
+			{/* Continue - rises once Zhenya has turned and walked off to the
+			    right after the spotlight goes out; on to the last page */}
+			<PopsicleButton
+				onClick={() => goTo("/lastpage")}
+				href="/lastpage"
+				style={{
+					...hang(stage >= 2, stage >= 2, "bottom", {
+						ms: 900,
+						easing: BUTTON_DROP,
+						delay: 2200,
+					}),
+					right: "-5vw",
+					bottom: "-2svh",
+					filter: "drop-shadow(12px 12px 2px #000000a0)",
+					zIndex: 20,
+				}}
+			>
+				Continue {"->"}
 			</PopsicleButton>
 
 			{/* Zhenya - drops into the middle, under the curtains (z-10) like on

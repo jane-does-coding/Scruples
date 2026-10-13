@@ -88,8 +88,12 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			</div>
 
 			{/* About the painting - hangs on the left of it, just after it */}
+			{/* Its strings - in their own layer, behind the curtains (z-10),
+			    moving with it. The card itself stays in front of them so the
+			    side curtains never cover its text */}
 			<div
-				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-[11]"
+				aria-hidden
+				className="absolute top-[-4svh] h-0 z-[9] pointer-events-none"
 				style={{
 					...aboutPlace,
 					...slideIn(shown && paintingWidth > 0, "top", 300),
@@ -97,6 +101,14 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-[1vw] absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-[1vw] absolute"></span>
+			</div>
+			<div
+				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-[11]"
+				style={{
+					...aboutPlace,
+					...slideIn(shown && paintingWidth > 0, "top", 300),
+				}}
+			>
 				<h2 className="text-[2.6svh] portrait:text-[2svh] mb-[0.8svh]">About it</h2>
 				<dl className="text-[1.9svh] portrait:text-[1.45svh] leading-snug flex flex-col gap-[1svh]">
 					{(
@@ -118,8 +130,12 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			</div>
 
 			{/* Fun facts - hang on the right of it, a moment later */}
+			{/* Its strings - in their own layer, behind the curtains (z-10),
+			    moving with it. The card itself stays in front of them so the
+			    side curtains never cover its text */}
 			<div
-				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-[11]"
+				aria-hidden
+				className="absolute top-[-4svh] h-0 z-[9] pointer-events-none"
 				style={{
 					...factsPlace,
 					...slideIn(shown && paintingWidth > 0, "top", 450),
@@ -127,6 +143,14 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-[1vw] absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-[1vw] absolute"></span>
+			</div>
+			<div
+				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-[11]"
+				style={{
+					...factsPlace,
+					...slideIn(shown && paintingWidth > 0, "top", 450),
+				}}
+			>
 				<h2 className="text-[2.6svh] portrait:text-[2svh] mb-[0.8svh]">Fun facts</h2>
 				<ul className="text-[1.9svh] portrait:text-[1.45svh] leading-snug flex flex-col gap-[1svh] list-['*_'] pl-[1.2vw] portrait:pl-[3vw]">
 					{frame.facts.map((fact) => (

@@ -6,6 +6,7 @@ import useWowDoll from "@/components/useWowDoll";
 import { asset } from "@/lib/asset";
 import usePortrait from "@/components/usePortrait";
 import { FRAMES } from "@/lib/frames";
+import { saveDrawing } from "@/lib/drawings";
 import { ITEMS } from "@/lib/shop";
 import {
 	penDown as startStroke,
@@ -81,7 +82,9 @@ const framed = (drawing: string) =>
 			ctx.fillRect(...box);
 			ctx.drawImage(art, ...box);
 			ctx.drawImage(frame, 0, 0);
-			resolve(canvas.toDataURL("image/png"));
+			// WebP keeps it small enough to save (PNG where WebP isn't
+			// supported)
+			resolve(canvas.toDataURL("image/webp", 0.85));
 		};
 		frame.onload = art.onload = draw;
 		// Without the frame, keep the drawing as it is
@@ -312,14 +315,16 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 		// Your drawing goes into the inventory - in its frame, like it hangs
 		// on the stage - and a bigger frame goes back to its normal size
 		if (url)
-			framed(url).then((image) =>
+			framed(url).then((image) => {
 				keepDrawing({
 					name: "Your drawing",
 					image,
 					description:
 						"The first thing Zhenya drew, in the frame on the stage. Every artist starts somewhere.",
-				}),
-			);
+				});
+				// …and joins everyone's drawings on the last page
+				saveDrawing(image);
+			});
 		setBig(false);
 		setStage(2);
 		setPenDown(false);
@@ -569,7 +574,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={sayVerdict}
 				disabled={!verdict || stage >= 3}
 				tabIndex={verdict && stage < 3 ? undefined : -1}
-				className={`absolute top-[2svh] left-[38%] portrait:top-[20svh] portrait:left-[34%] -translate-x-[50%] w-[18vw] portrait:w-[56vw] z-[13] ${BUTTON}`}
+				className={`absolute top-[2svh] left-[38%] portrait:top-[20svh] portrait:left-[34%] -translate-x-[50%] w-[18vw] portrait:w-[56vw] z-[9] ${BUTTON}`}
 				style={hang(verdict, verdict && stage < 4, "top", {
 					exitDelay: 0 * TALK_EXIT_STAGGER_MS,
 				})}
@@ -580,7 +585,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Daphne: "But did you have a good time?" */}
 			<p
-				className={`absolute top-[16svh] left-[60%] portrait:top-[30svh] portrait:left-[62%] -translate-x-[50%] w-max portrait:max-w-[70vw] z-[12] ${LABEL}`}
+				className={`absolute top-[16svh] left-[60%] portrait:top-[30svh] portrait:left-[62%] -translate-x-[50%] w-max portrait:max-w-[70vw] z-[8] ${LABEL}`}
 				style={hang(stage >= 3, stage === 3, "top", {
 					delay: 400,
 					exitDelay: 1 * TALK_EXIT_STAGGER_MS,
@@ -595,7 +600,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={sayYes}
 				disabled={!goodTime || stage >= 4}
 				tabIndex={goodTime && stage < 4 ? undefined : -1}
-				className={`absolute top-[22svh] left-[33%] portrait:top-[40svh] portrait:left-[34%] -translate-x-[50%] w-max z-[11] ${BUTTON}`}
+				className={`absolute top-[22svh] left-[33%] portrait:top-[40svh] portrait:left-[34%] -translate-x-[50%] w-max z-[7] ${BUTTON}`}
 				style={hang(goodTime, goodTime && stage < 4, "top", {
 					exitDelay: 2 * TALK_EXIT_STAGGER_MS,
 				})}

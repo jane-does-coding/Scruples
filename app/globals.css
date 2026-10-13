@@ -88,6 +88,11 @@ button {
 	animation-play-state: paused;
 }
 
+/* Marquees that stop while the pointer is over them (the last page) */
+.hover-pause:hover {
+	animation-play-state: paused;
+}
+
 @keyframes marquee {
 	from {
 		transform: translateX(0);

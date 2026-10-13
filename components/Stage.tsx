@@ -59,6 +59,10 @@ const backHref = (pathname: string) => {
 	if (page) return Number(page[1]) > 1 ? `/page${Number(page[1]) - 1}` : null;
 	// Paintings are opened from the marquee on Page 2
 	if (pathname.startsWith("/art-piece/")) return "/page2";
+	// The last page comes after Page 7 (for now), and the drawings wall is
+	// opened from the last page
+	if (pathname === "/lastpage") return "/page7";
+	if (pathname === "/gallery") return "/lastpage";
 	return null;
 };
 
@@ -103,14 +107,15 @@ const NAV_GLIDE_MS = 650;
 // sized by width on portrait screens)
 const ROW = "(var(--slot) + var(--slot-gap))";
 // The pages, as listed in the menu
-const PAGE_TITLES = [
-	"Meet Zhenya",
-	"Zhenya likes art",
-	"Souvenir shop",
-	"Art on social media",
-	"Meet Daphne",
-	"Every artist starts somewhere",
-	"In the spotlight",
+const PAGES = [
+	{ title: "Meet Zhenya", href: "/page1" },
+	{ title: "Zhenya likes art", href: "/page2" },
+	{ title: "Souvenir shop", href: "/page3" },
+	{ title: "Art on social media", href: "/page4" },
+	{ title: "Meet Daphne", href: "/page5" },
+	{ title: "Every artist starts somewhere", href: "/page6" },
+	{ title: "In the spotlight", href: "/page7" },
+	{ title: "Curtain call", href: "/lastpage" },
 ];
 
 const StageContext = createContext<StageContextValue | null>(null);
@@ -845,20 +850,20 @@ export default function Stage({ children }: { children: ReactNode }) {
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
 								<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
 								<ol className="h-[var(--slot)] w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-cols-2 grid-rows-[repeat(4,auto)] grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.6svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.4svh] portrait:text-[2svh] leading-[1.2]">
-									{PAGE_TITLES.map((title, i) => {
+									{PAGES.map(({ title, href }, i) => {
 										const n = i + 1;
-										const here = pathname === `/page${n}`;
+										const here = pathname === href;
 										return (
-											<li key={n}>
+											<li key={href}>
 												<a
-													href={`/page${n}`}
+													href={href}
 													onClick={(e) => {
 														if (here) {
 															e.preventDefault();
 															setNavOpen(false);
 															return;
 														}
-														linkClick(`/page${n}`, () => setNavOpen(false))(e);
+														linkClick(href, () => setNavOpen(false))(e);
 													}}
 													aria-current={here ? "page" : undefined}
 													className={`block py-[0.15svh] cursor-pointer hover:underline decoration-dashed underline-offset-4 ${here ? "underline" : ""}`}
