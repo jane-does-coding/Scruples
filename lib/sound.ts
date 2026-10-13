@@ -1,0 +1,291 @@
+// All of the site's sounds, made live with the Web Audio API - no audio
+// files to download. Browsers only allow sound after a click, so nothing
+// plays until unlock() is called from one (the ticket). Everything goes
+// through one master volume, which the sound button turns on and off
+//
+//   drop()      - a label landing on its strings: a soft wooden "tock"
+//   whoosh(ms)  - the curtains sweeping open or shut
+//   rip()       - the ticket tearing
+//   menu(open)  - the "?" menu dropping down (and landing) or lifting away
+//   startMusic()- a quiet, slow lullaby in the background, on a loop
+
+const STORAGE_KEY = "scruples-sound";
+const VOLUME = 1;
+const MUSIC_VOLUME = 0.14;
+
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let noise: AudioBuffer | null = null;
+let muted = false;
+const listeners = new Set<(muted: boolean) => void>();
+
+// Whether sound was switched off last time (kept in this browser)
+try {
+	muted =
+		typeof localStorage !== "undefined" &&
+		localStorage.getItem(STORAGE_KEY) === "off";
+} catch {}
+
+export const isMuted = () => muted;
+
+export const setMuted = (off: boolean) => {
+	muted = off;
+	try {
+		localStorage.setItem(STORAGE_KEY, off ? "off" : "on");
+	} catch {}
+	if (ctx && master)
+		master.gain.setTargetAtTime(off ? 0 : VOLUME, ctx.currentTime, 0.05);
+	listeners.forEach((listener) => listener(off));
+};
+
+export const onMutedChange = (listener: (muted: boolean) => void) => {
+	listeners.add(listener);
+	return () => {
+		listeners.delete(listener);
+	};
+};
+
+// Call from a click: creates (or wakes) the audio, so sounds can play
+export const unlock = () => {
+	if (typeof window === "undefined") return;
+	if (!ctx) {
+		ctx = new AudioContext();
+		master = ctx.createGain();
+		master.gain.value = muted ? 0 : VOLUME;
+		master.connect(ctx.destination);
+		// One second of white noise, reused for every noisy sound
+		noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+		const data = noise.getChannelData(0);
+		for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+		// Quiet while the tab is hidden
+		document.addEventListener("visibilitychange", () => {
+			if (!ctx) return;
+			if (document.hidden) ctx.suspend();
+			else ctx.resume();
+		});
+	}
+	if (ctx.state === "suspended") ctx.resume();
+};
+
+// Ready to make a sound? (unlocked, and not switched off)
+const ready = () => (ctx && master && !muted ? ctx : null);
+
+const noiseSource = (audio: AudioContext) => {
+	const source = audio.createBufferSource();
+	source.buffer = noise;
+	source.loop = true;
+	return source;
+};
+
+// A label landing: a soft, low "pff" - a gentle thump with a slow-ish
+// start and a little puff of air, like card settling on felt. Slightly
+// different pitch each time, and never more than one every 60ms, so a row
+// of labels landing together doesn't turn into a buzz
+let lastDrop = 0;
+export const drop = () => {
+	const audio = ready();
+	if (!audio || !master) return;
+	const now = audio.currentTime;
+	if (now - lastDrop < 0.06) return;
+	lastDrop = now;
+	const pitch = 0.9 + Math.random() * 0.2;
+
+	const thump = audio.createOscillator();
+	thump.type = "sine";
+	thump.frequency.setValueAtTime(220 * pitch, now);
+	thump.frequency.exponentialRampToValueAtTime(130 * pitch, now + 0.15);
+	const thumpGain = audio.createGain();
+	thumpGain.gain.setValueAtTime(0.0001, now);
+	thumpGain.gain.exponentialRampToValueAtTime(0.5, now + 0.015);
+	thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+	thump.connect(thumpGain).connect(master);
+	thump.start(now);
+	thump.stop(now + 0.28);
+
+	const puff = noiseSource(audio);
+	const low = audio.createBiquadFilter();
+	low.type = "lowpass";
+	low.frequency.value = 700 * pitch;
+	const puffGain = audio.createGain();
+	puffGain.gain.setValueAtTime(0.0001, now);
+	puffGain.gain.exponentialRampToValueAtTime(0.16, now + 0.01);
+	puffGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+	puff.connect(low).connect(puffGain).connect(master);
+	puff.start(now, Math.random() * 0.5);
+	puff.stop(now + 0.14);
+};
+
+// The menu: a quick swish as it drops, and a soft thump as it lands at the
+// bottom of its bounce - or just the swish, going back up
+export const menu = (open: boolean) => {
+	const audio = ready();
+	if (!audio || !master) return;
+	whoosh(open ? 450 : 350);
+	if (!open) return;
+	const at = audio.currentTime + 0.32;
+	const thump = audio.createOscillator();
+	thump.type = "sine";
+	thump.frequency.setValueAtTime(150, at);
+	thump.frequency.exponentialRampToValueAtTime(80, at + 0.2);
+	const gain = audio.createGain();
+	gain.gain.setValueAtTime(0.0001, at);
+	gain.gain.exponentialRampToValueAtTime(0.45, at + 0.02);
+	gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.3);
+	thump.connect(gain).connect(master);
+	thump.start(at);
+	thump.stop(at + 0.32);
+};
+
+// The curtains: a soft swish of fabric, rising then falling over `ms`
+export const whoosh = (ms = 900) => {
+	const audio = ready();
+	if (!audio || !master) return;
+	const now = audio.currentTime;
+	const length = ms / 1000;
+
+	const source = noiseSource(audio);
+	const band = audio.createBiquadFilter();
+	band.type = "bandpass";
+	band.Q.value = 0.8;
+	band.frequency.setValueAtTime(350, now);
+	band.frequency.exponentialRampToValueAtTime(1400, now + length * 0.45);
+	band.frequency.exponentialRampToValueAtTime(500, now + length);
+	const low = audio.createBiquadFilter();
+	low.type = "lowpass";
+	low.frequency.value = 2500;
+	const gain = audio.createGain();
+	gain.gain.setValueAtTime(0.0001, now);
+	gain.gain.exponentialRampToValueAtTime(0.3, now + length * 0.35);
+	gain.gain.exponentialRampToValueAtTime(0.0001, now + length);
+	source.connect(band).connect(low).connect(gain).connect(master);
+	source.start(now, Math.random() * 0.5);
+	source.stop(now + length + 0.05);
+};
+
+// The ticket tearing: a quick run of tiny crackles, made fresh each time
+export const rip = () => {
+	const audio = ready();
+	if (!audio || !master) return;
+	const now = audio.currentTime;
+	const length = 0.42;
+	const buffer = audio.createBuffer(
+		1,
+		Math.round(audio.sampleRate * length),
+		audio.sampleRate,
+	);
+	const data = buffer.getChannelData(0);
+	for (let i = 0; i < data.length; i++) {
+		const t = i / data.length;
+		// Fibres snapping: random clicks, denser in the middle of the tear
+		const density = 0.08 + 0.3 * Math.sin(Math.PI * t);
+		data[i] =
+			Math.random() < density ? (Math.random() * 2 - 1) * (1 - t * 0.6) : 0;
+	}
+	const source = audio.createBufferSource();
+	source.buffer = buffer;
+	const high = audio.createBiquadFilter();
+	high.type = "highpass";
+	high.frequency.value = 1800;
+	const gain = audio.createGain();
+	gain.gain.value = 0.3;
+	source.connect(high).connect(gain).connect(master);
+	source.start(now);
+};
+
+// ---------- Background music ----------
+// A slow, hushed lullaby in 4/4 (Dmaj7 - Bm7 - Gmaj7 - A): a soft pad holds
+// each chord, a low note under it, and a few felt-piano notes drift over
+// the top. Notes are scheduled a moment ahead on the audio clock, so the
+// timing stays steady
+const BEAT = 60 / 64;
+const BARS: { bass: number; pad: number[]; notes: number[] }[] = [
+	// MIDI note numbers; 8 eighth notes per bar (0 = rest)
+	{ bass: 38, pad: [62, 66, 69, 73], notes: [74, 0, 69, 0, 73, 0, 0, 0] },
+	{ bass: 35, pad: [59, 62, 66, 69], notes: [71, 0, 0, 69, 66, 0, 0, 0] },
+	{ bass: 31, pad: [59, 62, 66, 67], notes: [67, 0, 71, 0, 74, 0, 73, 0] },
+	{ bass: 33, pad: [57, 61, 64, 69], notes: [69, 0, 0, 0, 0, 0, 0, 0] },
+	{ bass: 38, pad: [62, 66, 69, 73], notes: [78, 0, 76, 0, 74, 0, 0, 0] },
+	{ bass: 35, pad: [59, 62, 66, 69], notes: [73, 0, 71, 0, 0, 66, 0, 0] },
+	{ bass: 31, pad: [59, 62, 66, 67], notes: [71, 0, 0, 74, 0, 0, 71, 0] },
+	{ bass: 33, pad: [57, 61, 64, 69], notes: [73, 0, 0, 0, 76, 0, 0, 0] },
+];
+const freq = (midi: number) => 440 * 2 ** ((midi - 69) / 12);
+
+let music: { bus: GainNode; timer: ReturnType<typeof setInterval> } | null =
+	null;
+
+// One soft note: a gentle attack (not a hard pluck) and a long fade
+const tone = (
+	audio: AudioContext,
+	out: AudioNode,
+	midi: number,
+	at: number,
+	volume: number,
+	attack: number,
+	length: number,
+	detune = 0,
+) => {
+	const osc = audio.createOscillator();
+	osc.type = "sine";
+	osc.frequency.value = freq(midi);
+	osc.detune.value = detune;
+	const gain = audio.createGain();
+	gain.gain.setValueAtTime(0.0001, at);
+	gain.gain.exponentialRampToValueAtTime(volume, at + attack);
+	gain.gain.exponentialRampToValueAtTime(0.0001, at + length);
+	osc.connect(gain).connect(out);
+	osc.start(at);
+	osc.stop(at + length + 0.05);
+};
+
+export const startMusic = () => {
+	if (!ctx || !master || music) return;
+	const audio = ctx;
+	const bus = audio.createGain();
+	bus.gain.setValueAtTime(0.0001, audio.currentTime);
+	bus.gain.exponentialRampToValueAtTime(
+		MUSIC_VOLUME,
+		audio.currentTime + 6,
+	);
+	// Warm it up: roll off the highs
+	const warm = audio.createBiquadFilter();
+	warm.type = "lowpass";
+	warm.frequency.value = 2200;
+	warm.connect(bus);
+	// A soft echo on the melody, for a sleepy, roomy feel
+	const echo = audio.createDelay();
+	echo.delayTime.value = BEAT * 1.5;
+	const feedback = audio.createGain();
+	feedback.gain.value = 0.3;
+	const wet = audio.createGain();
+	wet.gain.value = 0.3;
+	echo.connect(feedback).connect(echo);
+	echo.connect(wet).connect(warm);
+	bus.connect(master);
+
+	let bar = 0;
+	let nextBar = audio.currentTime + 0.3;
+	const schedule = () => {
+		// Fill in anything due in the next second and a half
+		while (nextBar < audio.currentTime + 1.5) {
+			const { bass, pad, notes } = BARS[bar % BARS.length];
+			const barLength = BEAT * 4;
+			tone(audio, warm, bass, nextBar, 0.45, 0.08, barLength * 1.1);
+			// The pad: each chord note twice, slightly detuned, swelling in
+			pad.forEach((note) => {
+				tone(audio, warm, note, nextBar, 0.08, 0.9, barLength * 1.15, -6);
+				tone(audio, warm, note, nextBar, 0.08, 0.9, barLength * 1.15, 6);
+			});
+			notes.forEach((note, i) => {
+				if (!note) return;
+				const at = nextBar + (i * BEAT) / 2;
+				tone(audio, warm, note, at, 0.35, 0.02, 2.2);
+				tone(audio, echo, note, at, 0.25, 0.02, 2.2);
+			});
+			nextBar += barLength;
+			bar++;
+		}
+	};
+	schedule();
+	music = { bus, timer: setInterval(schedule, 300) };
+};

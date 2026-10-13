@@ -13,6 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 import ArtViewer from "@/components/ArtViewer";
 import Notebook from "@/components/Notebook";
 import { asset, srcSet } from "@/lib/asset";
+import * as sound from "@/lib/sound";
 import {
 	BILL_IMAGES,
 	ITEMS,
@@ -93,8 +94,16 @@ const ALL_SLOTS = 7;
 // One row of the inventory: a slot plus the gap (set in globals.css, and
 // sized by width on portrait screens)
 const ROW = "(var(--slot) + var(--slot-gap))";
-// The pages, for the dots in the menu
-const PAGE_COUNT = 7;
+// The pages, as listed in the menu
+const PAGE_TITLES = [
+	"Meet Zhenya",
+	"Zhenya likes art",
+	"Souvenir shop",
+	"Art on social media",
+	"Meet Daphne",
+	"Every artist starts somewhere",
+	"In the spotlight",
+];
 
 const StageContext = createContext<StageContextValue | null>(null);
 
@@ -274,6 +283,55 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return () => window.removeEventListener("load", onLoad);
 	}, []);
 
+	// A soft "tock" whenever something hanging on strings lands: a label or
+	// button finishing its drop into place (its transform or top transition
+	// ending back at rest), or a line of dialogue's .hang-in animation
+	// ending. Hanging things have string spans (bg-black/60) as direct
+	// children; lifting away (ending off screen) is silent
+	useEffect(() => {
+		const hangs = (el: Element) =>
+			!!el.querySelector(':scope > span[class*="bg-black/60"]');
+		const onTransitionEnd = (e: TransitionEvent) => {
+			if (!(e.target instanceof HTMLElement) || !hangs(e.target)) return;
+			if (e.propertyName === "transform") {
+				if (/^translateY\(0(px|svh)?\)$/.test(e.target.style.transform))
+					sound.drop();
+			} else if (e.propertyName === "top") {
+				const top = parseFloat(getComputedStyle(e.target).top);
+				if (top > 0) sound.drop();
+			}
+		};
+		const onAnimationEnd = (e: AnimationEvent) => {
+			if (e.animationName === "hang-in") sound.drop();
+		};
+		document.addEventListener("transitionend", onTransitionEnd);
+		document.addEventListener("animationend", onAnimationEnd);
+		return () => {
+			document.removeEventListener("transitionend", onTransitionEnd);
+			document.removeEventListener("animationend", onAnimationEnd);
+		};
+	}, []);
+
+	// The menu makes a sound when it opens or closes (not on the first
+	// render)
+	const navOpenedBefore = useRef(false);
+	useEffect(() => {
+		if (!navOpenedBefore.current && !navOpen) return;
+		navOpenedBefore.current = true;
+		sound.menu(navOpen);
+	}, [navOpen]);
+
+	// Sound on/off (the button under the "?"), kept in this browser
+	const [muted, setMutedState] = useState(false);
+	useEffect(() => {
+		const timer = setTimeout(() => setMutedState(sound.isMuted()), 0);
+		const stop = sound.onMutedChange(setMutedState);
+		return () => {
+			clearTimeout(timer);
+			stop();
+		};
+	}, []);
+
 	// Clicking a hanging button (dashed border = clickable, on any page) gives
 	// it a tiny tug: it dips down a little and springs back. Hanging
 	// things are the ones with string spans (bg-black/60) as direct children,
@@ -374,6 +432,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 	const openCurtains = (duration = ANIMATION_MS) => {
 		setAnimationStage("opening");
+		sound.whoosh(duration);
 		playFrames(
 			bitmaps.current.opening,
 			() => setAnimationStage("idle"),
@@ -402,6 +461,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 		draw();
 		setTicket("ripping");
+		sound.rip();
 		const timer = setInterval(() => {
 			i++;
 			if (i < frames.length) {
@@ -450,6 +510,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 	const enter = () => {
 		if (enteredRef.current) return;
 		enteredRef.current = true;
+		// The first click is what lets the browser play sound: wake it up
+		// and start the music
+		sound.unlock();
+		sound.startMusic();
 		// Make sure both are on their way, even if the click beat the timer
 		loadOpening();
 
@@ -514,6 +578,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 			return false;
 		}
 		setAnimationStage("closing");
+		sound.whoosh(ANIMATION_MS);
 		playFrames(closing, onClosed);
 		return true;
 	};
@@ -581,6 +646,34 @@ export default function Stage({ children }: { children: ReactNode }) {
 					className="fixed top-[0.5svh] right-[0.5vw] text-[4svh] font-extrabold cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] min-w-[44px] min-h-[44px] portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:text-[2.6svh] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
 					?
+				</button>
+
+				{/* Sound on/off - same look as the "?", just under it */}
+				<button
+					onClick={() => {
+						sound.unlock();
+						sound.setMuted(!muted);
+					}}
+					aria-pressed={!muted}
+					aria-label={muted ? "Turn sound on" : "Turn sound off"}
+					title={muted ? "Sound off" : "Sound on"}
+					className="fixed top-[calc(1svh+max(3.5vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3.5vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] min-w-[44px] min-h-[44px] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+				>
+					{/* A music note, crossed out while sound is off */}
+					<svg
+						aria-hidden
+						viewBox="0 0 24 24"
+						className="w-[55%] h-[55%]"
+						fill="none"
+						stroke="black"
+						strokeWidth="2.2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						<ellipse cx="8" cy="18" rx="3.6" ry="2.8" fill="black" />
+						<path d="M11.4 17.5 V4 c2.5 1.5 5.5 2.2 6.5 5.5" />
+						{muted && <path d="M3 3 L21 21" />}
+					</svg>
 				</button>
 
 				{/* The pop-up's text for screen readers - always on the page, so
@@ -723,266 +816,248 @@ export default function Stage({ children }: { children: ReactNode }) {
 						    bills fanned out, with the total), then one slot per thing
 						    you can buy - filled in the order you bought them, the rest
 						    empty */}
-						{/* Pages - a dot for each page; click one to go there. The
-						    one you're on is bigger. (Positions are from the top, so
-						    they stay put when the inventory gets its second row) */}
-						{/* On wide screens these two sit either side of the inventory;
-						    on portrait screens, side by side above it */}
-						<div className="contents portrait:flex portrait:items-end portrait:justify-center portrait:gap-[10vw]">
-							<div className="contents portrait:flex portrait:flex-col portrait:items-center portrait:gap-[1svh]">
-								<h2 className="text-[4svh] portrait:text-[3svh] absolute portrait:static left-[12.5%] top-[9.9svh]">
-									Pages
-								</h2>
-								<div className="p-[3svh] portrait:p-[2svh] absolute portrait:static left-[12%] top-[16.2svh] bg-white/20 border-[0.3svh] border-black border-dashed">
-									<div className="grid grid-cols-3 gap-[1.5svh]">
-										{Array.from({ length: PAGE_COUNT }, (_, i) => i + 1).map(
-											(n) => {
-												const here = pathname === `/page${n}`;
-												return (
-													<a
-														key={n}
-														href={`/page${n}`}
-														onClick={(e) => {
-															if (here) {
-																e.preventDefault();
-																setNavOpen(false);
-																return;
-															}
-															linkClick(`/page${n}`, () => setNavOpen(false))(e);
-														}}
-														aria-label={`Page ${n}`}
-														aria-current={here ? "page" : undefined}
-														title={`Page ${n}`}
-														// The ::before is a bigger invisible area around the
-														// dot, so it's easy to tap
-														className="relative h-[1.25svh] w-[1.25svh] flex items-center justify-center cursor-pointer group before:absolute before:-inset-[1.2svh] before:content-['']"
-													>
-														<span
-															className={`block rounded-full transition-transform duration-200 group-hover:scale-150 ${here ? "h-[1.25svh] w-[1.25svh] bg-black scale-150" : "h-[1.25svh] w-[1.25svh] bg-neutral-600"}`}
-														/>
-													</a>
-												);
-											},
-										)}
-									</div>
-								</div>
-							</div>
-
-							{/* View all - a switch: on, the menu drops further down and the
-						    inventory shows a second row. Stays how you left it. Only
-						    there when there's more than one row of items */}
-							{canViewAll && (
-								<button
-									onClick={() => {
-										setAllItems(!allItems);
-										if (openItem) closeItem();
-									}}
-									role="switch"
-									aria-checked={allItems}
-									className="absolute portrait:static right-[9%] top-[9.9svh] flex flex-col items-center gap-[1.5svh] portrait:gap-[1svh] cursor-pointer"
-								>
-									<span className="text-[4svh] portrait:text-[3svh]">
-										View all
-									</span>
-									<span className="p-[2svh] bg-white/20 border-[0.3svh] border-black border-dashed">
-										<span
-											className="relative block w-[7svh] h-[3.5svh] rounded-full border-[0.3svh] border-black transition-colors duration-300"
-											style={{ background: allItems ? "#525252" : "white" }}
-										>
-											<span
-												className="absolute top-[50%] -translate-y-[50%] h-[2.3svh] w-[2.3svh] rounded-full border-[0.2svh] border-black bg-white transition-[left] duration-300"
-												style={{
-													left: allItems ? "calc(100% - 2.7svh)" : "0.3svh",
-												}}
-											/>
-										</span>
-									</span>
-								</button>
-							)}
-						</div>
-
-						<h2 className="text-[4svh] portrait:text-[3svh]">Inventory</h2>
-						{/* One row tall: the second row hangs below it, fading in and
-						    out with "View all" */}
-						<ul className="relative grid grid-cols-4 auto-rows-[var(--slot)] h-[var(--slot)] gap-[var(--slot-gap)]">
-							{/* Money - click it to see what it's for */}
-							<li
-								className="relative w-[var(--slot)] h-[var(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
-								style={{ opacity: itemOpen ? 0 : 1 }}
-								onClick={() => showItem("money", 0)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter" || e.key === " ") showItem("money", 0);
-								}}
-								role="button"
-								tabIndex={0}
-								aria-label={`$${money} - ${bills.fives} $5 bills and ${bills.ones} $1 bills - details`}
-							>
-								{moneyBills.map((src, i, all) => (
-									<img
-										key={i}
-										src={src}
-										className="absolute top-[50%] h-[82%] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
-										style={{
-											// Fanned out around the middle of the slot
-											left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
-											rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
-										}}
-										alt=""
-									/>
-								))}
-								<span className="absolute bottom-[0.5svh] right-[0.5vw] bg-white border-[0.2svh] border-black px-[0.5vw] text-[2.5svh] leading-tight">
-									${money}
-								</span>
-							</li>
-							{Array.from({ length: ALL_SLOTS }, (_, i) => entries[i]).map(
-								(entry, i) => {
-									const hidden = i >= SLOTS && !allItems;
-									return (
-										<li
-											key={entry?.key ?? `empty-${i}`}
-											inert={hidden}
-											className="relative w-[var(--slot)] h-[var(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
-											style={{
-												opacity: itemOpen || hidden ? 0 : 1,
-												// The second row fades in after the menu has started
-												// dropping, and out quickly
-												transition: `opacity ${hidden ? 200 : 500}ms ease ${i >= SLOTS && !hidden && !itemOpen ? 300 : 0}ms`,
-											}}
-											aria-label={entry ? undefined : "Empty slot"}
-										>
-											{entry && (
-												<button
-													onClick={() => showItem(entry.key, i + 1)}
-													className="w-full h-full flex items-center justify-center cursor-pointer"
-													aria-label={`${entry.name} - details`}
+						{/* Pages (left) and the inventory (right), side by side - on
+						    portrait screens, one above the other */}
+						<div className="flex portrait:flex-col items-end portrait:items-center gap-[3vw] portrait:gap-[2.5svh]">
+							{/* Pages - a link to every page, with its title, in two
+							    columns. Same height as a row of the inventory (and as
+							    wide as the screen leaves room for). The page you're on
+							    is marked */}
+							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
+								<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
+								<ol className="h-[var(--slot)] w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-cols-2 grid-rows-[repeat(4,auto)] grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.6svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.4svh] portrait:text-[2svh] leading-[1.2]">
+									{PAGE_TITLES.map((title, i) => {
+										const n = i + 1;
+										const here = pathname === `/page${n}`;
+										return (
+											<li key={n}>
+												<a
+													href={`/page${n}`}
+													onClick={(e) => {
+														if (here) {
+															e.preventDefault();
+															setNavOpen(false);
+															return;
+														}
+														linkClick(`/page${n}`, () => setNavOpen(false))(e);
+													}}
+													aria-current={here ? "page" : undefined}
+													className={`block py-[0.15svh] cursor-pointer hover:underline decoration-dashed underline-offset-4 ${here ? "underline" : ""}`}
 												>
-													<img
-														src={entry.image}
-														className="max-h-[90%] max-w-[90%] w-auto h-auto test-shadow-darker"
-														alt={entry.name}
-														title={entry.name}
-													/>
-												</button>
-											)}
-										</li>
-									);
-								},
-							)}
+													{here ? "-> " : `${n}. `}
+													{title}
+												</a>
+											</li>
+										);
+									})}
+								</ol>
+							</section>
 
-							{/* An opened item - starts exactly over its slot, then
+							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
+								{/* The title, and a small "view all" label next to it once
+								    there are more items than one row shows: drops the menu
+								    a row further so the second row shows (and back) */}
+								<div className="flex items-baseline gap-[1.2vw] portrait:gap-[3vw]">
+									<h2 className="text-[4svh] portrait:text-[3svh]">
+										Inventory
+									</h2>
+									{canViewAll && (
+										<button
+											onClick={() => {
+												setAllItems(!allItems);
+												if (openItem) closeItem();
+											}}
+											aria-pressed={allItems}
+											className="relative text-[2svh] portrait:text-[1.7svh] bg-white border-[0.2svh] border-black border-dashed px-[0.8vw] portrait:px-[2vw] cursor-pointer"
+										>
+											{allItems ? "view less" : "view all"}
+										</button>
+									)}
+								</div>
+								{/* One row tall: the second row hangs below it, fading in and
+						    out with "View all" */}
+								<ul className="relative grid grid-cols-4 auto-rows-[var(--slot)] h-[var(--slot)] gap-[var(--slot-gap)]">
+									{/* Money - click it to see what it's for */}
+									<li
+										className="relative w-[var(--slot)] h-[var(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
+										style={{ opacity: itemOpen ? 0 : 1 }}
+										onClick={() => showItem("money", 0)}
+										onKeyDown={(e) => {
+											if (e.key === "Enter" || e.key === " ")
+												showItem("money", 0);
+										}}
+										role="button"
+										tabIndex={0}
+										aria-label={`$${money} - ${bills.fives} $5 bills and ${bills.ones} $1 bills - details`}
+									>
+										{moneyBills.map((src, i, all) => (
+											<img
+												key={i}
+												src={src}
+												className="absolute top-[50%] h-[82%] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
+												style={{
+													// Fanned out around the middle of the slot
+													left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
+													rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
+												}}
+												alt=""
+											/>
+										))}
+										<span className="absolute bottom-[0.5svh] right-[0.5vw] bg-white border-[0.2svh] border-black px-[0.5vw] text-[2.5svh] leading-tight">
+											${money}
+										</span>
+									</li>
+									{Array.from({ length: ALL_SLOTS }, (_, i) => entries[i]).map(
+										(entry, i) => {
+											const hidden = i >= SLOTS && !allItems;
+											return (
+												<li
+													key={entry?.key ?? `empty-${i}`}
+													inert={hidden}
+													className="relative w-[var(--slot)] h-[var(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
+													style={{
+														opacity: itemOpen || hidden ? 0 : 1,
+														// The second row fades in after the menu has started
+														// dropping, and out quickly
+														transition: `opacity ${hidden ? 200 : 500}ms ease ${i >= SLOTS && !hidden && !itemOpen ? 300 : 0}ms`,
+													}}
+													aria-label={entry ? undefined : "Empty slot"}
+												>
+													{entry && (
+														<button
+															onClick={() => showItem(entry.key, i + 1)}
+															className="w-full h-full flex items-center justify-center cursor-pointer"
+															aria-label={`${entry.name} - details`}
+														>
+															<img
+																src={entry.image}
+																className="max-h-[90%] max-w-[90%] w-auto h-auto test-shadow-darker"
+																alt={entry.name}
+																title={entry.name}
+															/>
+														</button>
+													)}
+												</li>
+											);
+										},
+									)}
+
+									{/* An opened item - starts exactly over its slot, then
 							    stretches across the whole row while the other slots
 							    fade out */}
-							{openItem && opened && (
-								<li
-									// Taller on portrait screens, with the picture above the
-									// text, since the row is so narrow there
-									className="absolute h-[var(--slot)] portrait:h-auto portrait:min-h-[calc(2*var(--slot)+var(--slot-gap))] bg-white/80 border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] px-[2svh] portrait:p-[3vw] overflow-hidden"
-									style={{
-										transition:
-											"left 400ms cubic-bezier(0.34, 1.1, 0.64, 1), width 400ms cubic-bezier(0.34, 1.1, 0.64, 1)",
-										// Its row stays the same; it grows from its column
-										top: `calc(${Math.floor(openItem.slot / 4)} * ${ROW})`,
-										left: itemOpen
-											? "0"
-											: `calc(${openItem.slot % 4} * ${ROW})`,
-										width: itemOpen ? "100%" : "var(--slot)",
-									}}
-								>
-									{/* Money shows its bills fanned out, like in its slot */}
-									{opened.key === "money" ? (
-										<div className="relative h-[18svh] w-[18svh] portrait:h-[15vw] portrait:w-[22vw] shrink-0">
-											{moneyBills.map((src, i, all) => (
-												<img
-													key={i}
-													src={src}
-													className="absolute top-[50%] h-[15svh] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
-													style={{
-														left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
-														rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
-													}}
-													alt=""
-												/>
-											))}
-										</div>
-									) : (
-										<>
-											{/* Art can be clicked to view it big */}
-											<img
-												src={opened.image}
-												onClick={
-													opened.art
-														? () => {
+									{openItem && opened && (
+										<li
+											// Taller on portrait screens, with the picture above the
+											// text, since the row is so narrow there
+											className="absolute h-[var(--slot)] portrait:h-auto portrait:min-h-[calc(2*var(--slot)+var(--slot-gap))] bg-white/80 border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] px-[2svh] portrait:p-[3vw] overflow-hidden"
+											style={{
+												transition:
+													"left 400ms cubic-bezier(0.34, 1.1, 0.64, 1), width 400ms cubic-bezier(0.34, 1.1, 0.64, 1)",
+												// Its row stays the same; it grows from its column
+												top: `calc(${Math.floor(openItem.slot / 4)} * ${ROW})`,
+												left: itemOpen
+													? "0"
+													: `calc(${openItem.slot % 4} * ${ROW})`,
+												width: itemOpen ? "100%" : "var(--slot)",
+											}}
+										>
+											{/* Money shows its bills fanned out, like in its slot */}
+											{opened.key === "money" ? (
+												<div className="relative h-[18svh] w-[18svh] portrait:h-[15vw] portrait:w-[22vw] shrink-0">
+													{moneyBills.map((src, i, all) => (
+														<img
+															key={i}
+															src={src}
+															className="absolute top-[50%] h-[15svh] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
+															style={{
+																left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
+																rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
+															}}
+															alt=""
+														/>
+													))}
+												</div>
+											) : (
+												<>
+													{/* Art can be clicked to view it big */}
+													<img
+														src={opened.image}
+														onClick={
+															opened.art
+																? () => {
+																		closeItem();
+																		setNavOpen(false);
+																		setViewing({
+																			image: opened.image,
+																			name: opened.name,
+																		});
+																	}
+																: undefined
+														}
+														className={`h-[18svh] w-auto max-w-[18svh] portrait:h-[15vw] portrait:max-w-[30vw] object-contain test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
+														alt={opened.name}
+													/>
+												</>
+											)}
+											<div
+												className="flex flex-col gap-[1svh] text-left transition-opacity duration-300"
+												style={{ opacity: itemOpen ? 1 : 0 }}
+											>
+												<h3 className="text-[3svh] portrait:text-[2.4svh]">
+													{opened.name}
+												</h3>
+												<p className="text-[2.2svh] portrait:text-[1.8svh] leading-snug max-w-[45vw] portrait:max-w-none">
+													{opened.description}
+												</p>
+												<div className="flex flex-wrap gap-[1vw] portrait:gap-[2vw]">
+													{opened.item === "notebook" && (
+														<button
+															onClick={() => {
+																closeItem();
+																setNavOpen(false);
+																setNotebookOpen(true);
+															}}
+															className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
+														>
+															Use
+														</button>
+													)}
+													{opened.art && (
+														<button
+															onClick={() => {
 																closeItem();
 																setNavOpen(false);
 																setViewing({
 																	image: opened.image,
 																	name: opened.name,
 																});
-															}
-														: undefined
-												}
-												className={`h-[18svh] w-auto max-w-[18svh] portrait:h-[15vw] portrait:max-w-[30vw] object-contain test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
-												alt={opened.name}
-											/>
-										</>
+															}}
+															className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
+														>
+															View
+														</button>
+													)}
+													{opened.item && opened.price > 0 && (
+														<button
+															onClick={() => sell(opened.item!)}
+															className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
+														>
+															Sell for ${opened.price}
+														</button>
+													)}
+													<button
+														onClick={closeItem}
+														className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
+													>
+														Close
+													</button>
+												</div>
+											</div>
+										</li>
 									)}
-									<div
-										className="flex flex-col gap-[1svh] text-left transition-opacity duration-300"
-										style={{ opacity: itemOpen ? 1 : 0 }}
-									>
-										<h3 className="text-[3svh] portrait:text-[2.4svh]">
-											{opened.name}
-										</h3>
-										<p className="text-[2.2svh] portrait:text-[1.8svh] leading-snug max-w-[45vw] portrait:max-w-none">
-											{opened.description}
-										</p>
-										<div className="flex flex-wrap gap-[1vw] portrait:gap-[2vw]">
-											{opened.item === "notebook" && (
-												<button
-													onClick={() => {
-														closeItem();
-														setNavOpen(false);
-														setNotebookOpen(true);
-													}}
-													className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
-												>
-													Use
-												</button>
-											)}
-											{opened.art && (
-												<button
-													onClick={() => {
-														closeItem();
-														setNavOpen(false);
-														setViewing({
-															image: opened.image,
-															name: opened.name,
-														});
-													}}
-													className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
-												>
-													View
-												</button>
-											)}
-											{opened.item && opened.price > 0 && (
-												<button
-													onClick={() => sell(opened.item!)}
-													className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
-												>
-													Sell for ${opened.price}
-												</button>
-											)}
-											<button
-												onClick={closeItem}
-												className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
-											>
-												Close
-											</button>
-										</div>
-									</div>
-								</li>
-							)}
-						</ul>
+								</ul>
+							</section>
+						</div>
 					</div>
 				</nav>
 
