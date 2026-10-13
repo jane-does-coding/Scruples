@@ -12,6 +12,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import ArtViewer from "@/components/ArtViewer";
 import Notebook from "@/components/Notebook";
+import usePortrait from "@/components/usePortrait";
 import { asset, srcSet } from "@/lib/asset";
 import * as sound from "@/lib/sound";
 import {
@@ -268,6 +269,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 		slot: number;
 	} | null>(null);
 	const [itemOpen, setItemOpen] = useState(false);
+	const portrait = usePortrait();
 	const opened =
 		openItem &&
 		(openItem.key === "money"
@@ -904,7 +906,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 								<ul className="relative grid grid-cols-4 auto-rows-(--slot) h-(--slot) gap-(--slot-gap)">
 									{/* Money - click it to see what it's for */}
 									<li
-										className="relative w-(--slot) h-(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
+										className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
 										style={{ opacity: itemOpen ? 0 : 1 }}
 										onClick={() => showItem("money", 0)}
 										onKeyDown={(e) => {
@@ -939,7 +941,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 												<li
 													key={entry?.key ?? `empty-${i}`}
 													inert={hidden}
-													className="relative w-(--slot)] h-(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
+													className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
 													style={{
 														opacity: itemOpen || hidden ? 0 : 1,
 														// The second row fades in as the menu glides down,
@@ -973,10 +975,18 @@ export default function Stage({ children }: { children: ReactNode }) {
 									{openItem && opened && (
 										<li
 											// Taller on portrait screens, with the picture above the
-											// text, since the row is so narrow there
-											className="absolute h-(--slot)] portrait:h-auto portrait:min-h-[calc(2*var(--slot)+var(--slot-gap))] bg-white/80 border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] px-[2svh] portrait:p-[3vw] overflow-hidden"
+											// text, since the row is so narrow there: it starts at its
+											// slot's size and grows to fit (see maxHeight/minHeight)
+											className="absolute h-(--slot) portrait:h-auto bg-white/80 border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] px-[2svh] portrait:p-[3vw] overflow-hidden"
 											style={{
-												transition: ["left", "width", "top", "height"]
+												transition: [
+													"left",
+													"width",
+													"top",
+													"height",
+													"max-height",
+													"min-height",
+												]
 													.map(
 														(property) =>
 															`${property} 400ms cubic-bezier(0.34, 1.1, 0.64, 1)`,
@@ -993,7 +1003,16 @@ export default function Stage({ children }: { children: ReactNode }) {
 													: `calc(${openItem.slot % 4} * ${ROW})`,
 												width: itemOpen ? "100%" : "var(--slot)",
 												height:
-													itemOpen && allItems
+													itemOpen && allItems && !portrait
+														? "calc(2 * var(--slot) + var(--slot-gap))"
+														: undefined,
+												maxHeight: portrait
+													? itemOpen
+														? "70svh"
+														: "var(--slot)"
+													: undefined,
+												minHeight:
+													portrait && itemOpen
 														? "calc(2 * var(--slot) + var(--slot-gap))"
 														: undefined,
 											}}
