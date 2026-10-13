@@ -163,7 +163,7 @@ export default function Page3({
 
 			<img
 				src={dollSrc ?? blinkSrc}
-				className="h-[100svh] absolute top-[-32.5svh] right-[-5vw] portrait:h-[46svh] portrait:top-[-12svh] portrait:right-[-6svh] max-w-none test-shadow-darker z-5 -scale-x-[1]"
+				className="h-svh absolute top-[-32.5svh] right-[-5vw] portrait:h-[46svh] portrait:top-[-12svh] portrait:right-[-6svh] max-w-none test-shadow-darker z-5 scale-x-[-1]"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
 					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",
@@ -174,7 +174,7 @@ export default function Page3({
 			{/* Money - rises in from the bottom with the shop items as you enter
 			    (0.4s after the click), and sinks again on Exit */}
 			<div
-				className="absolute left-[35vw] bottom-[5svh] portrait:left-[64vw] portrait:bottom-[31svh] z-11 portrait:z-[9] test-shadow-darker"
+				className="absolute left-[35vw] bottom-[5svh] portrait:left-[64vw] portrait:bottom-[31svh] z-11 portrait:z-9 test-shadow-darker"
 				style={{
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: entered ? "400ms" : "0ms",
@@ -276,7 +276,7 @@ export default function Page3({
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
+					className="absolute top-[50%] left-[50%] translate-x-[-50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the pens"
 				/>
 			</div>
@@ -297,7 +297,7 @@ export default function Page3({
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
+					className="absolute top-[50%] left-[50%] translate-x-[-50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the Mona Lisa"
 				/>
 			</div>
@@ -318,7 +318,7 @@ export default function Page3({
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
+					className="absolute top-[50%] left-[50%] translate-x-[-50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the notebook"
 				/>
 			</div>

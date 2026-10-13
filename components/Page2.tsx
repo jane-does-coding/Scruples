@@ -135,7 +135,7 @@ export default function Page2({
 			{/* Doll */}
 			<img
 				src={dollImage}
-				className="h-[100svh] absolute top-[-27svh] left-[-8vw] portrait:h-[62svh] portrait:top-[-10svh] portrait:left-[-22vw] max-w-none test-shadow-darker z-5"
+				className="h-svh absolute top-[-27svh] left-[-8vw] portrait:h-[62svh] portrait:top-[-10svh] portrait:left-[-22vw] max-w-none test-shadow-darker z-5"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
 					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",
@@ -144,7 +144,7 @@ export default function Page2({
 			/>
 
 			<h1
-				className="text-[3svh] portrait:text-[2.3svh] max-w-[70%] mx-auto text-center scribbler absolute top-[-7svh] right-[25vw] portrait:top-[0svh] portrait:right-[12vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[3svh] portrait:text-[2.3svh] max-w-[70%] mx-auto text-center scribbler absolute top-[-7svh] right-[25vw] portrait:top-0 portrait:right-[12vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 2),
 					transform: step >= 2 ? "translateY(0)" : "translateY(-60svh)",
@@ -207,7 +207,7 @@ export default function Page2({
 							>
 								<img
 									src={asset("/imgs/popsicle.webp")}
-									className="absolute top-[30%] left-[50%] -translate-x-[50%] h-[80svh] min-w-[22vw] portrait:min-w-[22svh] z-1"
+									className="absolute top-[30%] left-[50%] translate-x-[-50%] h-[80svh] min-w-[22vw] portrait:min-w-[22svh] z-1"
 									alt="Wooden popsicle stick holding up the frame"
 								/>
 								<img
@@ -216,7 +216,7 @@ export default function Page2({
 									alt={`${label}, painting in a picture frame`}
 								/>
 								{/* Label - sits right under the frame image */}
-								<span className="border-[0.2svh] border-black bg-white px-[1vw] portrait:px-[3vw] py-[0.5svh] text-[3svh] portrait:text-[2.3svh] left-[50%] -translate-x-[50%] absolute top-full mt-[1svh] z-5 w-max whitespace-nowrap portrait:whitespace-normal portrait:max-w-[24svh] text-center">
+								<span className="border-[0.2svh] border-black bg-white px-[1vw] portrait:px-[3vw] py-[0.5svh] text-[3svh] portrait:text-[2.3svh] left-[50%] translate-x-[-50%] absolute top-full mt-[1svh] z-5 w-max whitespace-nowrap portrait:whitespace-normal portrait:max-w-[24svh] text-center">
 									{/* Just the title - the year is on its page */}
 									{label.split(" • ")[0]}
 								</span>

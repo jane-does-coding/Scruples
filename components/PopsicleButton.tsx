@@ -66,7 +66,7 @@ export default function PopsicleButton({
 		>
 			{/* Popsicle */}
 			<div
-				className={`absolute bottom-[-8svh] z-[-5] drop-shadow-md drop-shadow-black/40 ${right ? "left-[-2vw] portrait:left-[-2.7svh]" : "right-[-0vw]"}`}
+				className={`absolute bottom-[-8svh] z-[-5] drop-shadow-md drop-shadow-black/40 ${right ? "left-[-2vw] portrait:left-[-2.7svh]" : "right-0"}`}
 			>
 				<img
 					src={asset("/imgs/popsicle.webp")}

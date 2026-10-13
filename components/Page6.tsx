@@ -133,8 +133,8 @@ const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-da
 // A label's two hanging strings
 const Strings = () => (
 	<>
-		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 	</>
 );
 
@@ -391,7 +391,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			{/* Zhenya - on the left, facing Daphne (as Page 5 left them) */}
 			<img
 				src={zhenyaSrc}
-				className="h-[100svh] absolute top-[-28svh] left-[5%] portrait:h-[48svh] portrait:top-[-12svh] portrait:left-[20%] max-w-none -translate-x-[50%] test-shadow-darker z-5"
+				className="h-svh absolute top-[-28svh] left-[5%] portrait:h-[48svh] portrait:top-[-12svh] portrait:left-[20%] max-w-none translate-x-[-50%] test-shadow-darker z-5"
 				style={hang(step >= 1, step >= 1, "top", {
 					ms: 900,
 					easing: DOLL_DROP,
@@ -402,7 +402,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			{/* Daphne - on the right, mirrored to face Zhenya */}
 			<img
 				src={daphneSrc}
-				className="h-[100svh] absolute top-[-28svh] left-[91%] portrait:h-[48svh] portrait:top-[-12svh] portrait:left-[80%] max-w-none -translate-x-[50%] -scale-x-[1] test-shadow-darker z-4"
+				className="h-svh absolute top-[-28svh] left-[91%] portrait:h-[48svh] portrait:top-[-12svh] portrait:left-[80%] max-w-none translate-x-[-50%] scale-x-[-1] test-shadow-darker z-4"
 				style={hang(step >= 1, step >= 1, "top", {
 					ms: 900,
 					easing: DOLL_DROP,
@@ -413,7 +413,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* "Zhenya wants to try making art too" + "Let's draw!" */}
 			<p
-				className={`absolute top-[4svh] left-[52%] portrait:top-[30svh] portrait:left-[50%] -translate-x-[50%] w-max portrait:max-w-[80vw] z-6 ${LABEL}`}
+				className={`absolute top-[4svh] left-[52%] portrait:top-[30svh] portrait:left-[50%] translate-x-[-50%] w-max portrait:max-w-[80vw] z-6 ${LABEL}`}
 				style={hang(step >= 2, step >= 2 && stage < 1, "top")}
 			>
 				<Strings />
@@ -423,7 +423,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={letsDraw}
 				disabled={step < 3 || stage >= 1}
 				tabIndex={step >= 3 && stage < 1 ? undefined : -1}
-				className={`absolute top-[20svh] left-[34%] portrait:top-[38svh] portrait:left-[50%] -translate-x-[50%] w-max z-5 portrait:z-6 ${BUTTON}`}
+				className={`absolute top-[20svh] left-[34%] portrait:top-[38svh] portrait:left-[50%] translate-x-[-50%] w-max z-5 portrait:z-6 ${BUTTON}`}
 				style={hang(step >= 3, step >= 3 && stage < 1, "top")}
 			>
 				<Strings />
@@ -434,7 +434,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			    you're drawing, the canvas inside it is live; afterwards it holds
 			    your drawing. Sinks when the gallery comes */}
 			<div
-				className="absolute bottom-[6svh] left-[41%] portrait:left-[50%] -translate-x-[50%] z-5 test-shadow-darker"
+				className="absolute bottom-[6svh] left-[41%] portrait:left-[50%] translate-x-[-50%] z-5 test-shadow-darker"
 				style={(() => {
 					const style = hang(frameUp, frameUp && stage < 4, "bottom", {
 						ms: 900,
@@ -453,7 +453,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			>
 				<img
 					src={asset("/imgs/popsicle-stick.webp")}
-					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the frame"
 				/>
 				<canvas
@@ -476,7 +476,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			    while you draw: a single white strip on two strings, the colors
 			    side by side in it. The picked one has a ring round it */}
 			<div
-				className={`absolute left-[41%] portrait:left-[50%] -translate-x-[50%] flex gap-[0.8svh] p-[0.8svh] z-6 bg-white border-[0.3svh] border-black border-dashed drop-shadow-md drop-shadow-black/40 test-shadow-darker`}
+				className={`absolute left-[41%] portrait:left-[50%] translate-x-[-50%] flex gap-[0.8svh] p-[0.8svh] z-6 bg-white border-[0.3svh] border-black border-dashed drop-shadow-md drop-shadow-black/40 test-shadow-darker`}
 				style={(() => {
 					const style = hang(canDraw, canDraw && stage === 1, "top");
 					return {
@@ -504,7 +504,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Instructions - while you draw */}
 			<p
-				className={`absolute top-[8svh] left-[49%] portrait:top-[20svh] portrait:left-[50%] -translate-x-[50%] w-[30vw] portrait:w-[84vw] z-[9] ${LABEL}`}
+				className={`absolute top-[8svh] left-[49%] portrait:top-[20svh] portrait:left-[50%] translate-x-[-50%] w-[30vw] portrait:w-[84vw] z-9 ${LABEL}`}
 				// Lifts away while the frame is bigger, to make room for it
 				style={hang(canDraw, canDraw && stage === 1 && !big, "top")}
 			>
@@ -520,7 +520,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			    drawn. (On portrait screens it's a row above the colors, the
 			    strings at its two ends) */}
 			<div
-				className="absolute -translate-x-[50%] flex flex-col portrait:flex-row items-stretch portrait:items-center gap-[2svh] portrait:gap-[3vw] z-[7]"
+				className="absolute translate-x-[-50%] flex flex-col portrait:flex-row items-stretch portrait:items-center gap-[2svh] portrait:gap-[3vw] z-7"
 				// Moves over to stay clear of the frame while it's bigger. On
 				// portrait screens it moves up with the colors instead
 				style={(() => {
@@ -534,9 +534,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 							: big
 								? "max(65%, calc(41% + 33svh))"
 								: "65%",
-						bottom: portrait
-							? `calc(6svh + ${frameVh}svh + 10svh)`
-							: "22svh",
+						bottom: portrait ? `calc(6svh + ${frameVh}svh + 10svh)` : "22svh",
 						transition: `${style.transition}, left ${GROW_MS}ms ${DOLL_DROP}, bottom ${GROW_MS}ms ${DOLL_DROP}`,
 					};
 				})()}
@@ -574,7 +572,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={sayVerdict}
 				disabled={!verdict || stage >= 3}
 				tabIndex={verdict && stage < 3 ? undefined : -1}
-				className={`absolute top-[2svh] left-[38%] portrait:top-[20svh] portrait:left-[34%] -translate-x-[50%] w-[18vw] portrait:w-[56vw] z-[9] ${BUTTON}`}
+				className={`absolute top-[2svh] left-[38%] portrait:top-[20svh] portrait:left-[34%] translate-x-[-50%] w-[18vw] portrait:w-[56vw] z-9 ${BUTTON}`}
 				style={hang(verdict, verdict && stage < 4, "top", {
 					exitDelay: 0 * TALK_EXIT_STAGGER_MS,
 				})}
@@ -585,7 +583,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Daphne: "But did you have a good time?" */}
 			<p
-				className={`absolute top-[16svh] left-[60%] portrait:top-[30svh] portrait:left-[62%] -translate-x-[50%] w-max portrait:max-w-[70vw] z-[8] ${LABEL}`}
+				className={`absolute top-[16svh] left-[60%] portrait:top-[30svh] portrait:left-[62%] translate-x-[-50%] w-max portrait:max-w-[70vw] z-8 ${LABEL}`}
 				style={hang(stage >= 3, stage === 3, "top", {
 					delay: 400,
 					exitDelay: 1 * TALK_EXIT_STAGGER_MS,
@@ -600,7 +598,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={sayYes}
 				disabled={!goodTime || stage >= 4}
 				tabIndex={goodTime && stage < 4 ? undefined : -1}
-				className={`absolute top-[22svh] left-[33%] portrait:top-[40svh] portrait:left-[34%] -translate-x-[50%] w-max z-[7] ${BUTTON}`}
+				className={`absolute top-[22svh] left-[33%] portrait:top-[40svh] portrait:left-[34%] translate-x-[-50%] w-max z-7 ${BUTTON}`}
 				style={hang(goodTime, goodTime && stage < 4, "top", {
 					exitDelay: 2 * TALK_EXIT_STAGGER_MS,
 				})}
@@ -613,7 +611,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			    on long strings and sways gently (.sway), with your drawing last.
 			    Hung high, in front of the curtain valance (z-14 is above the
 			    curtains' z-10), so it's clear of the dolls' heads */}
-			{/* <ul className="absolute top-[-10svh] left-[46%] -translate-x-[50%] flex gap-[1.5vw] items-start z-[14]">
+			{/* <ul className="absolute top-[-10svh] left-[46%] translate-x-[-50%] flex gap-[1.5vw] items-start z-[14]">
 				{gallery.map(({ key, node }, i) => (
 					<li
 						key={key}
@@ -623,7 +621,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 							delay: i * GALLERY_STAGGER_MS,
 						})}
 					>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-[50%] absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-[50%] absolute"></span>
 						<div
 							className="sway"
 							// Each one swings a little out of step with its neighbours

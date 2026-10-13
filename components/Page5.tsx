@@ -341,8 +341,8 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						step >= 2 && !done ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Click this magic button to get a cute drawing
 			</p>
 
@@ -364,7 +364,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				}}
 			>
 				<span
-					className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] absolute"
+					className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] absolute"
 					style={{
 						transition: `rotate ${TILT}, left ${TILT}`,
 						rotate: step >= 3 ? "-6deg" : "0deg",
@@ -372,7 +372,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					}}
 				></span>
 				<span
-					className="w-[0.1vw] bg-black/60 h-[100svh] absolute"
+					className="w-[0.1vw] bg-black/60 h-svh absolute"
 					style={{
 						transition: `rotate ${TILT}, right ${TILT}, top ${TILT}`,
 						rotate: step >= 3 ? "-6deg" : "0deg",
@@ -398,7 +398,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				{/* popsicle-stick.webp is just the stick, so w-/h- are its real size */}
 				<img
 					src={asset("/imgs/popsicle-stick.webp")}
-					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the frame"
 				/>
 				<img
@@ -418,7 +418,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			    rotate */}
 			<div className="absolute bottom-[6svh] left-[2vw] portrait:left-[4vw] h-[38svh] w-[35.2svh] portrait:h-[28svh] portrait:w-[25.9svh] z-5 pointer-events-none">
 				<div
-					className="absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]"
+					className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"
 					style={{
 						visibility: magic ? "visible" : "hidden",
 						transition: `transform 900ms ${LABEL_DROP}`,
@@ -426,7 +426,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 							magic && !spiralGone ? "translateY(0)" : "translateY(-120svh)",
 					}}
 				>
-					<span className="w-[0.1vw] bg-black/60 h-[100svh] bottom-[50%] left-[50%] -translate-x-[50%] absolute z-1"></span>
+					<span className="w-[0.1vw] bg-black/60 h-svh bottom-[50%] left-[50%] translate-x-[-50%] absolute z-1"></span>
 					<img
 						src={asset("/imgs/spiral.webp")}
 						className="h-[16svh] portrait:h-[12svh] w-auto max-w-none spiral-spin"
@@ -447,7 +447,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			>
 				<img
 					src={asset("/imgs/popsicle-stick.webp")}
-					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the frame"
 				/>
 				<img
@@ -470,8 +470,8 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					transform: aww && !done ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Aww cute!
 			</button>
 
@@ -481,7 +481,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			    wow-reverse and then going back to idle blinking */}
 			<img
 				src={dollSrc}
-				className="h-[100svh] absolute top-[-28svh] portrait:h-[52svh] portrait:top-[-12svh] max-w-none -translate-x-[50%] test-shadow-darker z-5"
+				className="h-svh absolute top-[-28svh] portrait:h-[52svh] portrait:top-[-12svh] max-w-none translate-x-[-50%] test-shadow-darker z-5"
 				style={{
 					visibility: step >= 1 ? "visible" : "hidden",
 					transition: `top 900ms ${DOLL_DROP}, transform 900ms ${DOLL_DROP}, left 1200ms ease-in-out, scale 600ms ease-in-out`,
@@ -499,7 +499,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			    (her left slides from 160% to 82% over WALK_MS), stepping gently
 			    (.walk-bob) until she stops */}
 			<div
-				className="absolute top-[-28svh] h-[100svh] portrait:h-[52svh] portrait:top-[-12svh] -translate-x-[50%] -scale-x-[1] z-4"
+				className="absolute top-[-28svh] h-svh portrait:h-[52svh] portrait:top-[-12svh] translate-x-[-50%] scale-x-[-1] z-4"
 				style={{
 					visibility: daphneIn ? "visible" : "hidden",
 					transition: `left ${WALK_MS}ms cubic-bezier(0.25, 0.1, 0.45, 1)`,
@@ -516,21 +516,21 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* "This is Daphne" - drops in between the two dolls; lifts away
 			    once the ask button is clicked */}
 			<p
-				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-max mx-auto text-center scribbler absolute bottom-[60svh] left-[57%] portrait:bottom-[30svh] portrait:left-[50%] -translate-x-[50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-max mx-auto text-center scribbler absolute bottom-[60svh] left-[57%] portrait:bottom-[30svh] portrait:left-[50%] translate-x-[-50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(daphneStep >= 1, daphneStep >= 1 && !asked, "top")}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				This is Daphne
 			</p>
 
 			{/* "Daphne likes to draw" - a second later */}
 			<p
-				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-max mx-auto text-center scribbler absolute bottom-[51svh] left-[57%] portrait:bottom-[22svh] portrait:left-[50%] -translate-x-[50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-max mx-auto text-center scribbler absolute bottom-[51svh] left-[57%] portrait:bottom-[22svh] portrait:left-[50%] translate-x-[-50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(daphneStep >= 2, daphneStep >= 2 && !asked, "top")}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Daphne likes to draw
 			</p>
 
@@ -540,18 +540,18 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={ask}
 				disabled={daphneStep < 3 || asked}
 				tabIndex={daphneStep >= 3 && !asked ? undefined : -1}
-				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-[24vw] portrait:w-[70vw] mx-auto text-center scribbler absolute bottom-[34svh] portrait:bottom-[8svh] left-[46%] portrait:left-[50%] -translate-x-[50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-[24vw] portrait:w-[70vw] mx-auto text-center scribbler absolute bottom-[34svh] portrait:bottom-[8svh] left-[46%] portrait:left-[50%] translate-x-[-50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={hang(daphneStep >= 3, daphneStep >= 3 && !asked, "top")}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Daphne could you please draw something for me?
 			</button>
 
 			{/* Empty frame (2) - rises in the middle just after asking; sinks
 			    once the spiral has had its 2s */}
 			<div
-				className="absolute bottom-[6svh] left-[50%] -translate-x-[50%] z-5 test-shadow-darker"
+				className="absolute bottom-[6svh] left-[50%] translate-x-[-50%] z-5 test-shadow-darker"
 				style={hang(asked, asked && !spiral2Gone, "bottom", {
 					ms: 900,
 					easing: DOLL_DROP,
@@ -560,7 +560,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			>
 				<img
 					src={asset("/imgs/popsicle-stick.webp")}
-					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the frame"
 				/>
 				<img
@@ -572,15 +572,15 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Spiral (2) - over the middle frame, same as the first one: drops
 			    in on one string after Buy, spins for 2s, then goes back up */}
-			<div className="absolute bottom-[6svh] left-[50%] -translate-x-[50%] h-[38svh] w-[35.2svh] portrait:h-[28svh] portrait:w-[25.9svh] z-5 pointer-events-none">
+			<div className="absolute bottom-[6svh] left-[50%] translate-x-[-50%] h-[38svh] w-[35.2svh] portrait:h-[28svh] portrait:w-[25.9svh] z-5 pointer-events-none">
 				<div
-					className="absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]"
+					className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"
 					style={hang(bought, bought && !spiral2Gone, "top", {
 						ms: 900,
 						delay: SPIRAL2_IN_DELAY_MS,
 					})}
 				>
-					<span className="w-[0.1vw] bg-black/60 h-[100svh] bottom-[50%] left-[50%] -translate-x-[50%] absolute z-1"></span>
+					<span className="w-[0.1vw] bg-black/60 h-svh bottom-[50%] left-[50%] translate-x-[-50%] absolute z-1"></span>
 					<img
 						src={asset("/imgs/spiral.webp")}
 						className="h-[16svh] portrait:h-[12svh] w-auto max-w-none spiral-spin"
@@ -592,7 +592,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* Smile drawing - rises in the middle frame's place once the spiral
 			    has gone */}
 			<div
-				className="absolute bottom-[6svh] left-[50%] -translate-x-[50%] z-5 test-shadow-darker"
+				className="absolute bottom-[6svh] left-[50%] translate-x-[-50%] z-5 test-shadow-darker"
 				// Leaves once Zhenya says whether they like it
 				style={hang(smile, smile && !choice, "bottom", {
 					ms: 900,
@@ -601,7 +601,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			>
 				<img
 					src={asset("/imgs/popsicle-stick.webp")}
-					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the drawing"
 				/>
 				<img
@@ -627,11 +627,11 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* "Daphne charges $10 per drawing" - after the money; lifts away
 			    once Buy is clicked */}
 			<p
-				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] max-w-[22vw] portrait:max-w-[55vw] mx-auto text-center scribbler absolute bottom-[60svh] portrait:bottom-[44svh] left-[50%] -translate-x-[50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-7 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] max-w-[22vw] portrait:max-w-[55vw] mx-auto text-center scribbler absolute bottom-[60svh] portrait:bottom-[44svh] left-[50%] translate-x-[-50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-7 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(asked, asked && !decided, "top", { delay: PRICE_DELAY_MS })}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Daphne charges $10 per drawing
 			</p>
 
@@ -640,13 +640,13 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={cancel}
 				disabled={!asked || decided}
 				tabIndex={asked && !decided ? undefined : -1}
-				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] mx-auto text-center scribbler absolute bottom-[50svh] left-[43%] portrait:bottom-[36svh] portrait:left-[32%] -translate-x-[50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] mx-auto text-center scribbler absolute bottom-[50svh] left-[43%] portrait:bottom-[36svh] portrait:left-[32%] translate-x-[-50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={hang(asked, asked && !decided, "top", {
 					delay: CANCEL_DELAY_MS,
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Cancel
 			</button>
 
@@ -655,24 +655,24 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={buy}
 				disabled={!asked || decided}
 				tabIndex={asked && !decided ? undefined : -1}
-				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] mx-auto text-center scribbler absolute bottom-[50svh] left-[60%] portrait:bottom-[36svh] portrait:left-[68%] -translate-x-[50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] mx-auto text-center scribbler absolute bottom-[50svh] left-[60%] portrait:bottom-[36svh] portrait:left-[68%] translate-x-[-50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={hang(asked, asked && !decided, "top", { delay: BUY_DELAY_MS })}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				{buyNote ?? "Buy"}
 			</button>
 
 			{/* Daphne's plea - where the price was, once Buy fails (not enough
 			    money) or Cancel is clicked; lifts away as she starts drawing */}
 			<p
-				className="absolute bottom-[60svh] portrait:bottom-[44svh] left-[50%] -translate-x-[50%] w-max max-w-[26vw] portrait:max-w-[80vw] z-7 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute bottom-[60svh] portrait:bottom-[44svh] left-[50%] translate-x-[-50%] w-max max-w-[26vw] portrait:max-w-[80vw] z-7 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(plea !== null, plea !== null && !pleaDone, "top", {
 					delay: 400,
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				{plea === "please"
 					? "Pleeease can I draw for you?"
 					: "Aww man, you don't have $10 - any donation would help"}
@@ -683,32 +683,32 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={() => draw(true)}
 				disabled={plea !== "please" || pleaDone}
 				tabIndex={plea === "please" && !pleaDone ? undefined : -1}
-				className="absolute bottom-[50svh] portrait:bottom-[36svh] left-[40%] portrait:left-[50%] -translate-x-[50%] w-max z-6 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
+				className="absolute bottom-[50svh] portrait:bottom-[36svh] left-[40%] portrait:left-[50%] translate-x-[-50%] w-max z-6 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
 				style={hang(plea === "please", plea === "please" && !pleaDone, "top", {
 					delay: 1000,
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Yes
 			</button>
 
 			{/* The donation ask - after a free drawing is up. Amounts depend on
 			    Zhenya's money; picking one (or none) starts the chat */}
 			<p
-				className="absolute top-[4svh] portrait:top-[22svh] left-[50%] -translate-x-[50%] w-max max-w-[26vw] portrait:max-w-[80vw] z-7 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute top-[4svh] portrait:top-[22svh] left-[50%] translate-x-[-50%] w-max max-w-[26vw] portrait:max-w-[80vw] z-7 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(
 					donateOptions !== null,
 					donateOptions !== null && !donated,
 					"top",
 				)}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Would you like to donate? Anything helps!
 			</p>
 			<div
-				className="absolute top-[19svh] portrait:top-[31svh] left-[50%] -translate-x-[50%] flex flex-wrap justify-center gap-[1.5vw] portrait:gap-[2.5vw] portrait:w-[92vw] z-6"
+				className="absolute top-[19svh] portrait:top-[31svh] left-[50%] translate-x-[-50%] flex flex-wrap justify-center gap-[1.5vw] portrait:gap-[2.5vw] portrait:w-[92vw] z-6"
 				style={hang(
 					donateOptions !== null,
 					donateOptions !== null && !donated,
@@ -724,8 +724,8 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						tabIndex={donateOptions !== null && !donated ? undefined : -1}
 						className="relative w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
 					>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 						{amount === 0
 							? all.length === 1
 								? "Sorry, I have nothing..."
@@ -746,7 +746,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Row 1 - Zhenya: "I love it!" / "I dislike it..." side by side.
 			    The one not picked lifts away; the picked one stays */}
-			<div className="absolute top-[6svh] left-[40%] portrait:top-[24svh] portrait:left-[50%] -translate-x-[50%] flex gap-[1.5vw] portrait:gap-[4vw] z-[9]">
+			<div className="absolute top-[6svh] left-[40%] portrait:top-[24svh] portrait:left-[50%] translate-x-[-50%] flex gap-[1.5vw] portrait:gap-[4vw] z-9">
 				<button
 					onClick={() => choose("love")}
 					disabled={zhenyaStage !== 1}
@@ -759,8 +759,8 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						{ exitDelay: rowExit(0) },
 					)}
 				>
-					<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-					<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 					I love it!
 				</button>
 				<button
@@ -775,21 +775,21 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						{ exitDelay: rowExit(0) },
 					)}
 				>
-					<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-					<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 					I dislike it...
 				</button>
 			</div>
 
 			{/* Row 2 - Daphne: "Thanks!" / "Oh..." */}
 			<p
-				className="absolute top-[12svh] left-[65%] portrait:top-[31svh] portrait:left-[70%] -translate-x-[50%] w-max z-[8] text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute top-[12svh] left-[65%] portrait:top-[31svh] portrait:left-[70%] translate-x-[-50%] w-max z-8 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(replied, replied && !chatCleared, "top", {
 					exitDelay: rowExit(1),
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				{choice === "dislike" ? "Oh..." : "Thanks!"}
 			</p>
 
@@ -798,25 +798,25 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={askMagic}
 				disabled={zhenyaStage !== 3}
 				tabIndex={zhenyaStage === 3 ? undefined : -1}
-				className="absolute top-[21svh] left-[42%] portrait:top-[38svh] portrait:left-[34%] -translate-x-[50%] w-[18vw] portrait:w-[56vw] z-[8] text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="absolute top-[21svh] left-[42%] portrait:top-[38svh] portrait:left-[34%] translate-x-[-50%] w-[18vw] portrait:w-[56vw] z-8 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={hang(zhenyaStage >= 3, zhenyaStage >= 3 && !chatCleared, "top", {
 					exitDelay: rowExit(2),
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Why won&apos;t you just use the magic button?
 			</button>
 
 			{/* Row 4 - Daphne: "I enjoy the process of creating art…" */}
 			<p
-				className="absolute top-[37svh] left-[53%] portrait:top-[50svh] portrait:left-[62%] -translate-x-[50%] w-[20vw] portrait:w-[56vw] z-[7] text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute top-[37svh] left-[53%] portrait:top-[50svh] portrait:left-[62%] translate-x-[-50%] w-[20vw] portrait:w-[56vw] z-7 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(zhenyaStage >= 4, zhenyaStage >= 4 && !chatCleared, "top", {
 					exitDelay: rowExit(3),
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				I enjoy the process of creating art, it is part of me
 			</p>
 
@@ -825,13 +825,13 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={askWhy}
 				disabled={zhenyaStage !== 5}
 				tabIndex={zhenyaStage === 5 ? undefined : -1}
-				className="absolute top-[56svh] left-[44%] portrait:top-[64svh] portrait:left-[34%] -translate-x-[50%] w-max z-[6] text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="absolute top-[56svh] left-[44%] portrait:top-[64svh] portrait:left-[34%] translate-x-[-50%] w-max z-6 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={hang(zhenyaStage >= 5, zhenyaStage >= 5 && !chatCleared, "top", {
 					exitDelay: rowExit(4),
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Really? Why?
 			</button>
 
@@ -840,25 +840,25 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			    previous one lifts away (.hang-out), staying in front (z-2) like
 			    it was until it's gone. "next ->" sits under it, then
 			    lifts away after the last line */}
-			<div className="absolute top-[13svh] portrait:top-[26svh] left-[50%] -translate-x-[50%] w-[24vw] portrait:w-[84vw] z-6">
+			<div className="absolute top-[13svh] portrait:top-[26svh] left-[50%] translate-x-[-50%] w-[24vw] portrait:w-[84vw] z-6">
 				{daphneSaid && (
 					<p
 						key={`was-${daphneSaid}`}
 						aria-hidden
-						className="hang-out absolute top-0 left-[50%] -translate-x-[50%] w-max max-w-[24vw] portrait:max-w-[84vw] z-2 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+						className="hang-out absolute top-0 left-[50%] translate-x-[-50%] w-max max-w-[24vw] portrait:max-w-[84vw] z-2 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 					>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 						{daphneSaid}
 					</p>
 				)}
 				{daphneSays && (
 					<p
 						key={daphneSays}
-						className="hang-in absolute top-0 left-[50%] -translate-x-[50%] w-max max-w-[24vw] portrait:max-w-[84vw] z-1 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+						className="hang-in absolute top-0 left-[50%] translate-x-[-50%] w-max max-w-[24vw] portrait:max-w-[84vw] z-1 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 					>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 						{daphneSays}
 					</p>
 				)}
@@ -866,11 +866,11 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					onClick={() => setAnswerLine((line) => (line ?? 0) + 1)}
 					disabled={!nextUp}
 					tabIndex={nextUp ? undefined : -1}
-					className="absolute top-[18svh] left-[80%] portrait:top-[16svh] portrait:left-[75%] -translate-x-[50%] w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+					className="absolute top-[18svh] left-[80%] portrait:top-[16svh] portrait:left-[75%] translate-x-[-50%] w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 					style={hang(answerLine !== null, nextUp, "top", { delay: 400 })}
 				>
-					<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-					<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 					next {"->"}
 				</button>
 			</div>

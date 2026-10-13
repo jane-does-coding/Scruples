@@ -110,7 +110,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 			{/* Doll */}
 			<img
 				src={moving ? asset("/imgs/moving.webp") : blinkSrc}
-				className="h-[100svh] absolute top-[-30svh] left-[-5vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"
+				className="h-svh absolute top-[-30svh] left-[-5vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
 					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",

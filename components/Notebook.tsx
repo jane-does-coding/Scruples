@@ -60,8 +60,8 @@ const loadPages = (): Pages => {
 // The two strings the top bar hangs on
 const Strings = () => (
 	<>
-		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 	</>
 );
 
@@ -169,7 +169,7 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 			role="dialog"
 			aria-modal
 			aria-label="Notebook"
-			className="fixed inset-0 z-[25] bg-black/40 backdrop-blur-[1px] flex items-center justify-center transition-opacity duration-500"
+			className="fixed inset-0 z-25 bg-black/40 backdrop-blur-[1px] flex items-center justify-center transition-opacity duration-500"
 			style={{ opacity: shown ? 1 : 0 }}
 		>
 			{/* The colors - a column on the notebook's left, all on the same
@@ -198,11 +198,11 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 						aria-label={c.name}
 						aria-pressed={color === c.value}
 						title={c.name}
-						className={`relative ${BUTTON} drop-shadow-md drop-shadow-black/40 w-[8svh] h-[5svh] portrait:w-[11vw] transition-all ease-in-out duration-150 ${color === c.value ? "!border-solid  !p-[0.3svh]" : " !p-[0.7svh]"}`}
+						className={`relative ${BUTTON} drop-shadow-md drop-shadow-black/40 w-[8svh] h-[5svh] portrait:w-[11vw] transition-all ease-in-out duration-150 ${color === c.value ? "border-solid!  p-[0.3svh]!" : " p-[0.7svh]!"}`}
 					>
 						{/* In the portrait row, each has its own strings */}
-						<span className="hidden portrait:block w-[0.1vw] min-w-px bg-black/60 h-[100svh] top-[-100svh] left-[15%] absolute"></span>
-						<span className="hidden portrait:block w-[0.1vw] min-w-px bg-black/60 h-[100svh] top-[-100svh] right-[15%] absolute"></span>
+						<span className="hidden portrait:block w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[15%] absolute"></span>
+						<span className="hidden portrait:block w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[15%] absolute"></span>
 						<span
 							className="block w-full h-full"
 							style={{ background: c.value }}
@@ -292,7 +292,7 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 						<img
 							key={left}
 							src={asset("/imgs/popsicle-stick.webp")}
-							className={`absolute ${left} -translate-x-[50%] top-[80%] w-[2.5vw] h-[40svh] max-w-none`}
+							className={`absolute ${left} translate-x-[-50%] top-[80%] w-[2.5vw] h-[40svh] max-w-none`}
 							alt=""
 							aria-hidden
 						/>
@@ -346,7 +346,7 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 					})}
 					<img
 						src={asset("/imgs/bookmark.webp")}
-						className="absolute top-0 h-full w-auto max-w-none left-[calc(50%+2vw)] -translate-x-[50%] pointer-events-none"
+						className="absolute top-0 h-full w-auto max-w-none left-[calc(50%+2vw)] translate-x-[-50%] pointer-events-none"
 						alt=""
 						aria-hidden
 					/>

@@ -143,8 +143,8 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 								: "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Now people post their art on social medias
 			</h1>
 
@@ -168,8 +168,8 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 								: "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Wow Cool!
 			</button>
 
@@ -187,8 +187,8 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 					transform: wowed && !soWhat ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				So what?
 			</button>
 
@@ -212,15 +212,15 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			    start sliding over (1.4s after "So what?" is clicked), and
 			    "…while also opening a huge portal…" follows 0.4s later */}
 			<p
-				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 portrait:max-w-[44vw] portrait:px-[2.5vw] max-w-[18vw] mx-auto text-center scribbler absolute bottom-[49svh] right-[0vw] portrait:bottom-[46svh] portrait:right-[6vw] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 portrait:max-w-[44vw] portrait:px-[2.5vw] max-w-[18vw] mx-auto text-center scribbler absolute bottom-[49svh] right-0 portrait:bottom-[46svh] portrait:right-[6vw] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={{
 					...drop(soWhat, 800, LABEL_DROP),
 					transitionDelay: soWhat ? `${LABELS_UP_MS + 600}ms` : "0ms",
 					transform: soWhat ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				It opens a way for people to share their work with the whole world
 			</p>
 			<p
@@ -231,8 +231,8 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 					transform: soWhat ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				while also opening a huge portal for comparison to other artists
 			</p>
 
@@ -260,14 +260,14 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 						: "translateX(0)",
 				}}
 			>
-				<div className="absolute top-[-25svh] right-[0vw] h-[100svh] w-[43.5svh] portrait:top-[-20svh] portrait:right-[3vw] portrait:w-[21.75svh] test-shadow-darker pointer-events-auto">
+				<div className="absolute top-[-25svh] right-0 h-svh w-[43.5svh] portrait:top-[-20svh] portrait:right-[3vw] portrait:w-[21.75svh] test-shadow-darker pointer-events-auto">
 					<span className="w-[0.1vw] bg-black/60 h-full top-0 left-[2vw] absolute"></span>
 					<span className="w-[0.1vw] bg-black/60 h-full top-0 right-[2vw] absolute"></span>
 				</div>
 
 				<div
 					ref={marqueeRef}
-					className="absolute top-[-25svh] right-[0vw] portrait:top-[-20svh] portrait:right-[3vw] flex flex-col marquee-up test-shadow-darker pointer-events-auto"
+					className="absolute top-[-25svh] right-0 portrait:top-[-20svh] portrait:right-[3vw] flex flex-col marquee-up test-shadow-darker pointer-events-auto"
 					onMouseEnter={() => easeMarqueeTo(0.3)}
 					onMouseLeave={() => easeMarqueeTo(1)}
 				>

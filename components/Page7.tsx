@@ -51,8 +51,8 @@ const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-da
 // A label's two hanging strings
 const Strings = () => (
 	<>
-		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 	</>
 );
 
@@ -145,17 +145,16 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			    outside it */}
 			<div
 				aria-hidden
-				className="fixed inset-0 z-[11] pointer-events-none"
+				className="fixed inset-0 z-11 pointer-events-none"
 				style={{
 					// Switches on quickly (a quarter of a second, not instantly),
 					// and off the same way after "Whaaa-", once the labels have
 					// gone
 					opacity: step >= 2 && stage < 2 ? 1 : 0,
 					transition: "opacity 250ms ease-out",
-					background:
-						portrait
-							? "radial-gradient(circle at 50% 52%, transparent 0, transparent min(30svh, 46vw), rgba(0, 0, 0, 0.72) calc(min(30svh, 46vw) + 1svh))"
-							: "radial-gradient(circle at 50% 60%, transparent 0, transparent 33svh, rgba(0, 0, 0, 0.72) 34svh)",
+					background: portrait
+						? "radial-gradient(circle at 50% 52%, transparent 0, transparent min(30svh, 46vw), rgba(0, 0, 0, 0.72) calc(min(30svh, 46vw) + 1svh))"
+						: "radial-gradient(circle at 50% 60%, transparent 0, transparent 33svh, rgba(0, 0, 0, 0.72) 34svh)",
 				}}
 			/>
 
@@ -166,7 +165,7 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			{LABELS.map(({ text, top, left }, i) => (
 				<div
 					key={text}
-					className="absolute -translate-x-[50%] text-[4svh] portrait:text-[2.3svh] w-max portrait:max-w-[35vw] z-20 drop-shadow-md drop-shadow-black/40 test-shadow-darkest perspective-[100svh]"
+					className="absolute translate-x-[-50%] text-[4svh] portrait:text-[2.3svh] w-max portrait:max-w-[35vw] z-20 drop-shadow-md drop-shadow-black/40 test-shadow-darkest perspective-[100svh]"
 					style={{
 						...labelPlace(i, top, left),
 						// Earlier (higher up) labels in front, so the strings of the
@@ -246,7 +245,7 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			    outside the spotlight (the strings at the top) is in the dark */}
 			<img
 				src={blinkSrc}
-				className="h-[100svh] w-auto max-w-none absolute top-[-28svh] portrait:h-[60svh] portrait:top-[-8svh] -translate-x-[50%] z-[9]"
+				className="h-svh w-auto max-w-none absolute top-[-28svh] portrait:h-[60svh] portrait:top-[-8svh] translate-x-[-50%] z-9"
 				style={{
 					// Once the spotlight is off: her shadow goes back to the usual
 					// one, she's pulled up a little, turns round (the scale flips

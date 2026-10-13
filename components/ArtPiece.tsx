@@ -93,23 +93,25 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			    side curtains never cover its text */}
 			<div
 				aria-hidden
-				className="absolute top-[-4svh] h-0 z-[9] pointer-events-none"
+				className="absolute top-[-4svh] h-0 z-9 pointer-events-none"
 				style={{
 					...aboutPlace,
 					...slideIn(shown && paintingWidth > 0, "top", 300),
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-[1vw] absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-[1vw] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-[1vw] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-[1vw] absolute"></span>
 			</div>
 			<div
-				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-[11]"
+				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-11"
 				style={{
 					...aboutPlace,
 					...slideIn(shown && paintingWidth > 0, "top", 300),
 				}}
 			>
-				<h2 className="text-[2.6svh] portrait:text-[2svh] mb-[0.8svh]">About it</h2>
+				<h2 className="text-[2.6svh] portrait:text-[2svh] mb-[0.8svh]">
+					About it
+				</h2>
 				<dl className="text-[1.9svh] portrait:text-[1.45svh] leading-snug flex flex-col gap-[1svh]">
 					{(
 						[
@@ -135,23 +137,25 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			    side curtains never cover its text */}
 			<div
 				aria-hidden
-				className="absolute top-[-4svh] h-0 z-[9] pointer-events-none"
+				className="absolute top-[-4svh] h-0 z-9 pointer-events-none"
 				style={{
 					...factsPlace,
 					...slideIn(shown && paintingWidth > 0, "top", 450),
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-[1vw] absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-[1vw] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-[1vw] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-[1vw] absolute"></span>
 			</div>
 			<div
-				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-[11]"
+				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-11"
 				style={{
 					...factsPlace,
 					...slideIn(shown && paintingWidth > 0, "top", 450),
 				}}
 			>
-				<h2 className="text-[2.6svh] portrait:text-[2svh] mb-[0.8svh]">Fun facts</h2>
+				<h2 className="text-[2.6svh] portrait:text-[2svh] mb-[0.8svh]">
+					Fun facts
+				</h2>
 				<ul className="text-[1.9svh] portrait:text-[1.45svh] leading-snug flex flex-col gap-[1svh] list-['*_'] pl-[1.2vw] portrait:pl-[3vw]">
 					{frame.facts.map((fact) => (
 						<li key={fact}>{fact}</li>
@@ -168,7 +172,7 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 
 			{/* Labels rise in from the bottom */}
 			<div
-				className="absolute bottom-[6svh] right-[-3vw] portrait:bottom-auto portrait:top-[27svh] portrait:right-auto portrait:left-[50%] portrait:-translate-x-[50%] portrait:w-max test-shadow"
+				className="absolute bottom-[6svh] right-[-3vw] portrait:bottom-auto portrait:top-[27svh] portrait:right-auto portrait:left-[50%] portrait:translate-x-[-50%] portrait:w-max test-shadow"
 				style={slideIn(shown, "bottom", 200)}
 			>
 				<h1 className="border-[0.2svh] bg-white px-[1.5vw] portrait:px-[3vw] py-[1svh] text-[3svh] portrait:text-[2.3svh] text-center relative z-2 w-fit mx-auto">
@@ -181,7 +185,7 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 				    w-/h- here are the stick's real size */}
 				<img
 					src={asset("/imgs/popsicle-stick.webp")}
-					className="absolute w-[2.3vw] h-[38svh] max-w-none bottom-[-19svh] left-[50%] -translate-x-[50%] z-0"
+					className="absolute w-[2.3vw] h-[38svh] max-w-none bottom-[-19svh] left-[50%] translate-x-[-50%] z-0"
 					alt="Wooden popsicle stick holding up the labels"
 				/>
 			</div>

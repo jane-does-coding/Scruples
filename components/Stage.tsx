@@ -667,7 +667,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					aria-expanded={navOpen}
 					aria-controls="nav"
 					aria-label={navOpen ? "Close menu" : "Open menu"}
-					className="fixed top-[0.5svh] right-[0.5vw] text-[4svh] font-extrabold cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] min-w-[44px] min-h-[44px] portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:text-[2.6svh] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					className="fixed top-[0.5svh] right-[0.5vw] text-[4svh] font-extrabold cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:text-[2.6svh] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
 					?
 				</button>
@@ -681,7 +681,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					aria-pressed={!muted}
 					aria-label={muted ? "Turn sound on" : "Turn sound off"}
 					title={muted ? "Sound off" : "Sound on"}
-					className="fixed top-[calc(1.5svh+max(3.5vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3.5vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] min-w-[44px] min-h-[44px] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					className="fixed top-[calc(1.5svh+max(3.5vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3.5vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
 					{/* A music note, crossed out while sound is off */}
 					<svg
@@ -715,7 +715,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 							setNote(null);
 							setNavOpen(true);
 						}}
-						className="note-pop fixed top-[1svh] right-[4.8vw] portrait:top-[2vw] portrait:right-[16vw] z-[23] max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] cursor-pointer drop-shadow-lg drop-shadow-black/60"
+						className="note-pop fixed top-[1svh] right-[4.8vw] portrait:top-[2vw] portrait:right-[16vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] cursor-pointer drop-shadow-lg drop-shadow-black/60"
 					>
 						{note.text}, click to view {"->"}
 					</button>
@@ -732,7 +732,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 							goBack();
 						}}
 						aria-label="Back"
-						className="fixed top-[0.5svh] left-[0.5vw] text-[3.75svh] font-extrabold cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] min-w-[44px] min-h-[44px] portrait:top-[1.5vw] portrait:left-[1.5vw] portrait:text-[2.4svh] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+						className="fixed top-[0.5svh] left-[0.5vw] text-[3.75svh] font-extrabold cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 portrait:top-[1.5vw] portrait:left-[1.5vw] portrait:text-[2.4svh] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 					>
 						{"<-"}
 					</a>
@@ -743,7 +743,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				<div
 					onClick={() => setNavOpen(false)}
 					aria-hidden
-					className="fixed inset-0 z-[21] bg-black/20 backdrop-blur-[1px] transition-opacity duration-700"
+					className="fixed inset-0 z-21 bg-black/20 backdrop-blur-[1px] transition-opacity duration-700"
 					style={{
 						opacity: navOpen ? 1 : 0,
 						pointerEvents: navOpen ? "auto" : "none",
@@ -757,7 +757,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				<nav
 					id="nav"
 					inert={!navOpen}
-					className={`${navGliding ? "nav-smooth" : "nav-bounce"} fixed inset-x-0 bottom-[10svh] z-[22] drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
+					className={`${navGliding ? "nav-smooth" : "nav-bounce"} fixed inset-x-0 bottom-[10svh] z-22 drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
 					style={{
 						// "View all items" drops it one more row, so the second row
 						// shows
@@ -849,7 +849,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 							    is marked */}
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
 								<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
-								<ol className="h-[var(--slot)] w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-cols-2 grid-rows-[repeat(4,auto)] grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.6svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.4svh] portrait:text-[2svh] leading-[1.2]">
+								<ol className="h-(--slot) w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-cols-2 grid-rows-[repeat(4,auto)] grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.6svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.4svh] portrait:text-[2svh] leading-[1.2]">
 									{PAGES.map(({ title, href }, i) => {
 										const n = i + 1;
 										const here = pathname === href;
@@ -901,10 +901,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 								</div>
 								{/* One row tall: the second row hangs below it, fading in and
 						    out with "View all" */}
-								<ul className="relative grid grid-cols-4 auto-rows-[var(--slot)] h-[var(--slot)] gap-[var(--slot-gap)]">
+								<ul className="relative grid grid-cols-4 auto-rows-(--slot) h-(--slot) gap-(--slot-gap)">
 									{/* Money - click it to see what it's for */}
 									<li
-										className="relative w-[var(--slot)] h-[var(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
+										className="relative w-(--slot) h-(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
 										style={{ opacity: itemOpen ? 0 : 1 }}
 										onClick={() => showItem("money", 0)}
 										onKeyDown={(e) => {
@@ -919,7 +919,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 											<img
 												key={i}
 												src={src}
-												className="absolute top-[50%] h-[82%] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
+												className="absolute top-[50%] h-[82%] w-auto max-w-none translate-x-[-50%] translate-y-[-50%] test-shadow-darker"
 												style={{
 													// Fanned out around the middle of the slot
 													left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
@@ -939,7 +939,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 												<li
 													key={entry?.key ?? `empty-${i}`}
 													inert={hidden}
-													className="relative w-[var(--slot)] h-[var(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
+													className="relative w-(--slot)] h-(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
 													style={{
 														opacity: itemOpen || hidden ? 0 : 1,
 														// The second row fades in as the menu glides down,
@@ -974,7 +974,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 										<li
 											// Taller on portrait screens, with the picture above the
 											// text, since the row is so narrow there
-											className="absolute h-[var(--slot)] portrait:h-auto portrait:min-h-[calc(2*var(--slot)+var(--slot-gap))] bg-white/80 border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] px-[2svh] portrait:p-[3vw] overflow-hidden"
+											className="absolute h-(--slot)] portrait:h-auto portrait:min-h-[calc(2*var(--slot)+var(--slot-gap))] bg-white/80 border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] px-[2svh] portrait:p-[3vw] overflow-hidden"
 											style={{
 												transition: ["left", "width", "top", "height"]
 													.map(
@@ -1005,7 +1005,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 														<img
 															key={i}
 															src={src}
-															className="absolute top-[50%] h-[15svh] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
+															className="absolute top-[50%] h-[15svh] w-auto max-w-none translate-x-[-50%] translate-y-[-50%] test-shadow-darker"
 															style={{
 																left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
 																rotate: `${(i - (all.length - 1) / 2) * 8}deg`,

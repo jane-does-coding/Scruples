@@ -63,8 +63,8 @@ const LIFT_AWAY_MS = (PART_ITEMS - 1) * LIFT_STAGGER_MS + 800;
 // A label's two hanging strings
 const Strings = () => (
 	<>
-		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 	</>
 );
 
@@ -134,7 +134,7 @@ export default function LastPage() {
 			    where there's no room */}
 			<img
 				src={dollSrc}
-				className="h-[100svh] w-auto max-w-none absolute top-[-30svh] left-[-12vw] portrait:hidden test-shadow-darker z-5"
+				className="h-svh w-auto max-w-none absolute top-[-30svh] left-[-12vw] portrait:hidden test-shadow-darker z-5"
 				style={hang(shown, "top", { ms: 900, easing: DROP })}
 				alt="Zhenya, a marionette doll on strings"
 			/>
@@ -185,7 +185,7 @@ export default function LastPage() {
 			    in front of two still strings, like the posts on Page 4. Two
 			    copies, so the loop is seamless */}
 			<div
-				className="absolute top-[-25svh] right-[calc(3%)] portrait:top-[-20svh] portrait:right-[1vw] w-[26svh] portrait:w-[33vw] h-[100svh] test-shadow-darker"
+				className="absolute top-[-25svh] right-[calc(3%)] portrait:top-[-20svh] portrait:right-[1vw] w-[26svh] portrait:w-[33vw] h-svh test-shadow-darker"
 				// Just fades in - dropping in while it's already scrolling
 				// looked like a jump
 				style={{
@@ -224,22 +224,22 @@ export default function LastPage() {
 			{/* The drawings' label hangs over the top of their column, and "See
 			    them all" stands at the very bottom of it on a popsicle stick.
 			    This box just lines them up with the column */}
-			<div className="absolute top-[-5vh] bottom-0 right-[calc(3%)] portrait:right-[1vw] w-[26svh] portrait:w-[33vw] z-[9] pointer-events-none">
+			<div className="absolute top-[-5vh] bottom-0 right-[calc(3%)] portrait:right-[1vw] w-[26svh] portrait:w-[33vw] z-9 pointer-events-none">
 				<p
-					className={`absolute top-[4svh] portrait:top-[5svh] left-[50%] -translate-x-[50%] w-max max-w-[30svh] portrait:max-w-[33vw] text-[3svh] portrait:text-[2.3svh] pointer-events-auto ${LABEL}`}
+					className={`absolute top-[4svh] portrait:top-[5svh] left-[50%] translate-x-[-50%] w-max max-w-[30svh] portrait:max-w-[33vw] text-[3svh] portrait:text-[2.3svh] pointer-events-auto ${LABEL}`}
 					style={hang(shown, "top", { delay: 400 })}
 				>
 					<Strings />
 					Drawings by visitors
 				</p>
 				<div
-					className="absolute bottom-[4svh] left-[50%] -translate-x-[50%] pointer-events-auto test-shadow-darker"
+					className="absolute bottom-[4svh] left-[50%] translate-x-[-50%] pointer-events-auto test-shadow-darker"
 					style={hang(shown, "bottom", { ms: 900, easing: DROP, delay: 600 })}
 				>
 					{/* The stick, going down off the bottom of the screen */}
 					<img
 						src={asset("/imgs/popsicle-stick.webp")}
-						className="absolute w-[2vw] portrait:w-[2.5svh] h-[30svh] max-w-none left-[50%] -translate-x-[50%] top-[60%] z-0"
+						className="absolute w-[2vw] portrait:w-[2.5svh] h-[30svh] max-w-none left-[50%] translate-x-[-50%] top-[60%] z-0"
 						alt=""
 						aria-hidden
 					/>
