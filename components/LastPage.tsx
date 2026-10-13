@@ -203,7 +203,7 @@ export default function LastPage() {
 						{[0, 1].map((copy) => (
 							<ul
 								key={copy}
-								className="flex flex-col gap-[2svh] pb-[4svh]"
+								className="flex flex-col gap-[2svh] pb-[2svh]"
 								aria-hidden={copy === 1}
 							>
 								{loop.map((drawing, i) => (
