@@ -6,6 +6,13 @@ Scruples is a small interactive story told on a hand-drawn puppet stage. You tea
 
 Everything is drawn by hand, hangs on strings or stands on popsicle sticks, and moves like a real puppet theatre.
 
+## Screenshots
+
+<!-- Add your screenshots here, e.g.
+![The ticket and closed curtains](screenshots/ticket.png)
+![Zhenya and the gallery marquee](screenshots/gallery.png)
+-->
+
 ## The story
 
 | Page | Scene |
@@ -59,47 +66,19 @@ npm run build
 npm start
 ```
 
-## Screenshots
+## Project layout
 
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 19 13 AM" src="https://github.com/user-attachments/assets/b892f060-6cf8-4f95-ae6c-7d39627ddb86" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 19 31 AM" src="https://github.com/user-attachments/assets/ef683478-f4d2-44c4-8e72-b411fb3add6c" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 19 45 AM" src="https://github.com/user-attachments/assets/3b0f2479-c1e2-492c-bb0d-72bf5ac24390" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 20 03 AM" src="https://github.com/user-attachments/assets/513f99f5-941e-4b31-b8ec-ea939382d39d" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 20 21 AM" src="https://github.com/user-attachments/assets/9d5a513e-8ade-4619-82e7-2b2e37969a28" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 21 00 AM" src="https://github.com/user-attachments/assets/bc578ae6-81d6-4610-b5e7-2b4c76431625" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 21 22 AM" src="https://github.com/user-attachments/assets/b4ffe10e-7175-496c-8c43-53811bb911b4" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 21 34 AM" src="https://github.com/user-attachments/assets/46d278de-8445-4b3a-97a3-bfe126eae7a3" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 22 03 AM" src="https://github.com/user-attachments/assets/39f5946a-04bf-4db6-8631-831ad3d8d152" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 22 44 AM" src="https://github.com/user-attachments/assets/7982d19f-b0a0-4368-a08d-800e61778a5b" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 23 28 AM" src="https://github.com/user-attachments/assets/eb30dd96-c869-4117-a97c-1661e4136d9c" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 23 54 AM" src="https://github.com/user-attachments/assets/18672bb8-e469-4704-b1d8-a18f93de5776" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 24 19 AM" src="https://github.com/user-attachments/assets/ea2373a6-989f-4d29-9fef-c70d2522f86a" />
-
-
-<img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 25 21 AM" src="https://github.com/user-attachments/assets/76d7eaa2-6dfa-4a87-ab8a-52f15521272a" />
-
+```
+app/            Routes: /page1 … /page7, /art-piece/[slug], sitemap, robots, manifest
+components/     The stage (curtains, menu, inventory) and each page's scene
+  Stage.tsx       Curtains, ticket, "?" menu, inventory, sound button
+  Page1-7.tsx     The seven scenes
+  ArtPiece.tsx    A painting's own page
+  Notebook.tsx    The drawable notebook
+lib/
+  frames.ts       The gallery paintings, their details and fun facts
+  shop.ts         Everything that can be bought, and prices
+  sound.ts        All the sounds and the background music
+  stroke.ts       Smooth pen strokes for drawing
+public/imgs/    The hand-drawn art, curtain frames and animations
+```
