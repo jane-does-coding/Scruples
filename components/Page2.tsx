@@ -144,7 +144,7 @@ export default function Page2({
 			/>
 
 			<h1
-				className="text-[3svh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[-7svh] right-[25vw] portrait:top-[0svh] portrait:right-[12vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[3svh] portrait:text-[2.3svh] max-w-[70%] mx-auto text-center scribbler absolute top-[-7svh] right-[25vw] portrait:top-[0svh] portrait:right-[12vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 2),
 					transform: step >= 2 ? "translateY(0)" : "translateY(-60svh)",
@@ -155,7 +155,7 @@ export default function Page2({
 				Zhenya likes art
 			</h1>
 			<p
-				className="text-[3svh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[1svh] right-[13vw] portrait:top-[8svh] portrait:right-[16vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[3svh] portrait:text-[2.3svh] max-w-[70%] mx-auto text-center scribbler absolute top-[1svh] right-[13vw] portrait:top-[8svh] portrait:right-[16vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 3),
 					transform: step >= 3 ? "translateY(0)" : "translateY(-60svh)",
@@ -170,7 +170,7 @@ export default function Page2({
 			    (-50%), so the loop is seamless */}
 			<div
 				ref={marqueeRef}
-				className="absolute top-[15svh] portrait:top-[21svh] left-0 flex w-max marquee"
+				className="absolute top-[12svh] portrait:top-[21svh] left-0 flex w-max marquee"
 				onMouseEnter={() => {
 					slowDownTimer.current = setTimeout(() => easeMarqueeTo(0.3), 1000);
 					setHoveringArt(true);
@@ -216,8 +216,9 @@ export default function Page2({
 									alt={`${label}, painting in a picture frame`}
 								/>
 								{/* Label - sits right under the frame image */}
-								<span className="border-[0.2svh] bg-white px-[1vw] py-[1svh] text-[2svh] left-[50%] -translate-x-[50%] absolute top-full mt-[1svh] z-5 w-max max-w-[22vw] portrait:max-w-[24svh] portrait:px-[1.5svh] text-center">
-									{label}
+								<span className="border-[0.2svh] border-black bg-white px-[1vw] portrait:px-[3vw] py-[0.5svh] text-[3svh] portrait:text-[2.3svh] left-[50%] -translate-x-[50%] absolute top-full mt-[1svh] z-5 w-max whitespace-nowrap portrait:whitespace-normal portrait:max-w-[24svh] text-center">
+									{/* Just the title - the year is on its page */}
+									{label.split(" • ")[0]}
 								</span>
 							</a>
 						))}

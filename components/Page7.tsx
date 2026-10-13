@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import usePortrait from "@/components/usePortrait";
+import * as sound from "@/lib/sound";
 
 type PageProps = {
 	nextPage: () => void;
@@ -40,10 +41,10 @@ const hang = (
 // A label's face, without its shadow (the shadow goes on the whole hanging
 // label, so it doesn't flip with it)
 const FACE =
-	"pt-serif text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh]";
+	"text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh]";
 
 const LABEL =
-	" pt-serif text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darkest";
+	" text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darkest";
 const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer disabled:cursor-default`;
 
 // A label's two hanging strings
@@ -69,12 +70,13 @@ const LABELS = [
 const LABEL_STAGGER_MS = 250;
 const LABEL_EXIT_STAGGER_MS = 50;
 // After the spotlight comes on (ms): the last label has landed (each drop
-// takes 800ms), then 2s with them all on screen, then they all flip to "But
-// why?" (FLIP_MS long), and "Whaaa-" rises 0.5s after the flip
+// takes 800ms), and "Whaaa-" rises 0.5s later
 const LABELS_IN_MS = (LABELS.length - 1) * LABEL_STAGGER_MS + 800;
-const FLIP_AT_MS = LABELS_IN_MS + 2000;
+const WHAAA_MS = LABELS_IN_MS + 500;
+// Clicking "Whaaa-" flips every label over to "But why?" (FLIP_MS long);
+// 2s after the flip, the labels lift away
 const FLIP_MS = 700;
-const WHAAA_MS = FLIP_AT_MS + FLIP_MS + 500;
+const LABELS_OUT_MS = FLIP_MS + 2000;
 // After "Whaaa-", the spotlight goes off once the last label has lifted away
 // (each takes 800ms)
 const SPOTLIGHT_OFF_MS = (LABELS.length - 1) * LABEL_EXIT_STAGGER_MS + 800;
@@ -96,8 +98,13 @@ export default function Page7({ curtainsOpen }: PageProps) {
 
 	const [stage, setStage] = useState(0);
 
-	// The labels all flip over to "But why?" together, 2s after the last
-	// one has landed
+	// A thunderclap as the spotlight switches on
+	useEffect(() => {
+		if (step === 2) sound.thunder();
+	}, [step]);
+
+	// The labels all flip over to "But why?" together when "Whaaa-" is
+	// clicked
 	const [flipped, setFlipped] = useState(false);
 	// Phones held upright: a smaller Zhenya and spotlight, and the labels in
 	// two columns either side of her (left, right, left, right…) instead of
@@ -110,14 +117,19 @@ export default function Page7({ curtainsOpen }: PageProps) {
 					left: i % 2 ? "81%" : "19%",
 				}
 			: { top, left };
-	useEffect(() => {
-		if (step < 2) return;
-		const timer = setTimeout(
-			() => setFlipped(true),
-			FLIP_AT_MS,
+	// "Whaaa-": it sinks away and the labels flip to "But why?"; 2s after
+	// the flip they lift away one by one, then the spotlight goes off (and
+	// Zhenya turns and goes right)
+	const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+	useEffect(() => () => timers.current.forEach(clearTimeout), []);
+	const whaaa = () => {
+		if (flipped) return;
+		setFlipped(true);
+		timers.current.push(
+			setTimeout(() => setStage(1), LABELS_OUT_MS),
+			setTimeout(() => setStage(2), LABELS_OUT_MS + SPOTLIGHT_OFF_MS),
 		);
-		return () => clearTimeout(timer);
-	}, [step]);
+	};
 
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
@@ -145,13 +157,12 @@ export default function Page7({ curtainsOpen }: PageProps) {
 
 			{/* The labels - drop in one by one once the spotlight is on; lift
 			    away one by one, in the same order, after "Whaaa-" */}
-			{/* 2s after the last one has landed, they all flip over
-			    together (like cards on their strings) - the backs say "But
-			    why?" */}
+			{/* When "Whaaa-" is clicked they all flip over together (like
+			    cards on their strings) - the backs say "But why?" */}
 			{LABELS.map(({ text, top, left }, i) => (
 				<div
 					key={text}
-					className="absolute -translate-x-[50%] text-[4svh] portrait:text-[2.1svh] w-max portrait:max-w-[35vw] z-20 drop-shadow-md drop-shadow-black/40 test-shadow-darkest perspective-[100svh]"
+					className="absolute -translate-x-[50%] text-[4svh] portrait:text-[2.3svh] w-max portrait:max-w-[35vw] z-20 drop-shadow-md drop-shadow-black/40 test-shadow-darkest perspective-[100svh]"
 					style={{
 						...labelPlace(i, top, left),
 						// Earlier (higher up) labels in front, so the strings of the
@@ -183,16 +194,13 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			))}
 
 			{/* "Whaaa-" - on a popsicle like Continue, but lower and a little
-			    smaller. Rises 0.5s after the labels flip; clicking it sends the
-			    labels away, then turns the spotlight off */}
+			    smaller. Rises 0.5s after the last label lands; clicking it sinks
+			    it, flips the labels to "But why?", and 2s later sends them away
+			    and turns the spotlight off */}
 			<PopsicleButton
-				onClick={() => {
-					if (stage > 0) return;
-					setStage(1);
-					setTimeout(() => setStage(2), SPOTLIGHT_OFF_MS);
-				}}
+				onClick={whaaa}
 				style={{
-					...hang(step >= 2, step >= 2 && stage < 1, "bottom", {
+					...hang(step >= 2, step >= 2 && !flipped, "bottom", {
 						ms: 900,
 						easing: BUTTON_DROP,
 						delay: WHAAA_MS,

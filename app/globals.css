@@ -48,16 +48,13 @@ button {
 	}
 }
 
-.pt-serif {
-	/* --font-pt-serif is set by next/font in layout.tsx (self-hosted PT Serif) */
-	font-family: var(--font-pt-serif), "PT Serif", serif;
-}
-
 @font-face {
 	font-family: "scribbler";
 	/* Capital S to match the file - Vercel's servers are case-sensitive, so
 	   "scribbler.otf" 404s there even though it works on a Mac */
-	src: url("/scribbler-font/Scribbler.otf") format("opentype");
+	src:
+		url("/scribbler-font/Scribbler.woff2") format("woff2"),
+		url("/scribbler-font/Scribbler.otf") format("opentype");
 }
 
 .scribbler {
@@ -117,6 +114,12 @@ button {
 			0.994, 0.993, 0.992, 0.992, 0.992, 0.992, 0.993, 0.993, 0.994, 0.994, 0.995,
 			0.996, 0.996, 0.997, 0.997, 0.998, 1
 		);
+}
+
+/* The menu gliding a row further down (or back up) for "view all" - a
+   smooth ease, no bounce. Keep in sync with NAV_GLIDE_MS in Stage.tsx */
+.nav-smooth {
+	transition: transform 650ms cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* Page 5's spiral drawing - turns slowly, forever */

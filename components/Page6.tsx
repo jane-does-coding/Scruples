@@ -124,7 +124,7 @@ const hang = (
 });
 
 const LABEL =
-	"text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] pt-serif text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
+	"text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
 const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer disabled:cursor-default`;
 
 // A label's two hanging strings
@@ -467,17 +467,22 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				/>
 			</div>
 
-			{/* The colors - a row of buttons hanging just above the frame while
-			    you draw, one after another. Each is a white box with the color
-			    inside; the picked one has a solid border */}
+			{/* The colors - one connected palette hanging just above the frame
+			    while you draw: a single white strip on two strings, the colors
+			    side by side in it. The picked one has a ring round it */}
 			<div
-				className="absolute left-[41%] portrait:left-[50%] -translate-x-[50%] flex gap-[1vw] portrait:gap-[2vw] z-6"
-				style={{
-					bottom: `calc(6svh + ${frameVh}svh + 2svh)`,
-					transition: `bottom ${GROW_MS}ms ${DOLL_DROP}`,
-				}}
+				className={`absolute left-[41%] portrait:left-[50%] -translate-x-[50%] flex gap-[0.8svh] p-[0.8svh] z-6 bg-white border-[0.3svh] border-black border-dashed drop-shadow-md drop-shadow-black/40 test-shadow-darker`}
+				style={(() => {
+					const style = hang(canDraw, canDraw && stage === 1, "top");
+					return {
+						...style,
+						bottom: `calc(6svh + ${frameVh}svh + 2svh)`,
+						transition: `${style.transition}, bottom ${GROW_MS}ms ${DOLL_DROP}`,
+					};
+				})()}
 			>
-				{COLORS.map((c, i) => (
+				<Strings />
+				{COLORS.map((c) => (
 					<button
 						key={c.value}
 						onClick={() => setColor(c.value)}
@@ -486,23 +491,15 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 						aria-label={c.name}
 						aria-pressed={color === c.value}
 						title={c.name}
-						className={`relative ${BUTTON} !p-[0.4svh] ${color === c.value ? "!border-solid" : ""}`}
-						style={hang(canDraw, canDraw && stage === 1, "top", {
-							delay: i * 100,
-						})}
-					>
-						<Strings />
-						<span
-							className="block w-[6svh] h-[3svh]"
-							style={{ background: c.value }}
-						/>
-					</button>
+						className={`block w-[6svh] h-[3.5svh] cursor-pointer disabled:cursor-default ${color === c.value ? "outline-[0.3svh] outline-solid outline-black outline-offset-[0.15svh]" : ""}`}
+						style={{ background: c.value }}
+					/>
 				))}
 			</div>
 
 			{/* Instructions - while you draw */}
 			<p
-				className={`absolute top-[8svh] left-[49%] portrait:top-[10svh] portrait:left-[50%] -translate-x-[50%] w-[30vw] portrait:w-[84vw] z-[9] ${LABEL}`}
+				className={`absolute top-[8svh] left-[49%] portrait:top-[20svh] portrait:left-[50%] -translate-x-[50%] w-[30vw] portrait:w-[84vw] z-[9] ${LABEL}`}
 				// Lifts away while the frame is bigger, to make room for it
 				style={hang(canDraw, canDraw && stage === 1 && !big, "top")}
 			>
@@ -512,60 +509,58 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 					: "Daphne lends Zhenya her palette - draw something in the frame!"}
 			</p>
 
-			{/* Clear / Done - next to the frame while you draw. Done only works
-			    once there's something drawn */}
+			{/* Bigger / Clear / Done - next to the frame while you draw, hanging
+			    as one: the strings are tied to the bottom one (Done) and run up
+			    behind the other two. Done only works once there's something
+			    drawn. (On portrait screens it's a row above the colors, the
+			    strings at its two ends) */}
 			<div
-				className="absolute -translate-x-[50%] flex flex-col portrait:flex-row items-center gap-[3svh] portrait:gap-[3vw] z-[7]"
+				className="absolute -translate-x-[50%] flex flex-col portrait:flex-row items-stretch portrait:items-center gap-[2svh] portrait:gap-[3vw] z-[7]"
 				// Moves over to stay clear of the frame while it's bigger. On
-				// portrait screens it's a row above the colors instead, moving
-				// up with them
-				style={{
-					left: portrait
-						? "50%"
-						: big
-							? "max(65%, calc(41% + 33svh))"
-							: "65%",
-					bottom: portrait
-						? `calc(6svh + ${frameVh}svh + 10svh)`
-						: "22svh",
-					transition: `left ${GROW_MS}ms ${DOLL_DROP}, bottom ${GROW_MS}ms ${DOLL_DROP}`,
-				}}
+				// portrait screens it moves up with the colors instead
+				style={(() => {
+					const style = hang(canDraw, canDraw && stage === 1, "top", {
+						delay: 300,
+					});
+					return {
+						...style,
+						left: portrait
+							? "50%"
+							: big
+								? "max(65%, calc(41% + 33svh))"
+								: "65%",
+						bottom: portrait
+							? `calc(6svh + ${frameVh}svh + 10svh)`
+							: "22svh",
+						transition: `${style.transition}, left ${GROW_MS}ms ${DOLL_DROP}, bottom ${GROW_MS}ms ${DOLL_DROP}`,
+					};
+				})()}
 			>
+				<span className="w-[0.1vw] bg-black/60 h-[200svh] bottom-[2svh] left-[25%] portrait:bottom-[50%] portrait:left-[8%] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[200svh] bottom-[2svh] right-[25%] portrait:bottom-[50%] portrait:right-[8%] absolute"></span>
+				<button
+					onClick={() => setBig((b) => !b)}
+					disabled={stage !== 1}
+					tabIndex={canDraw && stage === 1 ? undefined : -1}
+					className={`relative w-full portrait:w-max ${BUTTON}`}
+				>
+					{big ? "Smaller" : "Bigger"}
+				</button>
 				<button
 					onClick={clear}
 					disabled={stage !== 1 || !drew}
 					tabIndex={canDraw && stage === 1 ? undefined : -1}
-					className={`relative w-max ${BUTTON}`}
-					style={hang(canDraw, canDraw && stage === 1, "top", {
-						delay: 300,
-					})}
+					className={`relative w-full portrait:w-max ${BUTTON}`}
 				>
-					<Strings />
 					Clear
 				</button>
 				<button
 					onClick={done}
 					disabled={stage !== 1 || !drew}
 					tabIndex={canDraw && stage === 1 ? undefined : -1}
-					className={`relative w-max ${BUTTON} disabled:opacity-60`}
-					style={hang(canDraw, canDraw && stage === 1, "top", {
-						delay: 500,
-					})}
+					className={`relative w-full portrait:w-max ${BUTTON} disabled:opacity-60`}
 				>
-					<Strings />
 					Done
-				</button>
-				<button
-					onClick={() => setBig((b) => !b)}
-					disabled={stage !== 1}
-					tabIndex={canDraw && stage === 1 ? undefined : -1}
-					className={`relative w-max ${BUTTON}`}
-					style={hang(canDraw, canDraw && stage === 1, "top", {
-						delay: 700,
-					})}
-				>
-					<Strings />
-					{big ? "Smaller" : "Bigger"}
 				</button>
 			</div>
 
@@ -574,7 +569,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={sayVerdict}
 				disabled={!verdict || stage >= 3}
 				tabIndex={verdict && stage < 3 ? undefined : -1}
-				className={`absolute top-[2svh] left-[38%] portrait:top-[10svh] portrait:left-[34%] -translate-x-[50%] w-[18vw] portrait:w-[56vw] z-[13] ${BUTTON}`}
+				className={`absolute top-[2svh] left-[38%] portrait:top-[20svh] portrait:left-[34%] -translate-x-[50%] w-[18vw] portrait:w-[56vw] z-[13] ${BUTTON}`}
 				style={hang(verdict, verdict && stage < 4, "top", {
 					exitDelay: 0 * TALK_EXIT_STAGGER_MS,
 				})}
@@ -585,7 +580,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Daphne: "But did you have a good time?" */}
 			<p
-				className={`absolute top-[16svh] left-[60%] portrait:top-[22svh] portrait:left-[62%] -translate-x-[50%] w-max portrait:max-w-[70vw] z-[12] ${LABEL}`}
+				className={`absolute top-[16svh] left-[60%] portrait:top-[30svh] portrait:left-[62%] -translate-x-[50%] w-max portrait:max-w-[70vw] z-[12] ${LABEL}`}
 				style={hang(stage >= 3, stage === 3, "top", {
 					delay: 400,
 					exitDelay: 1 * TALK_EXIT_STAGGER_MS,
@@ -600,7 +595,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={sayYes}
 				disabled={!goodTime || stage >= 4}
 				tabIndex={goodTime && stage < 4 ? undefined : -1}
-				className={`absolute top-[22svh] left-[33%] portrait:top-[33svh] portrait:left-[34%] -translate-x-[50%] w-max z-[11] ${BUTTON}`}
+				className={`absolute top-[22svh] left-[33%] portrait:top-[40svh] portrait:left-[34%] -translate-x-[50%] w-max z-[11] ${BUTTON}`}
 				style={hang(goodTime, goodTime && stage < 4, "top", {
 					exitDelay: 2 * TALK_EXIT_STAGGER_MS,
 				})}

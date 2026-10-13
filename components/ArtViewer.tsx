@@ -63,7 +63,7 @@ export default function ArtViewer({
 				{/* The name and Close hang on their own strings too, which run up
 				    behind the painting (z-0 under its z-1) */}
 				<div className="relative z-0 flex items-center gap-[1vw]">
-					<p className="relative text-[3svh] scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40">
+					<p className="relative text-[3svh] portrait:text-[2.3svh] scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40">
 						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
 						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
 						{name}
@@ -72,7 +72,7 @@ export default function ArtViewer({
 						onClick={close}
 						// Keyboard focus starts here when it opens
 						autoFocus
-						className="relative text-[3svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] cursor-pointer drop-shadow-md drop-shadow-black/40"
+						className="relative text-[3svh] portrait:text-[2.3svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] cursor-pointer drop-shadow-md drop-shadow-black/40"
 					>
 						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
 						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>

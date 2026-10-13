@@ -7,6 +7,7 @@
 //   whoosh(ms)  - the curtains sweeping open or shut
 //   rip()       - the ticket tearing
 //   menu(open)  - the "?" menu dropping down (and landing) or lifting away
+//   thunder()   - a thunderclap, for the spotlight switching on
 //   startMusic()- a quiet, slow lullaby in the background, on a loop
 
 const STORAGE_KEY = "scruples-sound";
@@ -134,6 +135,52 @@ export const menu = (open: boolean) => {
 	thump.connect(gain).connect(master);
 	thump.start(at);
 	thump.stop(at + 0.32);
+};
+
+// Thunder: a sharp crack, then a long low rumble that rolls and fades over
+// about three and a half seconds
+export const thunder = () => {
+	const audio = ready();
+	if (!audio || !master) return;
+	const now = audio.currentTime;
+
+	// The crack - bright noise, very short
+	const crack = noiseSource(audio);
+	const crackFilter = audio.createBiquadFilter();
+	crackFilter.type = "bandpass";
+	crackFilter.frequency.value = 1800;
+	crackFilter.Q.value = 0.6;
+	const crackGain = audio.createGain();
+	crackGain.gain.setValueAtTime(0.0001, now);
+	crackGain.gain.exponentialRampToValueAtTime(0.5, now + 0.01);
+	crackGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+	crack.connect(crackFilter).connect(crackGain).connect(master);
+	crack.start(now, Math.random() * 0.5);
+	crack.stop(now + 0.4);
+
+	// The rumble - deep noise whose loudness wobbles as it rolls away
+	const length = 3.5;
+	const rumble = noiseSource(audio);
+	const low = audio.createBiquadFilter();
+	low.type = "lowpass";
+	low.frequency.setValueAtTime(400, now);
+	low.frequency.exponentialRampToValueAtTime(90, now + length);
+	const rumbleGain = audio.createGain();
+	rumbleGain.gain.setValueAtTime(0.0001, now);
+	rumbleGain.gain.exponentialRampToValueAtTime(0.9, now + 0.08);
+	// A few rolls, each a bit quieter
+	let t = now + 0.08;
+	let level = 0.9;
+	while (t < now + length - 0.4) {
+		t += 0.25 + Math.random() * 0.35;
+		level *= 0.72;
+		rumbleGain.gain.exponentialRampToValueAtTime(level * 0.55, t);
+		rumbleGain.gain.exponentialRampToValueAtTime(level, t + 0.12);
+	}
+	rumbleGain.gain.exponentialRampToValueAtTime(0.0001, now + length);
+	rumble.connect(low).connect(rumbleGain).connect(master);
+	rumble.start(now, Math.random() * 0.5);
+	rumble.stop(now + length + 0.05);
 };
 
 // The curtains: a soft swish of fabric, rising then falling over `ms`

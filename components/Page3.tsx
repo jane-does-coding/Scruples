@@ -188,7 +188,7 @@ export default function Page3({
 			<button
 				onClick={enter}
 				disabled={entered}
-				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59svh] left-[28vw] portrait:bottom-[58svh] portrait:left-[10vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[3vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[59svh] left-[28vw] portrait:bottom-[58svh] portrait:left-[10vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[3vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					...drop(step >= 2),
 					transitionDelay: leaving ? "900ms" : "0ms",
@@ -328,7 +328,7 @@ export default function Page3({
 				onClick={() => setItem((i) => (i + 1) % ITEM_COUNT)}
 				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
-				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59svh] left-[28vw] portrait:bottom-[61svh] portrait:left-[8vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[3vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[59svh] left-[28vw] portrait:bottom-[61svh] portrait:left-[8vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[3vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				style={{
 					...drop(opened),
 					transitionDelay: entered ? "900ms" : "0ms",
@@ -345,7 +345,7 @@ export default function Page3({
 				onClick={() => tryBuy("pins")}
 				disabled={!pinsUp}
 				tabIndex={pinsUp ? undefined : -1}
-				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[22vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[22vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
@@ -363,7 +363,7 @@ export default function Page3({
 				onClick={() => tryBuy("pens")}
 				disabled={!pensUp}
 				tabIndex={pensUp ? undefined : -1}
-				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[22vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[22vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
@@ -381,7 +381,7 @@ export default function Page3({
 				onClick={() => tryBuy("mona-lisa")}
 				disabled={!monaUp}
 				tabIndex={monaUp ? undefined : -1}
-				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
@@ -403,7 +403,7 @@ export default function Page3({
 				onClick={() => tryBuy("notebook")}
 				disabled={!notebookUp}
 				tabIndex={notebookUp ? undefined : -1}
-				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
@@ -422,7 +422,7 @@ export default function Page3({
 
 			{/* "Exit" - drops in on the left, 1.1s after the click */}
 			<button
-				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] cursor-pointer mx-auto text-center scribbler absolute bottom-[59svh] left-[2vw] portrait:bottom-[69svh] portrait:left-[8vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] cursor-pointer mx-auto text-center scribbler absolute bottom-[59svh] left-[2vw] portrait:bottom-[69svh] portrait:left-[8vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				onClick={() => setEntered(!entered)}
 				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
@@ -439,7 +439,7 @@ export default function Page3({
 
 			{/* "Prev item" - under "Exit", drops in 1.3s after the click */}
 			<button
-				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[51svh] left-[-1vw] portrait:bottom-[69svh] portrait:left-[28vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[51svh] left-[-1vw] portrait:bottom-[69svh] portrait:left-[28vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				onClick={() => setItem((i) => (i - 1 + ITEM_COUNT) % ITEM_COUNT)}
 				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}

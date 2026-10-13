@@ -35,6 +35,11 @@ const frames = (name: string, count: number) =>
 
 const CLOSING_FRAMES = frames("closing", 10);
 const OPENING_FRAMES = frames("opening", 12);
+// The same at 800px wide, for phones (≈1.3MB for both instead of ≈3.1MB)
+const CLOSING_FRAMES_SMALL = frames("closing-800", 10);
+const OPENING_FRAMES_SMALL = frames("opening-800", 12);
+// A phone (either way up): the short side of the screen is at most 500px
+const isPhone = () => Math.min(window.innerWidth, window.innerHeight) <= 500;
 // First half (21 of 42 frames) of ripping.gif. The GIF runs at 50ms a frame;
 // it's played faster here
 const RIPPING_FRAMES = frames("ripping", 21);
@@ -91,6 +96,9 @@ type Drawing = {
 // "View all items"
 const SLOTS = 3;
 const ALL_SLOTS = 7;
+// How long the menu glides for when "view all" extends or shrinks it (the
+// length of .nav-smooth in globals.css)
+const NAV_GLIDE_MS = 650;
 // One row of the inventory: a slot plus the gap (set in globals.css, and
 // sized by width on portrait screens)
 const ROW = "(var(--slot) + var(--slot-gap))";
@@ -207,6 +215,15 @@ export default function Stage({ children }: { children: ReactNode }) {
 	// It's a toggle that stays as you left it (kept in this browser too), and
 	// turns itself on once there are more items than one row can show
 	const [allItemsOn, setAllItemsState] = useState(false);
+	// While "view all" is extending or shrinking the open menu, it glides
+	// (.nav-smooth) instead of using the springy bounce it opens with
+	const [navGliding, setNavGliding] = useState(false);
+	const glideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const glideNav = () => {
+		setNavGliding(true);
+		clearTimeout(glideTimer.current);
+		glideTimer.current = setTimeout(() => setNavGliding(false), NAV_GLIDE_MS);
+	};
 	// The switch only shows once there are more items than one row fits, and
 	// until then (or after selling things) it's as if it were off
 	const canViewAll = entries.length > SLOTS;
@@ -499,7 +516,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 	};
 	const openingLoading = useRef<Promise<void> | null>(null);
 	const loadOpening = () => {
-		openingLoading.current ??= decodeFrames(OPENING_FRAMES).then((b) => {
+		openingLoading.current ??= decodeFrames(
+			isPhone() ? OPENING_FRAMES_SMALL : OPENING_FRAMES,
+		).then((b) => {
 			bitmaps.current.opening = b;
 			// Ticket was clicked while the frames were still loading
 			if (enteredRef.current && curtainDelayDone.current) openCurtains();
@@ -554,7 +573,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 			loadRipping();
 			delay = setTimeout(() => {
 				Promise.all([loadOpening(), loadRipping()]).then(() =>
-					decodeFrames(CLOSING_FRAMES).then(
+					decodeFrames(isPhone() ? CLOSING_FRAMES_SMALL : CLOSING_FRAMES).then(
 						(b) => (bitmaps.current.closing = b),
 					),
 				);
@@ -657,7 +676,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					aria-pressed={!muted}
 					aria-label={muted ? "Turn sound on" : "Turn sound off"}
 					title={muted ? "Sound off" : "Sound on"}
-					className="fixed top-[calc(1svh+max(3.5vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3.5vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] min-w-[44px] min-h-[44px] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					className="fixed top-[calc(1.5svh+max(3.5vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3.5vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] min-w-[44px] min-h-[44px] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
 					{/* A music note, crossed out while sound is off */}
 					<svg
@@ -733,7 +752,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				<nav
 					id="nav"
 					inert={!navOpen}
-					className={`nav-bounce fixed inset-x-0 bottom-[10svh] z-[22] drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
+					className={`${navGliding ? "nav-smooth" : "nav-bounce"} fixed inset-x-0 bottom-[10svh] z-[22] drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
 					style={{
 						// "View all items" drops it one more row, so the second row
 						// shows
@@ -794,7 +813,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					    by the same amount, with the same spring, so everything here
 					    stays still while the second row fades in below */}
 					<div
-						className="nav-bounce absolute inset-x-0 bottom-[45%] flex flex-col items-center gap-[2svh] text-[3svh] pt-[3svh]"
+						className={`${navGliding ? "nav-smooth" : "nav-bounce"} absolute inset-x-0 bottom-[45%] flex flex-col items-center gap-[2svh] text-[3svh] pt-[3svh]`}
 						style={{
 							transform: allItems ? `translateY(calc(-1 * ${ROW}))` : "none",
 						}}
@@ -864,6 +883,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 									{canViewAll && (
 										<button
 											onClick={() => {
+												glideNav();
 												setAllItems(!allItems);
 												if (openItem) closeItem();
 											}}
@@ -917,9 +937,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 													className="relative w-[var(--slot)] h-[var(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
 													style={{
 														opacity: itemOpen || hidden ? 0 : 1,
-														// The second row fades in after the menu has started
-														// dropping, and out quickly
-														transition: `opacity ${hidden ? 200 : 500}ms ease ${i >= SLOTS && !hidden && !itemOpen ? 300 : 0}ms`,
+														// The second row fades in as the menu glides down,
+														// and out quickly
+														transition: `opacity ${hidden ? 200 : 450}ms ease ${i >= SLOTS && !hidden && !itemOpen ? 150 : 0}ms`,
 													}}
 													aria-label={entry ? undefined : "Empty slot"}
 												>
@@ -943,22 +963,34 @@ export default function Stage({ children }: { children: ReactNode }) {
 									)}
 
 									{/* An opened item - starts exactly over its slot, then
-							    stretches across the whole row while the other slots
-							    fade out */}
+							    stretches across the whole row (both rows, while "view
+							    all" is on) while the other slots fade out */}
 									{openItem && opened && (
 										<li
 											// Taller on portrait screens, with the picture above the
 											// text, since the row is so narrow there
 											className="absolute h-[var(--slot)] portrait:h-auto portrait:min-h-[calc(2*var(--slot)+var(--slot-gap))] bg-white/80 border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] px-[2svh] portrait:p-[3vw] overflow-hidden"
 											style={{
-												transition:
-													"left 400ms cubic-bezier(0.34, 1.1, 0.64, 1), width 400ms cubic-bezier(0.34, 1.1, 0.64, 1)",
-												// Its row stays the same; it grows from its column
-												top: `calc(${Math.floor(openItem.slot / 4)} * ${ROW})`,
+												transition: ["left", "width", "top", "height"]
+													.map(
+														(property) =>
+															`${property} 400ms cubic-bezier(0.34, 1.1, 0.64, 1)`,
+													)
+													.join(", "),
+												// It grows from its slot across the whole row - or,
+												// while both rows are showing, over both of them
+												top:
+													itemOpen && allItems
+														? "0"
+														: `calc(${Math.floor(openItem.slot / 4)} * ${ROW})`,
 												left: itemOpen
 													? "0"
 													: `calc(${openItem.slot % 4} * ${ROW})`,
 												width: itemOpen ? "100%" : "var(--slot)",
+												height:
+													itemOpen && allItems
+														? "calc(2 * var(--slot) + var(--slot-gap))"
+														: undefined,
 											}}
 										>
 											{/* Money shows its bills fanned out, like in its slot */}

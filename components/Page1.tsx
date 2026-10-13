@@ -64,7 +64,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 		<div className="h-full flex flex-col items-center justify-center relative">
 			{/* Title */}
 			<h1
-				className="text-[4svh] portrait:text-[2.8svh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-0 right-[10vw] portrait:right-[12vw] portrait:top-[26svh] portrait:max-w-[50vw] bg-white border-[0.2svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[4svh] portrait:text-[2.8svh] max-w-[70%] mx-auto text-center scribbler absolute top-0 right-[10vw] portrait:right-[12vw] portrait:top-[26svh] portrait:max-w-[50vw] bg-white border-[0.2svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 2),
 					transform: step >= 2 ? "translateY(0)" : "translateY(-60svh)",
@@ -88,7 +88,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 				<button
 					onClick={handleSayHi}
-					className="text-[4svh] portrait:text-[2.8svh] pt-serif text-center scribbler relative bg-white border-[0.3svh] border-black border-dashed px-[2vw] portrait:px-[3vw] py-[1svh] z-20 cursor-pointer"
+					className="text-[4svh] portrait:text-[2.8svh] text-center scribbler relative bg-white border-[0.3svh] border-black border-dashed px-[2vw] portrait:px-[3vw] py-[1svh] z-20 cursor-pointer"
 				>
 					Say &quot;Hi&quot; to Zhenya!
 				</button>
@@ -96,7 +96,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Hi response */}
 			<p
-				className="text-[4svh] portrait:text-[2.8svh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute right-[22vw] portrait:right-[20vw] bg-white border-[0.2svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] z-0 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[4svh] portrait:text-[2.8svh] max-w-[70%] mx-auto text-center scribbler absolute right-[22vw] portrait:right-[20vw] bg-white border-[0.2svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] z-0 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(saidHi),
 					top: saidHi ? (portrait ? "50svh" : "35svh") : "-60svh",

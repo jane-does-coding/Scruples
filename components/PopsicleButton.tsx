@@ -90,7 +90,7 @@ export default function PopsicleButton({
 							e.preventDefault();
 							onClick();
 						}}
-						className="cursor-pointer bg-white border-[0.3svh] border-black border-dashed px-[2vw] portrait:px-[2.5svh] py-[1svh] text-[4svh] portrait:text-[3.2svh] flex whitespace-nowrap"
+						className="cursor-pointer bg-white border-[0.3svh] border-black border-dashed px-[2vw] portrait:px-[2.5svh] py-[1svh] text-[4svh] portrait:text-[2.8svh] flex whitespace-nowrap"
 						style={tilt((portrait ? PORTRAIT_PIVOT : BUTTON_PIVOT)[side])}
 						{...hoverProps}
 					>
@@ -99,7 +99,7 @@ export default function PopsicleButton({
 				) : (
 					<button
 						onClick={onClick}
-						className="cursor-pointer bg-white border-[0.3svh] border-black border-dashed px-[2vw] portrait:px-[2.5svh] py-[1svh] text-[4svh] portrait:text-[3.2svh] flex whitespace-nowrap"
+						className="cursor-pointer bg-white border-[0.3svh] border-black border-dashed px-[2vw] portrait:px-[2.5svh] py-[1svh] text-[4svh] portrait:text-[2.8svh] flex whitespace-nowrap"
 						style={tilt((portrait ? PORTRAIT_PIVOT : BUTTON_PIVOT)[side])}
 						{...hoverProps}
 					>

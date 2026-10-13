@@ -147,10 +147,10 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 				className="absolute bottom-[6svh] right-[-3vw] portrait:bottom-auto portrait:top-[27svh] portrait:right-auto portrait:left-[50%] portrait:-translate-x-[50%] portrait:w-max test-shadow"
 				style={slideIn(shown, "bottom", 200)}
 			>
-				<h1 className="border-[0.2svh] bg-white px-[1.5vw] portrait:px-[3vw] py-[1svh] text-[3svh] portrait:text-[2.2svh] text-center relative z-2 w-fit mx-auto">
+				<h1 className="border-[0.2svh] bg-white px-[1.5vw] portrait:px-[3vw] py-[1svh] text-[3svh] portrait:text-[2.3svh] text-center relative z-2 w-fit mx-auto">
 					{frame.label}
 				</h1>
-				<p className="border-[0.2svh] bg-white px-[1.5vw] portrait:px-[3vw] py-[1svh] text-[3svh] portrait:text-[2.2svh] text-center relative z-2 mt-[2svh] portrait:mt-[1svh] w-fit mx-auto">
+				<p className="border-[0.2svh] bg-white px-[1.5vw] portrait:px-[3vw] py-[1svh] text-[3svh] portrait:text-[2.3svh] text-center relative z-2 mt-[2svh] portrait:mt-[1svh] w-fit mx-auto">
 					by {frame.artist}
 				</p>
 				{/* popsicle-stick.png is popsicle.png trimmed to just the stick, so
