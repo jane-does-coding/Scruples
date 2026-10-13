@@ -6,6 +6,13 @@ import useWowDoll from "@/components/useWowDoll";
 import { asset } from "@/lib/asset";
 import { FRAMES } from "@/lib/frames";
 import { ITEMS } from "@/lib/shop";
+import {
+	penDown as startStroke,
+	penMove,
+	penUp,
+	pointsOn,
+	type Pen,
+} from "@/lib/stroke";
 
 type PageProps = {
 	nextPage: () => void;
@@ -186,7 +193,8 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 	// finger or stylus); `drew` turns on Done once there's something there,
 	// and `drawingUrl` is the finished picture, for the gallery
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const lastPoint = useRef<{ x: number; y: number } | null>(null);
+	// The stroke being drawn (see lib/stroke)
+	const pen = useRef<Pen | null>(null);
 	const [drew, setDrew] = useState(false);
 	const [drawingUrl, setDrawingUrl] = useState<string | null>(null);
 	const [color, setColor] = useState(COLORS[3].value);
@@ -222,47 +230,25 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 		canvas.height = Math.round(height * devicePixelRatio);
 	}, [canDraw]);
 
-	const pointOn = (e: React.PointerEvent<HTMLCanvasElement>) => {
-		const rect = e.currentTarget.getBoundingClientRect();
-		return {
-			x: ((e.clientX - rect.left) / rect.width) * e.currentTarget.width,
-			y: ((e.clientY - rect.top) / rect.height) * e.currentTarget.height,
-		};
-	};
-
-	const drawTo = (point: { x: number; y: number }) => {
-		const canvas = canvasRef.current;
-		const from = lastPoint.current;
-		if (!canvas || !from) return;
-		const ctx = canvas.getContext("2d")!;
-		ctx.strokeStyle = color;
-		ctx.lineWidth = 3.5 * devicePixelRatio;
-		ctx.lineCap = "round";
-		ctx.lineJoin = "round";
-		ctx.beginPath();
-		ctx.moveTo(from.x, from.y);
-		ctx.lineTo(point.x, point.y);
-		ctx.stroke();
-		lastPoint.current = point;
-	};
-
 	const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
 		if (stage !== 1) return;
 		// Keep drawing even if the pointer slips outside the frame
 		try {
 			e.currentTarget.setPointerCapture(e.pointerId);
 		} catch {}
-		lastPoint.current = pointOn(e);
-		// A tap leaves a dot
-		drawTo({ ...lastPoint.current, x: lastPoint.current.x + 0.1 });
+		const [point] = pointsOn(e);
+		pen.current = startStroke(e.currentTarget, point, color);
 		setPenDown(true);
 		setDrew(true);
 	};
 	const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-		if (lastPoint.current) drawTo(pointOn(e));
+		if (pen.current)
+			pen.current = penMove(e.currentTarget, pen.current, pointsOn(e), color);
 	};
 	const onPointerUp = () => {
-		lastPoint.current = null;
+		if (pen.current && canvasRef.current)
+			penUp(canvasRef.current, pen.current, color);
+		pen.current = null;
 		setPenDown(false);
 	};
 
@@ -502,7 +488,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Instructions - while you draw */}
 			<p
-				className={`absolute top-[8vh] left-[49%] -translate-x-[50%] w-[30vw] z-6 ${LABEL}`}
+				className={`absolute top-[8vh] left-[49%] -translate-x-[50%] w-[30vw] z-[9] ${LABEL}`}
 				// Lifts away while the frame is bigger, to make room for it
 				style={hang(canDraw, canDraw && stage === 1 && !big, "top")}
 			>
@@ -515,7 +501,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			{/* Clear / Done - next to the frame while you draw. Done only works
 			    once there's something drawn */}
 			<div
-				className="absolute bottom-[22vh] -translate-x-[50%] flex flex-col items-center gap-[3vh] z-[14]"
+				className="absolute bottom-[22vh] -translate-x-[50%] flex flex-col items-center gap-[3vh] z-[7]"
 				// Moves over to stay clear of the frame while it's bigger
 				style={{
 					left: big ? "max(65%, calc(41% + 33vh))" : "65%",

@@ -512,7 +512,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* "This is Daphne" - drops in between the two dolls; lifts away
 			    once the ask button is clicked */}
 			<p
-				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[56vh] left-[46%] -translate-x-[50%] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[60vh] left-[57%] -translate-x-[50%] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(daphneStep >= 1, daphneStep >= 1 && !asked, "top")}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
@@ -522,7 +522,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* "Daphne likes to draw" - a second later */}
 			<p
-				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[46vh] left-[46%] -translate-x-[50%] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3vh] pt-serif w-max mx-auto text-center scribbler absolute bottom-[51vh] left-[57%] -translate-x-[50%] bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(daphneStep >= 2, daphneStep >= 2 && !asked, "top")}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
@@ -536,12 +536,12 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={ask}
 				disabled={daphneStep < 3 || asked}
 				tabIndex={daphneStep >= 3 && !asked ? undefined : -1}
-				className="text-[3vh] pt-serif w-[24vw] mx-auto text-center scribbler absolute bottom-[27vh] left-[46%] -translate-x-[50%] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3vh] pt-serif w-[24vw] mx-auto text-center scribbler absolute bottom-[34vh] left-[46%] -translate-x-[50%] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={hang(daphneStep >= 3, daphneStep >= 3 && !asked, "top")}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
-				Daphne could you please draw me something?
+				Daphne could you please draw something for me?
 			</button>
 
 			{/* Empty frame (2) - rises in the middle just after asking; sinks
@@ -588,7 +588,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* Smile drawing - rises in the middle frame's place once the spiral
 			    has gone */}
 			<div
-				className="absolute bottom-[6vh] left-[46%] -translate-x-[50%] z-5 test-shadow-darker"
+				className="absolute bottom-[6vh] left-[50%] -translate-x-[50%] z-5 test-shadow-darker"
 				// Leaves once Zhenya says whether they like it
 				style={hang(smile, smile && !choice, "bottom", {
 					ms: 900,
@@ -637,7 +637,9 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				disabled={!asked || decided}
 				tabIndex={asked && !decided ? undefined : -1}
 				className="text-[3vh] pt-serif mx-auto text-center scribbler absolute bottom-[50vh] left-[43%] -translate-x-[50%] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
-				style={hang(asked, asked && !decided, "top", { delay: CANCEL_DELAY_MS })}
+				style={hang(asked, asked && !decided, "top", {
+					delay: CANCEL_DELAY_MS,
+				})}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
@@ -669,7 +671,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
 				{plea === "please"
 					? "Pleeease can I draw for you?"
-					: "Aww man, any donation would help"}
+					: "Aww man, you don't have $10 - any donation would help"}
 			</p>
 
 			{/* After Cancel, the only answer: Yes. She draws for free */}
@@ -677,7 +679,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={() => draw(true)}
 				disabled={plea !== "please" || pleaDone}
 				tabIndex={plea === "please" && !pleaDone ? undefined : -1}
-				className="absolute bottom-[50vh] left-[50%] -translate-x-[50%] w-max z-6 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
+				className="absolute bottom-[50vh] left-[40%] -translate-x-[50%] w-max z-6 text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
 				style={hang(plea === "please", plea === "please" && !pleaDone, "top", {
 					delay: 1000,
 				})}
@@ -690,7 +692,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			{/* The donation ask - after a free drawing is up. Amounts depend on
 			    Zhenya's money; picking one (or none) starts the chat */}
 			<p
-				className="absolute top-[8vh] left-[62%] -translate-x-[50%] w-max max-w-[26vw] z-7 text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute top-[4vh] left-[50%] -translate-x-[50%] w-max max-w-[26vw] z-7 text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(
 					donateOptions !== null,
 					donateOptions !== null && !donated,
@@ -702,7 +704,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				Would you like to donate? Anything helps!
 			</p>
 			<div
-				className="absolute top-[20vh] left-[40%] -translate-x-[50%] flex gap-[1.5vw] z-6"
+				className="absolute top-[19vh] left-[50%] -translate-x-[50%] flex gap-[1.5vw] z-6"
 				style={hang(
 					donateOptions !== null,
 					donateOptions !== null && !donated,
@@ -719,7 +721,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						className="relative w-max text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
 					>
 						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
 						{amount === 0
 							? all.length === 1
 								? "Sorry, I have nothing..."
@@ -740,7 +742,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Row 1 - Zhenya: "I love it!" / "I dislike it..." side by side.
 			    The one not picked lifts away; the picked one stays */}
-			<div className="absolute top-[6vh] left-[40%] -translate-x-[50%] flex gap-[1.5vw] z-[15]">
+			<div className="absolute top-[6vh] left-[40%] -translate-x-[50%] flex gap-[1.5vw] z-[9]">
 				<button
 					onClick={() => choose("love")}
 					disabled={zhenyaStage !== 1}
@@ -777,7 +779,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Row 2 - Daphne: "Thanks!" / "Oh..." */}
 			<p
-				className="absolute top-[12vh] left-[65%] -translate-x-[50%] w-max z-[14] text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute top-[12vh] left-[65%] -translate-x-[50%] w-max z-[8] text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(replied, replied && !chatCleared, "top", {
 					exitDelay: rowExit(1),
 				})}
@@ -792,7 +794,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={askMagic}
 				disabled={zhenyaStage !== 3}
 				tabIndex={zhenyaStage === 3 ? undefined : -1}
-				className="absolute top-[21vh] left-[42%] -translate-x-[50%] w-[18vw] z-[13] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="absolute top-[21vh] left-[42%] -translate-x-[50%] w-[18vw] z-[8] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={hang(zhenyaStage >= 3, zhenyaStage >= 3 && !chatCleared, "top", {
 					exitDelay: rowExit(2),
 				})}
@@ -804,7 +806,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Row 4 - Daphne: "I enjoy the process of creating art…" */}
 			<p
-				className="absolute top-[37vh] left-[53%] -translate-x-[50%] w-[20vw] z-[12] text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="absolute top-[37vh] left-[53%] -translate-x-[50%] w-[20vw] z-[7] text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(zhenyaStage >= 4, zhenyaStage >= 4 && !chatCleared, "top", {
 					exitDelay: rowExit(3),
 				})}
@@ -819,7 +821,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				onClick={askWhy}
 				disabled={zhenyaStage !== 5}
 				tabIndex={zhenyaStage === 5 ? undefined : -1}
-				className="absolute top-[56vh] left-[44%] -translate-x-[50%] w-max z-[11] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="absolute top-[56vh] left-[44%] -translate-x-[50%] w-max z-[6] text-[3vh] pt-serif text-center scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={hang(zhenyaStage >= 5, zhenyaStage >= 5 && !chatCleared, "top", {
 					exitDelay: rowExit(4),
 				})}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import type { Frame } from "@/lib/frames";
@@ -21,6 +21,8 @@ const slideIn = (shown: boolean, from: "top" | "bottom", delay = 0) => ({
 export default function ArtPiece({ frame }: { frame: Frame }) {
 	const { goTo, curtainsOpen } = useStage();
 	const tall = frame.size === "tall";
+	// "The Starry Night • 1889" → "1889"
+	const year = frame.label.split(" • ")[1];
 
 	// Everything comes in once the curtains have opened, and stays put while
 	// they close again on the way out
@@ -30,6 +32,29 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 		const timer = setTimeout(() => setShown(true), 0);
 		return () => clearTimeout(timer);
 	}, [curtainsOpen]);
+
+	// How wide the painting is on screen, so the cards either side of it sit
+	// just clear of it whatever its size (tall, wide or extra wide)
+	const paintingRef = useRef<HTMLImageElement>(null);
+	const [paintingWidth, setPaintingWidth] = useState(0);
+	const measurePainting = () => {
+		const width = paintingRef.current?.getBoundingClientRect().width ?? 0;
+		if (width) setPaintingWidth(width);
+	};
+	// Measured when it loads, and again whenever the window changes size
+	useEffect(() => {
+		const timer = setTimeout(measurePainting, 0);
+		window.addEventListener("resize", measurePainting);
+		return () => {
+			clearTimeout(timer);
+			window.removeEventListener("resize", measurePainting);
+		};
+	}, []);
+	// Half the painting plus a gap, from the middle of the page; and each
+	// card's width: up to 19vw, less if the painting leaves less room (they
+	// stay 3vw from the screen's edges, hanging in front of the curtains)
+	const clear = `(${paintingWidth / 2}px + 2vw)`;
+	const cardWidth = `min(19vw, calc(50vw - ${clear} - 3vw))`;
 
 	return (
 		<div className="h-full flex flex-col items-center justify-center gap-[2vh]">
@@ -41,12 +66,64 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 				style={slideIn(shown, "top")}
 			>
 				<img
+					ref={paintingRef}
+					onLoad={measurePainting}
 					src={frame.src}
 					className={`${tall ? "max-h-[65vh] top-[-3vh]" : "max-h-[45vh]"} max-w-[40vw] test-shadow z-2 relative`}
 					alt={`${frame.label} by ${frame.artist}, in a picture frame`}
 				/>
 				<span className="w-[0.1vw] bg-black/60 h-[30vh] top-[-25vh] left-[3vw] absolute z-1"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[30vh] top-[-25vh] right-[3vw] absolute z-1"></span>
+			</div>
+
+			{/* About the painting - hangs on the left of it, just after it */}
+			<div
+				className="absolute top-[-4vh] bg-white border-[0.2vh] border-black px-[1vw] py-[1.2vh] test-shadow z-[11]"
+				style={{
+					right: `calc(50% + ${clear})`,
+					width: cardWidth,
+					...slideIn(shown && paintingWidth > 0, "top", 300),
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-[1vw] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-[1vw] absolute"></span>
+				<h2 className="text-[2.6vh] mb-[0.8vh]">About it</h2>
+				<dl className="text-[1.9vh] leading-snug flex flex-col gap-[1vh]">
+					{(
+						[
+							["Painted in", year],
+							["Made with", frame.details.medium],
+							["Size", frame.details.size],
+							["Where it is", frame.details.where],
+						] as const
+					).map(([term, value]) => (
+						<div key={term}>
+							<dt className="underline decoration-dashed underline-offset-4">
+								{term}
+							</dt>
+							<dd>{value}</dd>
+						</div>
+					))}
+				</dl>
+			</div>
+
+			{/* Fun facts - hang on the right of it, a moment later */}
+			<div
+				className="absolute top-[-4vh] bg-white border-[0.2vh] border-black px-[1vw] py-[1.2vh] test-shadow z-[11]"
+				style={{
+					left: `calc(50% + ${clear})`,
+					width: cardWidth,
+					...slideIn(shown && paintingWidth > 0, "top", 450),
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-[1vw] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-[1vw] absolute"></span>
+				<h2 className="text-[2.6vh] mb-[0.8vh]">Fun facts</h2>
+				<ul className="text-[1.9vh] leading-snug flex flex-col gap-[1vh] list-['*_'] pl-[1.2vw]">
+					{frame.facts.map((fact) => (
+						<li key={fact}>{fact}</li>
+					))}
+				</ul>
 			</div>
 
 			{/* Doll */}

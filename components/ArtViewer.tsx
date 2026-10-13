@@ -57,17 +57,23 @@ export default function ArtViewer({
 				<span className="w-[0.1vw] bg-black/60 h-[100vh] bottom-[calc(100%-12vh)] right-[30%] absolute"></span>
 				<img
 					src={image}
-					className="relative max-h-[70vh] max-w-[80vw] w-auto h-auto test-shadow-darker"
+					className="relative z-1 max-h-[70vh] max-w-[80vw] w-auto h-auto test-shadow-darker"
 					alt={name}
 				/>
-				<div className="relative flex items-center gap-[1vw]">
-					<p className="text-[3vh] scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh]">
+				{/* The name and Close hang on their own strings too, which run up
+				    behind the painting (z-0 under its z-1) */}
+				<div className="relative z-0 flex items-center gap-[1vw]">
+					<p className="relative text-[3vh] scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40">
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
 						{name}
 					</p>
 					<button
 						onClick={close}
-						className="text-[3vh] scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] cursor-pointer"
+						className="relative text-[3vh] scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] cursor-pointer drop-shadow-md drop-shadow-black/40"
 					>
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
 						Close
 					</button>
 				</div>

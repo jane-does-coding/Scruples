@@ -196,7 +196,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 	// "View all items": the menu drops further down to show a second row
 	// It's a toggle that stays as you left it (kept in this browser too), and
 	// turns itself on once there are more items than one row can show
-	const [allItems, setAllItemsState] = useState(false);
+	const [allItemsOn, setAllItemsState] = useState(false);
+	// The switch only shows once there are more items than one row fits, and
+	// until then (or after selling things) it's as if it were off
+	const canViewAll = entries.length > SLOTS;
+	const allItems = allItemsOn && canViewAll;
 	const setAllItems = (on: boolean) => {
 		setAllItemsState(on);
 		try {
@@ -280,6 +284,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 				e.target instanceof Element
 					? e.target.closest(".border-dashed:not(:disabled)")
 					: null;
+			// Things marked data-no-tug (like the notebook's colors) stay still
+			if (dashed?.closest("[data-no-tug]")) return;
 			let el = dashed;
 			while (el && el !== document.body) {
 				if (el.querySelector(':scope > span[class*="bg-black/60"]')) break;
@@ -725,29 +731,34 @@ export default function Stage({ children }: { children: ReactNode }) {
 						</div>
 
 						{/* View all - a switch: on, the menu drops further down and the
-						    inventory shows a second row. Stays how you left it */}
-						<button
-							onClick={() => {
-								setAllItems(!allItems);
-								if (openItem) closeItem();
-							}}
-							role="switch"
-							aria-checked={allItems}
-							className="absolute right-[9%] top-[9.9vh] flex flex-col items-center gap-[1.5vh] cursor-pointer"
-						>
-							<span className="text-[4vh]">View all</span>
-							<span className="p-[2vh] bg-white/20 border-[0.3vh] border-black border-dashed">
-								<span
-									className="relative block w-[7vh] h-[3.5vh] rounded-full border-[0.3vh] border-black transition-colors duration-300"
-									style={{ background: allItems ? "#525252" : "white" }}
-								>
+						    inventory shows a second row. Stays how you left it. Only
+						    there when there's more than one row of items */}
+						{canViewAll && (
+							<button
+								onClick={() => {
+									setAllItems(!allItems);
+									if (openItem) closeItem();
+								}}
+								role="switch"
+								aria-checked={allItems}
+								className="absolute right-[9%] top-[9.9vh] flex flex-col items-center gap-[1.5vh] cursor-pointer"
+							>
+								<span className="text-[4vh]">View all</span>
+								<span className="p-[2vh] bg-white/20 border-[0.3vh] border-black border-dashed">
 									<span
-										className="absolute top-[50%] -translate-y-[50%] h-[2.3vh] w-[2.3vh] rounded-full border-[0.2vh] border-black bg-white transition-[left] duration-300"
-										style={{ left: allItems ? "calc(100% - 2.7vh)" : "0.3vh" }}
-									/>
+										className="relative block w-[7vh] h-[3.5vh] rounded-full border-[0.3vh] border-black transition-colors duration-300"
+										style={{ background: allItems ? "#525252" : "white" }}
+									>
+										<span
+											className="absolute top-[50%] -translate-y-[50%] h-[2.3vh] w-[2.3vh] rounded-full border-[0.2vh] border-black bg-white transition-[left] duration-300"
+											style={{
+												left: allItems ? "calc(100% - 2.7vh)" : "0.3vh",
+											}}
+										/>
+									</span>
 								</span>
-							</span>
-						</button>
+							</button>
+						)}
 
 						<h2 className="text-[4vh]">Inventory</h2>
 						{/* One row tall: the second row hangs below it, fading in and
@@ -852,24 +863,24 @@ export default function Stage({ children }: { children: ReactNode }) {
 										</div>
 									) : (
 										<>
-									{/* Art can be clicked to view it big */}
-										<img
-											src={opened.image}
-											onClick={
-												opened.art
-													? () => {
-															closeItem();
-															setNavOpen(false);
-															setViewing({
-																image: opened.image,
-																name: opened.name,
-															});
-														}
-													: undefined
-											}
-											className={`h-[18vh] w-auto max-w-[18vh] object-contain test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
-											alt={opened.name}
-										/>
+											{/* Art can be clicked to view it big */}
+											<img
+												src={opened.image}
+												onClick={
+													opened.art
+														? () => {
+																closeItem();
+																setNavOpen(false);
+																setViewing({
+																	image: opened.image,
+																	name: opened.name,
+																});
+															}
+														: undefined
+												}
+												className={`h-[18vh] w-auto max-w-[18vh] object-contain test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
+												alt={opened.name}
+											/>
 										</>
 									)}
 									<div

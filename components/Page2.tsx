@@ -1,5 +1,5 @@
 import PopsicleButton from "@/components/PopsicleButton";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useStage } from "@/components/Stage";
 import { FRAMES, type FrameSize } from "@/lib/frames";
 import { asset } from "@/lib/asset";
@@ -21,6 +21,10 @@ type PageProps = {
 	totalPages: number;
 	curtainsOpen: boolean;
 };
+
+// Where the marquee was when you left this page (e.g. to open a painting),
+// so it carries on from there when you come back instead of starting over
+let marqueeTime: CSSNumberish | null = null;
 
 export default function Page2({
 	nextPage,
@@ -102,6 +106,19 @@ export default function Page2({
 		};
 		tick();
 	};
+	// Pick up where it left off, and remember where it is when leaving. A
+	// layout effect, so on the way out the strip is still on the page (and
+	// its animation still running) when its position is read
+	useLayoutEffect(() => {
+		const el = marqueeRef.current;
+		const animation = el?.getAnimations()[0];
+		if (animation && marqueeTime !== null) animation.currentTime = marqueeTime;
+		return () => {
+			const leaving = el?.getAnimations()[0];
+			if (leaving?.currentTime != null) marqueeTime = leaving.currentTime;
+		};
+	}, []);
+
 	// Only slows down once the pointer has stayed on the marquee for 1s
 	const slowDownTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 	useEffect(
