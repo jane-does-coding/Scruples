@@ -101,6 +101,11 @@ type Drawing = {
 // "View all items"
 const SLOTS = 3;
 const ALL_SLOTS = 7;
+// An opened item: how long it takes to grow (with a little spring) and to
+// shrink back (smoothly), and its final fade as the slots come back
+const ITEM_GROW_MS = 400;
+const ITEM_SHRINK_MS = 350;
+const ITEM_FADE_MS = 200;
 // How long the menu glides for when "view all" extends or shrinks it (the
 // length of .nav-smooth in globals.css)
 const NAV_GLIDE_MS = 650;
@@ -287,10 +292,28 @@ export default function Stage({ children }: { children: ReactNode }) {
 		setOpenItem({ key, slot });
 		setTimeout(() => setItemOpen(true), 20);
 	};
+	// Closing: the text fades, the box eases back into its slot (no bounce)
+	// while the other slots fade back in, then it's swapped for its own slot,
+	// which looks exactly the same by then. That slot comes back instantly,
+	// not with a fade (settlingSlot), so the swap can't be seen
+	const [itemFading, setItemFading] = useState(false);
+	const [settlingSlot, setSettlingSlot] = useState<number | null>(null);
 	const closeItem = () => {
+		const slot = openItem?.slot ?? null;
 		setItemOpen(false);
-		setTimeout(() => setOpenItem(null), 400);
+		setTimeout(() => setItemFading(true), ITEM_SHRINK_MS);
+		setTimeout(() => {
+			setSettlingSlot(slot);
+			setOpenItem(null);
+			setItemFading(false);
+			setTimeout(() => setSettlingSlot(null), 100);
+		}, ITEM_SHRINK_MS + ITEM_FADE_MS);
 	};
+	// Slot k is the one that's opened (or just closed): it hides and comes
+	// back instantly, under the opened box
+	const instantSlot = (k: number) => openItem?.slot === k || settlingSlot === k;
+	// The slots are hidden while an item is open, until it's fading out
+	const slotsHidden = !!openItem && !itemFading;
 
 	// Images that can't be seen until after the ticket is clicked (the menu
 	// header and bag, the open curtains, the paper background behind the closed
@@ -906,8 +929,13 @@ export default function Stage({ children }: { children: ReactNode }) {
 								<ul className="relative grid grid-cols-4 auto-rows-(--slot) h-(--slot) gap-(--slot-gap)">
 									{/* Money - click it to see what it's for */}
 									<li
-										className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
-										style={{ opacity: itemOpen ? 0 : 1 }}
+										className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed cursor-pointer"
+										style={{
+											opacity: slotsHidden || openItem?.slot === 0 ? 0 : 1,
+											transition: instantSlot(0)
+												? "none"
+												: `opacity ${slotsHidden ? 300 : ITEM_FADE_MS}ms ease`,
+										}}
 										onClick={() => showItem("money", 0)}
 										onKeyDown={(e) => {
 											if (e.key === "Enter" || e.key === " ")
@@ -943,10 +971,20 @@ export default function Stage({ children }: { children: ReactNode }) {
 													inert={hidden}
 													className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
 													style={{
-														opacity: itemOpen || hidden ? 0 : 1,
+														opacity:
+															slotsHidden || hidden || openItem?.slot === i + 1
+																? 0
+																: 1,
 														// The second row fades in as the menu glides down,
-														// and out quickly
-														transition: `opacity ${hidden ? 200 : 450}ms ease ${i >= SLOTS && !hidden && !itemOpen ? 150 : 0}ms`,
+														// and out quickly; all of them fade back as an
+														// opened item finishes closing
+														transition: instantSlot(i + 1)
+															? "none"
+															: slotsHidden
+																? "opacity 300ms ease"
+																: openItem
+																	? `opacity ${ITEM_FADE_MS}ms ease`
+																	: `opacity ${hidden ? 200 : 450}ms ease ${i >= SLOTS && !hidden ? 150 : 0}ms`,
 													}}
 													aria-label={entry ? undefined : "Empty slot"}
 												>
@@ -977,7 +1015,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 											// Taller on portrait screens, with the picture above the
 											// text, since the row is so narrow there: it starts at its
 											// slot's size and grows to fit (see maxHeight/minHeight)
-											className="absolute h-(--slot) portrait:h-auto bg-white/80 border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] px-[2svh] portrait:p-[3vw] overflow-hidden"
+											className="absolute h-(--slot) portrait:h-auto border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] portrait:gap-0 overflow-hidden"
 											style={{
 												transition: [
 													"left",
@@ -987,11 +1025,19 @@ export default function Stage({ children }: { children: ReactNode }) {
 													"max-height",
 													"min-height",
 												]
-													.map(
-														(property) =>
-															`${property} 400ms cubic-bezier(0.34, 1.1, 0.64, 1)`,
+													.map((property) =>
+														itemOpen
+															? `${property} ${ITEM_GROW_MS}ms cubic-bezier(0.34, 1.1, 0.64, 1)`
+															: `${property} ${ITEM_SHRINK_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+													)
+													.concat(
+														`background-color ${itemOpen ? ITEM_GROW_MS : ITEM_SHRINK_MS}ms ease`,
 													)
 													.join(", "),
+												// Starts (and ends) looking just like its slot
+												backgroundColor: itemOpen
+													? "rgb(255 255 255 / 0.8)"
+													: "rgb(255 255 255 / 0.2)",
 												// It grows from its slot across the whole row - or,
 												// while both rows are showing, over both of them
 												top:
@@ -1017,25 +1063,34 @@ export default function Stage({ children }: { children: ReactNode }) {
 														: undefined,
 											}}
 										>
-											{/* Money shows its bills fanned out, like in its slot */}
-											{opened.key === "money" ? (
-												<div className="relative h-[18svh] w-[18svh] portrait:h-[15vw] portrait:w-[22vw] shrink-0">
-													{moneyBills.map((src, i, all) => (
+											{/* Its picture - exactly where and as big as it is in the
+											    slot (so it never jumps or fades), shrinking a little
+											    as the item opens and growing back as it closes. Money
+											    shows its bills fanned out, like in its slot */}
+											<div
+												className="relative shrink-0 w-[calc(var(--slot)-0.6svh)] h-[calc(var(--slot)-0.6svh)] flex items-center justify-center"
+												style={{
+													scale: itemOpen ? "0.85" : "1",
+													transition: itemOpen
+														? `scale ${ITEM_GROW_MS}ms cubic-bezier(0.34, 1.1, 0.64, 1)`
+														: `scale ${ITEM_SHRINK_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+												}}
+											>
+												{opened.key === "money" ? (
+													moneyBills.map((src, i, all) => (
 														<img
 															key={i}
 															src={src}
-															className="absolute top-[50%] h-[15svh] w-auto max-w-none translate-x-[-50%] translate-y-[-50%] test-shadow-darker"
+															className="absolute top-[50%] h-[82%] w-auto max-w-none translate-x-[-50%] translate-y-[-50%] test-shadow-darker"
 															style={{
 																left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
 																rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
 															}}
 															alt=""
 														/>
-													))}
-												</div>
-											) : (
-												<>
-													{/* Art can be clicked to view it big */}
+													))
+												) : (
+													// Art can be clicked to view it big
 													<img
 														src={opened.image}
 														onClick={
@@ -1050,14 +1105,18 @@ export default function Stage({ children }: { children: ReactNode }) {
 																	}
 																: undefined
 														}
-														className={`h-[18svh] w-auto max-w-[18svh] portrait:h-[15vw] portrait:max-w-[30vw] object-contain test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
+														className={`max-h-[90%] max-w-[90%] w-auto h-auto test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
 														alt={opened.name}
 													/>
-												</>
-											)}
+												)}
+											</div>
 											<div
-												className="flex flex-col gap-[1svh] text-left transition-opacity duration-300"
-												style={{ opacity: itemOpen ? 1 : 0 }}
+												className="flex flex-col gap-[1svh] text-left pr-[2svh] portrait:px-[3vw] portrait:pb-[3vw]"
+												// Fades in as it opens; out fast, before it shrinks
+												style={{
+													opacity: itemOpen ? 1 : 0,
+													transition: `opacity ${itemOpen ? 300 : 120}ms ease`,
+												}}
 											>
 												<h3 className="text-[3svh] portrait:text-[2.4svh]">
 													{opened.name}
