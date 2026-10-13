@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import { asset } from "@/lib/asset";
+import usePortrait from "@/components/usePortrait";
 
 type PageProps = {
 	nextPage: () => void;
@@ -22,6 +23,9 @@ const drop = (shown: boolean, ms = 800, easing = LABEL_DROP) => ({
 
 export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 	const [step, setStep] = useState(0);
+	// Phones held upright get their own layout: the doll smaller on the left,
+	// the labels stacked beside her on the right
+	const portrait = usePortrait();
 
 	// Controls whether the "Hi" response/buttons have appeared
 	const [saidHi, setSaidHi] = useState(false);
@@ -60,31 +64,31 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 		<div className="h-full flex flex-col items-center justify-center relative">
 			{/* Title */}
 			<h1
-				className="text-[4vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-0 right-[10vw] bg-white border-[0.2vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[4svh] portrait:text-[2.8svh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-0 right-[10vw] portrait:right-[12vw] portrait:top-[26svh] portrait:max-w-[50vw] bg-white border-[0.2svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 2),
-					transform: step >= 2 ? "translateY(0)" : "translateY(-60vh)",
+					transform: step >= 2 ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] right-0 absolute"></span>
 				This is Zhenya
 			</h1>
 
 			{/* Say Hi button */}
 			<div
-				className="absolute right-[18vw] drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="absolute right-[18vw] portrait:right-[10vw] portrait:max-w-[52vw] drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 3),
-					top: step >= 3 ? "22.5vh" : "-60vh",
+					top: step >= 3 ? (portrait ? "37svh" : "22.5svh") : "-60svh",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[40vh] top-[-40vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[40vh] top-[-40vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[40svh] top-[-40svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[40svh] top-[-40svh] right-0 absolute"></span>
 
 				<button
 					onClick={handleSayHi}
-					className="text-[4vh] pt-serif text-center scribbler relative bg-white border-[0.3vh] border-black border-dashed px-[2vw] py-[1vh] z-20 cursor-pointer"
+					className="text-[4svh] portrait:text-[2.8svh] pt-serif text-center scribbler relative bg-white border-[0.3svh] border-black border-dashed px-[2vw] portrait:px-[3vw] py-[1svh] z-20 cursor-pointer"
 				>
 					Say &quot;Hi&quot; to Zhenya!
 				</button>
@@ -92,34 +96,35 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Hi response */}
 			<p
-				className="text-[4vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute right-[22vw] bg-white border-[0.2vh] border-black px-[2vw] py-[1vh] z-0 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[4svh] portrait:text-[2.8svh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute right-[22vw] portrait:right-[20vw] bg-white border-[0.2svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] z-0 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(saidHi),
-					top: saidHi ? "35vh" : "-60vh",
+					top: saidHi ? (portrait ? "50svh" : "35svh") : "-60svh",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[50vh] top-[-50vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[50vh] top-[-50vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[50svh] top-[-50svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[50svh] top-[-50svh] right-0 absolute"></span>
 				&quot;Hi&quot;
 			</p>
 
 			{/* Doll */}
 			<img
 				src={moving ? asset("/imgs/moving.webp") : blinkSrc}
-				className="h-[100vh] absolute top-[-30vh] left-[-5vw] test-shadow"
+				className="h-[100svh] absolute top-[-30svh] left-[-5vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
-					transform: step >= 1 ? "translateY(0)" : "translateY(-120vh)",
+					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",
 				}}
 				alt="Zhenya, a marionette doll on strings"
 			/>
 
 			<PopsicleButton
 				onClick={nextPage}
+				href="/page2"
 				style={{
 					...drop(saidHi, 900, BUTTON_DROP),
 					transitionDelay: saidHi ? "400ms" : "0ms",
-					transform: saidHi ? "translateY(0)" : "translateY(100vh)",
+					transform: saidHi ? "translateY(0)" : "translateY(100svh)",
 				}}
 			>
 				Continue {"->"}

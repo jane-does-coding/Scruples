@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { asset } from "@/lib/asset";
+import usePortrait from "@/components/usePortrait";
 import { penDown, penMove, penUp, pointsOn, type Pen } from "@/lib/stroke";
 
 // The ruled notebook from the souvenir shop, opened from the inventory with
@@ -39,7 +40,7 @@ const RISE = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 const RISE_MS = 900;
 
 const BUTTON =
-	"text-[2.5vh] scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.3vh] cursor-pointer disabled:cursor-default disabled:opacity-50";
+	"text-[2.5svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.3svh] cursor-pointer disabled:cursor-default disabled:opacity-50";
 
 type Pages = (string | null)[];
 
@@ -56,6 +57,14 @@ const loadPages = (): Pages => {
 	return blank();
 };
 
+// The two strings the top bar hangs on
+const Strings = () => (
+	<>
+		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+	</>
+);
+
 export default function Notebook({ onClose }: { onClose: () => void }) {
 	// The two pages that are open: left, right
 	const canvases = useRef<(HTMLCanvasElement | null)[]>([null, null]);
@@ -65,6 +74,9 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 	// Which spread is open: 0 = pages 1-2, 1 = pages 3-4, …
 	const [spread, setSpread] = useState(0);
 	const [color, setColor] = useState(COLORS[0].value);
+	// Phones held upright: the notebook takes nearly the whole width, and the
+	// colors hang in a row under it, each on its own strings
+	const portrait = usePortrait();
 	// Unsaved changes on the open pages, and a short "Saved!" after saving
 	const [dirty, setDirty] = useState(false);
 	const [saved, setSaved] = useState(false);
@@ -152,13 +164,6 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 		setDirty(true);
 	};
 
-	const Strings = () => (
-		<>
-			<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
-			<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
-		</>
-	);
-
 	return (
 		<div
 			role="dialog"
@@ -173,16 +178,19 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 			    when one is clicked (data-no-tug) */}
 			<div
 				data-no-tug
-				className="absolute top-[18vh] flex flex-col gap-[1.5vh] z-1"
+				className="absolute top-[18svh] portrait:top-auto portrait:bottom-[7svh] flex flex-col portrait:flex-row gap-[1.5svh] portrait:gap-[1.5vw] z-1 portrait:z-0"
 				style={{
 					// Just left of the notebook, whatever size it is
-					right: `calc(50% + min(${NOTEBOOK_MAX_VW / 2}vw, calc(39vh * ${NOTEBOOK_ASPECT})) + 1.5vw)`,
+					right: portrait
+						? "50%"
+						: `calc(50% + min(${NOTEBOOK_MAX_VW / 2}vw, calc(39svh * ${NOTEBOOK_ASPECT})) + 1.5vw)`,
+					translate: portrait ? "50% 0" : undefined,
 					transition: `transform ${RISE_MS}ms ${RISE}`,
-					transform: shown ? "translateY(0)" : "translateY(-110vh)",
+					transform: shown ? "translateY(0)" : "translateY(-110svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[200vh] bottom-[3vh] left-[25%] absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[200vh] bottom-[3vh] right-[25%] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[200svh] bottom-[3svh] left-[25%] absolute portrait:hidden"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[200svh] bottom-[3svh] right-[25%] absolute portrait:hidden"></span>
 				{COLORS.map((c) => (
 					<button
 						key={c.value}
@@ -190,8 +198,11 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 						aria-label={c.name}
 						aria-pressed={color === c.value}
 						title={c.name}
-						className={`relative ${BUTTON} drop-shadow-md drop-shadow-black/40 w-[8vh] h-[5vh] transition-all ease-in-out duration-150 ${color === c.value ? "!border-solid  !p-[0.3vh]" : " !p-[0.7vh]"}`}
+						className={`relative ${BUTTON} drop-shadow-md drop-shadow-black/40 w-[8svh] h-[5svh] portrait:w-[11vw] transition-all ease-in-out duration-150 ${color === c.value ? "!border-solid  !p-[0.3svh]" : " !p-[0.7svh]"}`}
 					>
+						{/* In the portrait row, each has its own strings */}
+						<span className="hidden portrait:block w-[0.1vw] min-w-px bg-black/60 h-[100svh] top-[-100svh] left-[15%] absolute"></span>
+						<span className="hidden portrait:block w-[0.1vw] min-w-px bg-black/60 h-[100svh] top-[-100svh] right-[15%] absolute"></span>
 						<span
 							className="block w-full h-full"
 							style={{ background: c.value }}
@@ -201,10 +212,10 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 			</div>
 
 			<div
-				className="relative w-[92vw] h-[90vh] flex flex-col items-center gap-[1.5vh]"
+				className="relative w-[92vw] portrait:w-full h-[90svh] flex flex-col items-center gap-[1.5svh] portrait:gap-[3svh]"
 				style={{
 					transition: `transform ${RISE_MS}ms ${RISE}`,
-					transform: shown ? "translateY(0)" : "translateY(110vh)",
+					transform: shown ? "translateY(0)" : "translateY(110svh)",
 				}}
 			>
 				{/* Top bar - page turning, Clear / Save / Close. It hangs on
@@ -212,14 +223,14 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 				    rises from the bottom: it sits in the rising box, so it moves
 				    twice as far the other way, with the same timing */}
 				<div
-					className="relative self-stretch flex items-center gap-[1vw] px-[1.5vw] py-[1vh] bg-white border-[0.3vh] border-black drop-shadow-lg drop-shadow-black/60 w-[50vw] mx-auto"
+					className="relative self-stretch flex portrait:flex-wrap items-center portrait:justify-center gap-[1vw] portrait:gap-[2vw] px-[1.5vw] py-[1svh] bg-white border-[0.3svh] border-black drop-shadow-lg drop-shadow-black/60 w-[50vw] portrait:w-[94vw] mx-auto"
 					style={{
 						transition: `transform ${RISE_MS}ms ${RISE}`,
-						transform: shown ? "translateY(0)" : "translateY(-220vh)",
+						transform: shown ? "translateY(0)" : "translateY(-220svh)",
 					}}
 				>
 					<Strings />
-					<div className="flex-1" />
+					<div className="flex-1 portrait:hidden" />
 					<button
 						onClick={() => turnTo(spread - 1)}
 						disabled={spread === 0}
@@ -228,7 +239,7 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 					>
 						{"<-"}
 					</button>
-					<span className="text-[2.5vh] scribbler w-max">
+					<span className="text-[2.5svh] scribbler w-max">
 						Pages {spread * 2 + 1}-{spread * 2 + 2} of {PAGE_COUNT}
 					</span>
 					<button
@@ -239,7 +250,7 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 					>
 						{"->"}
 					</button>
-					<div className="flex-1" />
+					<div className="flex-1 portrait:hidden" />
 					<button onClick={clear} className={BUTTON}>
 						Clear
 					</button>
@@ -252,7 +263,12 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 					>
 						{saved ? "Saved!" : "Save"}
 					</button>
-					<button onClick={close} className={BUTTON}>
+					<button
+						onClick={close}
+						// Keyboard focus starts here when it opens
+						autoFocus
+						className={BUTTON}
+					>
 						Close
 					</button>
 				</div>
@@ -264,7 +280,9 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 				<div
 					className="relative"
 					style={{
-						width: `min(${NOTEBOOK_MAX_VW}vw, calc(85vh * ${NOTEBOOK_ASPECT}))`,
+						width: portrait
+							? "96vw"
+							: `min(${NOTEBOOK_MAX_VW}vw, calc(85svh * ${NOTEBOOK_ASPECT}))`,
 						aspectRatio: NOTEBOOK_ASPECT,
 					}}
 				>
@@ -274,7 +292,7 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 						<img
 							key={left}
 							src={asset("/imgs/popsicle-stick.webp")}
-							className={`absolute ${left} -translate-x-[50%] top-[80%] w-[2.5vw] h-[40vh] max-w-none`}
+							className={`absolute ${left} -translate-x-[50%] top-[80%] w-[2.5vw] h-[40svh] max-w-none`}
 							alt=""
 							aria-hidden
 						/>
@@ -319,7 +337,7 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 								/>
 								{/* Page number, in the outer bottom corner */}
 								<span
-									className={`absolute bottom-[1.5vh] text-[3vh] scribbler pointer-events-none ${side === 0 ? "left-[1.5vw]" : "right-[1.5vw]"}`}
+									className={`absolute bottom-[1.5svh] text-[3svh] scribbler pointer-events-none ${side === 0 ? "left-[1.5vw]" : "right-[1.5vw]"}`}
 								>
 									{number}
 								</span>

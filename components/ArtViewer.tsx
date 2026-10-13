@@ -45,35 +45,37 @@ export default function ArtViewer({
 			style={{ opacity: shown ? 1 : 0 }}
 		>
 			<div
-				className="relative flex flex-col items-center gap-[2vh]"
+				className="relative flex flex-col items-center gap-[2svh]"
 				onClick={(e) => e.stopPropagation()}
 				style={{
 					transition: `transform ${MS}ms ${DROP}`,
-					transform: shown ? "translateY(0)" : "translateY(-110vh)",
+					transform: shown ? "translateY(0)" : "translateY(-110svh)",
 				}}
 			>
 				{/* The strings it hangs on */}
-				<span className="w-[0.1vw] bg-black/60 h-[100vh] bottom-[calc(100%-12vh)] left-[30%] absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100vh] bottom-[calc(100%-12vh)] right-[30%] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100svh] bottom-[calc(100%-12svh)] left-[30%] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100svh] bottom-[calc(100%-12svh)] right-[30%] absolute"></span>
 				<img
 					src={image}
-					className="relative z-1 max-h-[70vh] max-w-[80vw] w-auto h-auto test-shadow-darker"
+					className="relative z-1 max-h-[70svh] max-w-[80vw] w-auto h-auto test-shadow-darker"
 					alt={name}
 				/>
 				{/* The name and Close hang on their own strings too, which run up
 				    behind the painting (z-0 under its z-1) */}
 				<div className="relative z-0 flex items-center gap-[1vw]">
-					<p className="relative text-[3vh] scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40">
-						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+					<p className="relative text-[3svh] scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40">
+						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
 						{name}
 					</p>
 					<button
 						onClick={close}
-						className="relative text-[3vh] scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] cursor-pointer drop-shadow-md drop-shadow-black/40"
+						// Keyboard focus starts here when it opens
+						autoFocus
+						className="relative text-[3svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] cursor-pointer drop-shadow-md drop-shadow-black/40"
 					>
-						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
 						Close
 					</button>
 				</div>

@@ -4,6 +4,7 @@ import { useStage } from "@/components/Stage";
 import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
 import useWowDoll from "@/components/useWowDoll";
 import { asset } from "@/lib/asset";
+import usePortrait from "@/components/usePortrait";
 import { FRAMES } from "@/lib/frames";
 import { ITEMS } from "@/lib/shop";
 import {
@@ -101,6 +102,9 @@ const COLORS = [
 // The frame's height normally, and after "Bigger"; how long it takes to grow
 const FRAME_VH = 38;
 const BIG_FRAME_VH = 50;
+// …and on portrait screens (phones held upright)
+const PORTRAIT_FRAME_VH = 30;
+const PORTRAIT_BIG_FRAME_VH = 40;
 const GROW_MS = 500;
 
 // Hangs or stands something in place, or sends it off the top/bottom.
@@ -116,18 +120,18 @@ const hang = (
 	transition: `transform ${ms}ms ${easing} ${inPlace ? delay : exitDelay}ms`,
 	transform: inPlace
 		? "translateY(0)"
-		: `translateY(${from === "top" ? "-100vh" : "100vh"})`,
+		: `translateY(${from === "top" ? "-100svh" : "100svh"})`,
 });
 
 const LABEL =
-	"text-[3vh] pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
-const BUTTON = `${LABEL.replace("border-[0.2vh]", "border-[0.3vh]")} border-dashed cursor-pointer disabled:cursor-default`;
+	"text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] pt-serif text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
+const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer disabled:cursor-default`;
 
 // A label's two hanging strings
 const Strings = () => (
 	<>
-		<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
 	</>
 );
 
@@ -198,8 +202,18 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 	const [drew, setDrew] = useState(false);
 	const [drawingUrl, setDrawingUrl] = useState<string | null>(null);
 	const [color, setColor] = useState(COLORS[3].value);
-	// "Bigger" grows the frame to 50vh (and "Smaller" shrinks it back)
+	// "Bigger" grows the frame to 50svh (and "Smaller" shrinks it back)
 	const [big, setBig] = useState(false);
+	// Phones held upright get their own layout: smaller dolls at the top, the
+	// frame below them, and the buttons in a row above the colors
+	const portrait = usePortrait();
+	const frameVh = portrait
+		? big
+			? PORTRAIT_BIG_FRAME_VH
+			: PORTRAIT_FRAME_VH
+		: big
+			? BIG_FRAME_VH
+			: FRAME_VH;
 
 	// Once the frame has grown or shrunk, give the canvas pixels for its new
 	// size and copy the drawing over, so it stays sharp
@@ -340,7 +354,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			node: (
 				<img
 					src={frame.src}
-					className="h-[13vh] w-auto max-w-none"
+					className="h-[13svh] w-auto max-w-none"
 					alt={`${frame.label} by ${frame.artist}`}
 				/>
 			),
@@ -352,7 +366,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 						node: (
 							<img
 								src={ITEMS["daphne-drawing"].image}
-								className="h-[13vh] w-auto max-w-none"
+								className="h-[13svh] w-auto max-w-none"
 								alt="Daphne's drawing of a smiley face"
 							/>
 						),
@@ -361,7 +375,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			: []),
 		{
 			key: "yours",
-			node: <YourArt drawingUrl={drawingUrl} className="h-[13vh]" />,
+			node: <YourArt drawingUrl={drawingUrl} className="h-[13svh]" />,
 		},
 	]; */
 
@@ -372,7 +386,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			{/* Zhenya - on the left, facing Daphne (as Page 5 left them) */}
 			<img
 				src={zhenyaSrc}
-				className="h-[100vh] absolute top-[-28vh] left-[5%] -translate-x-[50%] test-shadow-darker z-5"
+				className="h-[100svh] absolute top-[-28svh] left-[5%] portrait:h-[48svh] portrait:top-[-12svh] portrait:left-[20%] max-w-none -translate-x-[50%] test-shadow-darker z-5"
 				style={hang(step >= 1, step >= 1, "top", {
 					ms: 900,
 					easing: DOLL_DROP,
@@ -383,7 +397,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			{/* Daphne - on the right, mirrored to face Zhenya */}
 			<img
 				src={daphneSrc}
-				className="h-[100vh] absolute top-[-28vh] left-[91%] -translate-x-[50%] -scale-x-[1] test-shadow-darker z-4"
+				className="h-[100svh] absolute top-[-28svh] left-[91%] portrait:h-[48svh] portrait:top-[-12svh] portrait:left-[80%] max-w-none -translate-x-[50%] -scale-x-[1] test-shadow-darker z-4"
 				style={hang(step >= 1, step >= 1, "top", {
 					ms: 900,
 					easing: DOLL_DROP,
@@ -394,7 +408,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* "Zhenya wants to try making art too" + "Let's draw!" */}
 			<p
-				className={`absolute top-[4vh] left-[52%] -translate-x-[50%] w-max z-6 ${LABEL}`}
+				className={`absolute top-[4svh] left-[52%] portrait:top-[30svh] portrait:left-[50%] -translate-x-[50%] w-max portrait:max-w-[80vw] z-6 ${LABEL}`}
 				style={hang(step >= 2, step >= 2 && stage < 1, "top")}
 			>
 				<Strings />
@@ -404,7 +418,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={letsDraw}
 				disabled={step < 3 || stage >= 1}
 				tabIndex={step >= 3 && stage < 1 ? undefined : -1}
-				className={`absolute top-[20vh] left-[34%] -translate-x-[50%] w-max z-5 ${BUTTON}`}
+				className={`absolute top-[20svh] left-[34%] portrait:top-[38svh] portrait:left-[50%] -translate-x-[50%] w-max z-5 portrait:z-6 ${BUTTON}`}
 				style={hang(step >= 3, step >= 3 && stage < 1, "top")}
 			>
 				<Strings />
@@ -415,7 +429,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			    you're drawing, the canvas inside it is live; afterwards it holds
 			    your drawing. Sinks when the gallery comes */}
 			<div
-				className="absolute bottom-[6vh] left-[41%] -translate-x-[50%] z-5 test-shadow-darker"
+				className="absolute bottom-[6svh] left-[41%] portrait:left-[50%] -translate-x-[50%] z-5 test-shadow-darker"
 				style={(() => {
 					const style = hang(frameUp, frameUp && stage < 4, "bottom", {
 						ms: 900,
@@ -423,7 +437,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 					});
 					return {
 						...style,
-						height: `${big ? BIG_FRAME_VH : FRAME_VH}vh`,
+						height: `${frameVh}svh`,
 						transition: `${style.transition}, height ${GROW_MS}ms ${DOLL_DROP}`,
 					};
 				})()}
@@ -434,7 +448,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			>
 				<img
 					src={asset("/imgs/popsicle-stick.webp")}
-					className="absolute w-[2vw] h-[35vh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
+					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] -translate-x-[50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the frame"
 				/>
 				<canvas
@@ -457,9 +471,9 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			    you draw, one after another. Each is a white box with the color
 			    inside; the picked one has a solid border */}
 			<div
-				className="absolute left-[41%] -translate-x-[50%] flex gap-[1vw] z-6"
+				className="absolute left-[41%] portrait:left-[50%] -translate-x-[50%] flex gap-[1vw] portrait:gap-[2vw] z-6"
 				style={{
-					bottom: `calc(6vh + ${big ? BIG_FRAME_VH : FRAME_VH}vh + 2vh)`,
+					bottom: `calc(6svh + ${frameVh}svh + 2svh)`,
 					transition: `bottom ${GROW_MS}ms ${DOLL_DROP}`,
 				}}
 			>
@@ -472,14 +486,14 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 						aria-label={c.name}
 						aria-pressed={color === c.value}
 						title={c.name}
-						className={`relative ${BUTTON} !p-[0.4vh] ${color === c.value ? "!border-solid" : ""}`}
+						className={`relative ${BUTTON} !p-[0.4svh] ${color === c.value ? "!border-solid" : ""}`}
 						style={hang(canDraw, canDraw && stage === 1, "top", {
 							delay: i * 100,
 						})}
 					>
 						<Strings />
 						<span
-							className="block w-[6vh] h-[3vh]"
+							className="block w-[6svh] h-[3svh]"
 							style={{ background: c.value }}
 						/>
 					</button>
@@ -488,7 +502,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Instructions - while you draw */}
 			<p
-				className={`absolute top-[8vh] left-[49%] -translate-x-[50%] w-[30vw] z-[9] ${LABEL}`}
+				className={`absolute top-[8svh] left-[49%] portrait:top-[10svh] portrait:left-[50%] -translate-x-[50%] w-[30vw] portrait:w-[84vw] z-[9] ${LABEL}`}
 				// Lifts away while the frame is bigger, to make room for it
 				style={hang(canDraw, canDraw && stage === 1 && !big, "top")}
 			>
@@ -501,11 +515,20 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			{/* Clear / Done - next to the frame while you draw. Done only works
 			    once there's something drawn */}
 			<div
-				className="absolute bottom-[22vh] -translate-x-[50%] flex flex-col items-center gap-[3vh] z-[7]"
-				// Moves over to stay clear of the frame while it's bigger
+				className="absolute -translate-x-[50%] flex flex-col portrait:flex-row items-center gap-[3svh] portrait:gap-[3vw] z-[7]"
+				// Moves over to stay clear of the frame while it's bigger. On
+				// portrait screens it's a row above the colors instead, moving
+				// up with them
 				style={{
-					left: big ? "max(65%, calc(41% + 33vh))" : "65%",
-					transition: `left ${GROW_MS}ms ${DOLL_DROP}`,
+					left: portrait
+						? "50%"
+						: big
+							? "max(65%, calc(41% + 33svh))"
+							: "65%",
+					bottom: portrait
+						? `calc(6svh + ${frameVh}svh + 10svh)`
+						: "22svh",
+					transition: `left ${GROW_MS}ms ${DOLL_DROP}, bottom ${GROW_MS}ms ${DOLL_DROP}`,
 				}}
 			>
 				<button
@@ -551,7 +574,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={sayVerdict}
 				disabled={!verdict || stage >= 3}
 				tabIndex={verdict && stage < 3 ? undefined : -1}
-				className={`absolute top-[2vh] left-[38%] -translate-x-[50%] w-[18vw] z-[13] ${BUTTON}`}
+				className={`absolute top-[2svh] left-[38%] portrait:top-[10svh] portrait:left-[34%] -translate-x-[50%] w-[18vw] portrait:w-[56vw] z-[13] ${BUTTON}`}
 				style={hang(verdict, verdict && stage < 4, "top", {
 					exitDelay: 0 * TALK_EXIT_STAGGER_MS,
 				})}
@@ -562,7 +585,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Daphne: "But did you have a good time?" */}
 			<p
-				className={`absolute top-[16vh] left-[60%] -translate-x-[50%] w-max z-[12] ${LABEL}`}
+				className={`absolute top-[16svh] left-[60%] portrait:top-[22svh] portrait:left-[62%] -translate-x-[50%] w-max portrait:max-w-[70vw] z-[12] ${LABEL}`}
 				style={hang(stage >= 3, stage === 3, "top", {
 					delay: 400,
 					exitDelay: 1 * TALK_EXIT_STAGGER_MS,
@@ -577,7 +600,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				onClick={sayYes}
 				disabled={!goodTime || stage >= 4}
 				tabIndex={goodTime && stage < 4 ? undefined : -1}
-				className={`absolute top-[22vh] left-[33%] -translate-x-[50%] w-max z-[11] ${BUTTON}`}
+				className={`absolute top-[22svh] left-[33%] portrait:top-[33svh] portrait:left-[34%] -translate-x-[50%] w-max z-[11] ${BUTTON}`}
 				style={hang(goodTime, goodTime && stage < 4, "top", {
 					exitDelay: 2 * TALK_EXIT_STAGGER_MS,
 				})}
@@ -590,7 +613,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			    on long strings and sways gently (.sway), with your drawing last.
 			    Hung high, in front of the curtain valance (z-14 is above the
 			    curtains' z-10), so it's clear of the dolls' heads */}
-			{/* <ul className="absolute top-[-10vh] left-[46%] -translate-x-[50%] flex gap-[1.5vw] items-start z-[14]">
+			{/* <ul className="absolute top-[-10svh] left-[46%] -translate-x-[50%] flex gap-[1.5vw] items-start z-[14]">
 				{gallery.map(({ key, node }, i) => (
 					<li
 						key={key}
@@ -600,7 +623,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 							delay: i * GALLERY_STAGGER_MS,
 						})}
 					>
-						<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-[50%] absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-[50%] absolute"></span>
 						<div
 							className="sway"
 							// Each one swings a little out of step with its neighbours
@@ -616,13 +639,14 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			    Pages 4 and 5, in front of everything on the page */}
 			<PopsicleButton
 				onClick={nextPage}
+				href="/page7"
 				style={{
 					...hang(showContinue, showContinue, "bottom", {
 						ms: 900,
 						easing: BUTTON_DROP,
 					}),
 					right: "-5vw",
-					bottom: "-2vh",
+					bottom: "-2svh",
 					filter: "drop-shadow(12px 12px 2px #000000a0)",
 					zIndex: 20,
 				}}

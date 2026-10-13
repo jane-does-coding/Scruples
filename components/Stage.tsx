@@ -90,8 +90,9 @@ type Drawing = {
 // "View all items"
 const SLOTS = 3;
 const ALL_SLOTS = 7;
-// One row of the inventory: a 22vh slot plus the 1.5vw gap
-const ROW = "(22vh + 1.5vw)";
+// One row of the inventory: a slot plus the gap (set in globals.css, and
+// sized by width on portrait screens)
+const ROW = "(var(--slot) + var(--slot-gap))";
 // The pages, for the dots in the menu
 const PAGE_COUNT = 7;
 
@@ -301,9 +302,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 			const tug = el.animate(
 				[
 					{ translate: "0 0" },
-					{ translate: "0 0.8vh", offset: 0.25 },
-					{ translate: "0 -0.3vh", offset: 0.55 },
-					{ translate: "0 0.1vh", offset: 0.8 },
+					{ translate: "0 0.8svh", offset: 0.25 },
+					{ translate: "0 -0.3svh", offset: 0.55 },
+					{ translate: "0 0.1svh", offset: 0.8 },
 					{ translate: "0 0" },
 				],
 				{ duration: 450, easing: "ease-out", composite: "add" },
@@ -530,6 +531,17 @@ export default function Stage({ children }: { children: ReactNode }) {
 		if (!closing) router.push(href);
 	};
 
+	// For real links (<a href>) that should still go through the curtains on
+	// a plain click; a click with a modifier key (new tab etc.) is left alone
+	const linkClick =
+		(href: string, before?: () => void) =>
+		(e: React.MouseEvent<HTMLAnchorElement>) => {
+			if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+			e.preventDefault();
+			before?.();
+			goTo(href);
+		};
+
 	const back = backHref(pathname);
 	const goBack = () => {
 		// Only once the curtains are fully open (not mid-animation or behind
@@ -560,16 +572,22 @@ export default function Stage({ children }: { children: ReactNode }) {
 				keepDrawing,
 			}}
 		>
-			<div className="relative h-screen overflow-clip">
+			<div className="relative h-svh overflow-clip">
 				<button
 					onClick={() => setNavOpen((open) => !open)}
 					aria-expanded={navOpen}
 					aria-controls="nav"
 					aria-label={navOpen ? "Close menu" : "Open menu"}
-					className="fixed top-[0.5vh] right-[0.5vw] text-[4vh] font-extrabold cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] bg-white border-dashed border-[0.2vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					className="fixed top-[0.5svh] right-[0.5vw] text-[4svh] font-extrabold cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] min-w-[44px] min-h-[44px] portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:text-[2.6svh] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
 					?
 				</button>
+
+				{/* The pop-up's text for screen readers - always on the page, so
+				    a new note is announced when it changes */}
+				<p role="status" aria-live="polite" className="sr-only">
+					{note?.text}
+				</p>
 
 				{/* Inventory pop-up - just left of the "?", whenever something is
 				    added, sold or given. Clicking it opens the inventory */}
@@ -580,7 +598,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 							setNote(null);
 							setNavOpen(true);
 						}}
-						className="note-pop fixed top-[1vh] right-[4.8vw] z-[23] max-w-[40vw] text-[2.5vh] text-left scribbler bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] cursor-pointer drop-shadow-lg drop-shadow-black/60"
+						className="note-pop fixed top-[1svh] right-[4.8vw] portrait:top-[2vw] portrait:right-[16vw] z-[23] max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] cursor-pointer drop-shadow-lg drop-shadow-black/60"
 					>
 						{note.text}, click to view {"->"}
 					</button>
@@ -588,13 +606,19 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 				{/* Back - same look as the "?", in the top-left corner */}
 				{back && (
-					<button
-						onClick={goBack}
+					<a
+						href={back}
+						onClick={(e) => {
+							if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)
+								return;
+							e.preventDefault();
+							goBack();
+						}}
 						aria-label="Back"
-						className="fixed top-[0.5vh] left-[0.5vw] text-[3.75vh] font-extrabold cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] bg-white border-dashed border-[0.2vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+						className="fixed top-[0.5svh] left-[0.5vw] text-[3.75svh] font-extrabold cursor-pointer z-[23] w-[3.5vw] h-[3.5vw] min-w-[44px] min-h-[44px] portrait:top-[1.5vw] portrait:left-[1.5vw] portrait:text-[2.4svh] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 					>
 						{"<-"}
-					</button>
+					</a>
 				)}
 
 				{/* Backdrop behind the nav - fades in darker and slightly blurred,
@@ -609,14 +633,14 @@ export default function Stage({ children }: { children: ReactNode }) {
 					}}
 				/>
 
-				{/* Nav - header.png's bottom rests 10vh above the bottom of the page.
-			    Closed, it's pushed up by 90vh so it sits fully above the screen.
+				{/* Nav - header.png's bottom rests 10svh above the bottom of the page.
+			    Closed, it's pushed up by 90svh so it sits fully above the screen.
 			    Sits above the curtains, buttons (z-20) and backdrop (z-21),
 			    under the "?" (z-23) */}
 				<nav
 					id="nav"
 					inert={!navOpen}
-					className={`nav-bounce fixed inset-x-0 bottom-[10vh] z-[22] drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
+					className={`nav-bounce fixed inset-x-0 bottom-[10svh] z-[22] drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
 					style={{
 						// "View all items" drops it one more row, so the second row
 						// shows
@@ -624,21 +648,21 @@ export default function Stage({ children }: { children: ReactNode }) {
 							? allItems
 								? `translateY(calc${ROW})`
 								: "translateY(0)"
-							: "translateY(-90vh)",
+							: "translateY(-90svh)",
 					}}
 				>
 					{/* Hidden scribble ("nothing to see here"). The nav's bottom edge
-					    rests 90vh down the screen, so bottom-[90vh] puts this right
+					    rests 90svh down the screen, so bottom-[90svh] puts this right
 					    above the top of the screen when the nav is open - out of
 					    sight. It rides along with the nav, so it only peeks in at
 					    the lowest point of the bounce (the spring in .nav-bounce
-					    dips 8vh - exactly this image's height), then slides back out as
+					    dips 8svh - exactly this image's height), then slides back out as
 					    the nav settles. Keep the two in sync: see .nav-bounce */}
 					{pageLoaded && (
 						<img
 							src={asset("/imgs/hidden-scribble.webp")}
 							fetchPriority="low"
-							className="absolute bottom-[90vh] left-0 w-screen h-[8vh] max-w-none pointer-events-none"
+							className="absolute bottom-[90svh] left-0 w-screen h-[8svh] max-w-none pointer-events-none"
 							// Gone at once while it's dropped further for "View all" -
 							// and only back once the menu has moved back up (the
 							// length of .nav-bounce), so it's never seen then
@@ -653,7 +677,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 					{/* White above the header, for when it's dropped further down for
 					    "View all items" (the header's top is white too) */}
-					<div className="absolute bottom-full inset-x-0 h-[60vh] bg-white -mb-px" />
+					<div className="absolute bottom-full inset-x-0 h-[60svh] bg-white -mb-px" />
 
 					{pageLoaded && (
 						<img
@@ -665,7 +689,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 							])}
 							sizes="100vw"
 							fetchPriority="low"
-							className="w-screen block"
+							// Portrait screens are too narrow for its height, so it's
+							// made taller there and cropped to its middle instead
+							className="w-screen block portrait:h-[85svh] portrait:object-cover portrait:object-bottom"
 							alt="Theatre curtain valance"
 						/>
 					)}
@@ -675,7 +701,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					    by the same amount, with the same spring, so everything here
 					    stays still while the second row fades in below */}
 					<div
-						className="nav-bounce absolute inset-x-0 bottom-[45%] flex flex-col items-center gap-[2vh] text-[3vh] pt-[3vh]"
+						className="nav-bounce absolute inset-x-0 bottom-[45%] flex flex-col items-center gap-[2svh] text-[3svh] pt-[3svh]"
 						style={{
 							transform: allItems ? `translateY(calc(-1 * ${ROW}))` : "none",
 						}}
@@ -689,7 +715,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 								])}
 								sizes="18vw"
 								fetchPriority="low"
-								className="w-[18vw] absolute right-[8vw] top-[-9vh] test-shadow-darker"
+								className="w-[18vw] absolute right-[8vw] top-[-9svh] test-shadow-darker"
 								alt=""
 							/>
 						)} */}
@@ -700,73 +726,88 @@ export default function Stage({ children }: { children: ReactNode }) {
 						{/* Pages - a dot for each page; click one to go there. The
 						    one you're on is bigger. (Positions are from the top, so
 						    they stay put when the inventory gets its second row) */}
-						<h2 className="text-[4vh] absolute left-[12.5%] top-[9.9vh]">
-							Pages
-						</h2>
-						<div className="p-[3vh] absolute left-[12%] top-[16.2vh] bg-white/20 border-[0.3vh] border-black border-dashed">
-							<div className="grid grid-cols-3 gap-[1.5vh]">
-								{Array.from({ length: PAGE_COUNT }, (_, i) => i + 1).map(
-									(n) => {
-										const here = pathname === `/page${n}`;
-										return (
-											<button
-												key={n}
-												onClick={() => {
-													setNavOpen(false);
-													if (!here) goTo(`/page${n}`);
-												}}
-												aria-label={`Page ${n}`}
-												aria-current={here ? "page" : undefined}
-												title={`Page ${n}`}
-												className="h-[1.25vh] w-[1.25vh] flex items-center justify-center cursor-pointer group"
-											>
-												<span
-													className={`block rounded-full transition-transform duration-200 group-hover:scale-150 ${here ? "h-[1.25vh] w-[1.25vh] bg-black scale-150" : "h-[1.25vh] w-[1.25vh] bg-neutral-600"}`}
-												/>
-											</button>
-										);
-									},
-								)}
+						{/* On wide screens these two sit either side of the inventory;
+						    on portrait screens, side by side above it */}
+						<div className="contents portrait:flex portrait:items-end portrait:justify-center portrait:gap-[10vw]">
+							<div className="contents portrait:flex portrait:flex-col portrait:items-center portrait:gap-[1svh]">
+								<h2 className="text-[4svh] portrait:text-[3svh] absolute portrait:static left-[12.5%] top-[9.9svh]">
+									Pages
+								</h2>
+								<div className="p-[3svh] portrait:p-[2svh] absolute portrait:static left-[12%] top-[16.2svh] bg-white/20 border-[0.3svh] border-black border-dashed">
+									<div className="grid grid-cols-3 gap-[1.5svh]">
+										{Array.from({ length: PAGE_COUNT }, (_, i) => i + 1).map(
+											(n) => {
+												const here = pathname === `/page${n}`;
+												return (
+													<a
+														key={n}
+														href={`/page${n}`}
+														onClick={(e) => {
+															if (here) {
+																e.preventDefault();
+																setNavOpen(false);
+																return;
+															}
+															linkClick(`/page${n}`, () => setNavOpen(false))(e);
+														}}
+														aria-label={`Page ${n}`}
+														aria-current={here ? "page" : undefined}
+														title={`Page ${n}`}
+														// The ::before is a bigger invisible area around the
+														// dot, so it's easy to tap
+														className="relative h-[1.25svh] w-[1.25svh] flex items-center justify-center cursor-pointer group before:absolute before:-inset-[1.2svh] before:content-['']"
+													>
+														<span
+															className={`block rounded-full transition-transform duration-200 group-hover:scale-150 ${here ? "h-[1.25svh] w-[1.25svh] bg-black scale-150" : "h-[1.25svh] w-[1.25svh] bg-neutral-600"}`}
+														/>
+													</a>
+												);
+											},
+										)}
+									</div>
+								</div>
 							</div>
-						</div>
 
-						{/* View all - a switch: on, the menu drops further down and the
+							{/* View all - a switch: on, the menu drops further down and the
 						    inventory shows a second row. Stays how you left it. Only
 						    there when there's more than one row of items */}
-						{canViewAll && (
-							<button
-								onClick={() => {
-									setAllItems(!allItems);
-									if (openItem) closeItem();
-								}}
-								role="switch"
-								aria-checked={allItems}
-								className="absolute right-[9%] top-[9.9vh] flex flex-col items-center gap-[1.5vh] cursor-pointer"
-							>
-								<span className="text-[4vh]">View all</span>
-								<span className="p-[2vh] bg-white/20 border-[0.3vh] border-black border-dashed">
-									<span
-										className="relative block w-[7vh] h-[3.5vh] rounded-full border-[0.3vh] border-black transition-colors duration-300"
-										style={{ background: allItems ? "#525252" : "white" }}
-									>
-										<span
-											className="absolute top-[50%] -translate-y-[50%] h-[2.3vh] w-[2.3vh] rounded-full border-[0.2vh] border-black bg-white transition-[left] duration-300"
-											style={{
-												left: allItems ? "calc(100% - 2.7vh)" : "0.3vh",
-											}}
-										/>
+							{canViewAll && (
+								<button
+									onClick={() => {
+										setAllItems(!allItems);
+										if (openItem) closeItem();
+									}}
+									role="switch"
+									aria-checked={allItems}
+									className="absolute portrait:static right-[9%] top-[9.9svh] flex flex-col items-center gap-[1.5svh] portrait:gap-[1svh] cursor-pointer"
+								>
+									<span className="text-[4svh] portrait:text-[3svh]">
+										View all
 									</span>
-								</span>
-							</button>
-						)}
+									<span className="p-[2svh] bg-white/20 border-[0.3svh] border-black border-dashed">
+										<span
+											className="relative block w-[7svh] h-[3.5svh] rounded-full border-[0.3svh] border-black transition-colors duration-300"
+											style={{ background: allItems ? "#525252" : "white" }}
+										>
+											<span
+												className="absolute top-[50%] -translate-y-[50%] h-[2.3svh] w-[2.3svh] rounded-full border-[0.2svh] border-black bg-white transition-[left] duration-300"
+												style={{
+													left: allItems ? "calc(100% - 2.7svh)" : "0.3svh",
+												}}
+											/>
+										</span>
+									</span>
+								</button>
+							)}
+						</div>
 
-						<h2 className="text-[4vh]">Inventory</h2>
+						<h2 className="text-[4svh] portrait:text-[3svh]">Inventory</h2>
 						{/* One row tall: the second row hangs below it, fading in and
 						    out with "View all" */}
-						<ul className="relative grid grid-cols-4 auto-rows-[22vh] h-[22vh] gap-[1.5vw]">
+						<ul className="relative grid grid-cols-4 auto-rows-[var(--slot)] h-[var(--slot)] gap-[var(--slot-gap)]">
 							{/* Money - click it to see what it's for */}
 							<li
-								className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
+								className="relative w-[var(--slot)] h-[var(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed transition-opacity duration-300 cursor-pointer"
 								style={{ opacity: itemOpen ? 0 : 1 }}
 								onClick={() => showItem("money", 0)}
 								onKeyDown={(e) => {
@@ -780,7 +821,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 									<img
 										key={i}
 										src={src}
-										className="absolute top-[50%] h-[18vh] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
+										className="absolute top-[50%] h-[82%] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
 										style={{
 											// Fanned out around the middle of the slot
 											left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
@@ -789,7 +830,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 										alt=""
 									/>
 								))}
-								<span className="absolute bottom-[0.5vh] right-[0.5vw] bg-white border-[0.2vh] border-black px-[0.5vw] text-[2.5vh] leading-tight">
+								<span className="absolute bottom-[0.5svh] right-[0.5vw] bg-white border-[0.2svh] border-black px-[0.5vw] text-[2.5svh] leading-tight">
 									${money}
 								</span>
 							</li>
@@ -800,7 +841,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 										<li
 											key={entry?.key ?? `empty-${i}`}
 											inert={hidden}
-											className="relative w-[22vh] h-[22vh] bg-white/20 border-[0.3vh] border-black border-dashed flex items-center justify-center"
+											className="relative w-[var(--slot)] h-[var(--slot)] bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
 											style={{
 												opacity: itemOpen || hidden ? 0 : 1,
 												// The second row fades in after the menu has started
@@ -833,7 +874,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 							    fade out */}
 							{openItem && opened && (
 								<li
-									className="absolute h-[22vh] bg-white/80 border-[0.3vh] border-black border-dashed flex items-center gap-[2vw] px-[2vh] overflow-hidden"
+									// Taller on portrait screens, with the picture above the
+									// text, since the row is so narrow there
+									className="absolute h-[var(--slot)] portrait:h-auto portrait:min-h-[calc(2*var(--slot)+var(--slot-gap))] bg-white/80 border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] px-[2svh] portrait:p-[3vw] overflow-hidden"
 									style={{
 										transition:
 											"left 400ms cubic-bezier(0.34, 1.1, 0.64, 1), width 400ms cubic-bezier(0.34, 1.1, 0.64, 1)",
@@ -842,17 +885,17 @@ export default function Stage({ children }: { children: ReactNode }) {
 										left: itemOpen
 											? "0"
 											: `calc(${openItem.slot % 4} * ${ROW})`,
-										width: itemOpen ? "100%" : "22vh",
+										width: itemOpen ? "100%" : "var(--slot)",
 									}}
 								>
 									{/* Money shows its bills fanned out, like in its slot */}
 									{opened.key === "money" ? (
-										<div className="relative h-[18vh] w-[18vh] shrink-0">
+										<div className="relative h-[18svh] w-[18svh] portrait:h-[15vw] portrait:w-[22vw] shrink-0">
 											{moneyBills.map((src, i, all) => (
 												<img
 													key={i}
 													src={src}
-													className="absolute top-[50%] h-[15vh] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
+													className="absolute top-[50%] h-[15svh] w-auto max-w-none -translate-x-[50%] -translate-y-[50%] test-shadow-darker"
 													style={{
 														left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
 														rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
@@ -878,20 +921,22 @@ export default function Stage({ children }: { children: ReactNode }) {
 															}
 														: undefined
 												}
-												className={`h-[18vh] w-auto max-w-[18vh] object-contain test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
+												className={`h-[18svh] w-auto max-w-[18svh] portrait:h-[15vw] portrait:max-w-[30vw] object-contain test-shadow-darker ${opened.art ? "cursor-zoom-in" : ""}`}
 												alt={opened.name}
 											/>
 										</>
 									)}
 									<div
-										className="flex flex-col gap-[1vh] text-left transition-opacity duration-300"
+										className="flex flex-col gap-[1svh] text-left transition-opacity duration-300"
 										style={{ opacity: itemOpen ? 1 : 0 }}
 									>
-										<h3 className="text-[3vh]">{opened.name}</h3>
-										<p className="text-[2.2vh] leading-snug max-w-[45vw]">
+										<h3 className="text-[3svh] portrait:text-[2.4svh]">
+											{opened.name}
+										</h3>
+										<p className="text-[2.2svh] portrait:text-[1.8svh] leading-snug max-w-[45vw] portrait:max-w-none">
 											{opened.description}
 										</p>
-										<div className="flex gap-[1vw]">
+										<div className="flex flex-wrap gap-[1vw] portrait:gap-[2vw]">
 											{opened.item === "notebook" && (
 												<button
 													onClick={() => {
@@ -899,7 +944,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 														setNavOpen(false);
 														setNotebookOpen(true);
 													}}
-													className="text-[2.5vh] bg-white border-[0.3vh] border-black border-dashed px-[1vw] cursor-pointer"
+													className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
 												>
 													Use
 												</button>
@@ -914,7 +959,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 															name: opened.name,
 														});
 													}}
-													className="text-[2.5vh] bg-white border-[0.3vh] border-black border-dashed px-[1vw] cursor-pointer"
+													className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
 												>
 													View
 												</button>
@@ -922,14 +967,14 @@ export default function Stage({ children }: { children: ReactNode }) {
 											{opened.item && opened.price > 0 && (
 												<button
 													onClick={() => sell(opened.item!)}
-													className="text-[2.5vh] bg-white border-[0.3vh] border-black border-dashed px-[1vw] cursor-pointer"
+													className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
 												>
 													Sell for ${opened.price}
 												</button>
 											)}
 											<button
 												onClick={closeItem}
-												className="text-[2.5vh] bg-white border-[0.3vh] border-black border-dashed px-[1vw] cursor-pointer"
+												className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
 											>
 												Close
 											</button>
@@ -955,7 +1000,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 						])}
 						sizes="100vw"
 						fetchPriority="low"
-						className="w-screen h-screen top-0 left-0 fixed z-10 pointer-events-none scene-shadow"
+						className="w-screen h-svh top-0 left-0 portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none fixed z-10 pointer-events-none scene-shadow"
 						style={{
 							visibility: animationStage === "idle" ? "visible" : "hidden",
 						}}
@@ -975,7 +1020,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 						])}
 						sizes="100vw"
 						fetchPriority="high"
-						className="w-screen h-screen top-0 left-0 fixed z-30"
+						className="w-screen h-svh top-0 left-0 portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none fixed z-30"
 						alt="Closed theatre curtains"
 					/>
 				)}
@@ -985,19 +1030,20 @@ export default function Stage({ children }: { children: ReactNode }) {
 					<button
 						onClick={enter}
 						disabled={ticket !== "waiting"}
-						className={`fixed top-[40vh] left-[20vw] z-40 cursor-pointer disabled:cursor-default drop-shadow-lg drop-shadow-black/60 test-shadow-darkest ${ticket === "waiting" ? "ticket-shake" : ""}`}
+						className={`fixed top-[40svh] left-[20vw] portrait:left-[10vw] z-40 cursor-pointer disabled:cursor-default drop-shadow-lg drop-shadow-black/60 test-shadow-darkest ${ticket === "waiting" ? "ticket-shake" : ""}`}
 						aria-label="Enter"
 					>
 						<img
 							src={asset("/imgs/ticket2.webp")}
-							// Shown at 50vw - smaller screens get the 700px version
+							// Shown at 50vw (80vw on portrait screens) - smaller screens get the
+							// 700px version
 							srcSet={srcSet([
 								["/imgs/ticket2-700.webp", 700],
 								["/imgs/ticket2.webp", 1400],
 							])}
-							sizes="50vw"
+							sizes="(orientation: portrait) 80vw, 50vw"
 							fetchPriority="high"
-							className="w-[50vw] block"
+							className="w-[50vw] portrait:w-[80vw] block"
 							style={{
 								visibility: ticket === "ripping" ? "hidden" : "visible",
 							}}
@@ -1012,21 +1058,23 @@ export default function Stage({ children }: { children: ReactNode }) {
 				)}
 
 				{/* Closing / opening animation - always on screen (transparent when
-			    idle) so a click only has to draw, not show/hide anything */}
+			    idle) so a click only has to draw, not show/hide anything. On
+			    portrait screens all the curtains are a quarter wider than the
+			    screen, so the side drapes don't cover so much of it */}
 				<canvas
 					ref={canvasRef}
-					className="w-screen h-screen top-0 left-0 fixed z-30 pointer-events-none scene-shadow"
+					className="w-screen h-svh top-0 left-0 portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none fixed z-30 pointer-events-none scene-shadow"
 				/>
 
 				{/* Content - no z-index here, so it doesn't form a stacking context:
 			    curtains (z-10) sit above it, buttons (z-20) sit above curtains,
 			    and the animation (z-30) covers everything */}
-				<main className="bg-white/0 border-[0.3vh] border-black/0 w-[65vw] h-[75vh] mx-auto top-[25vh] relative">
+				<main className="bg-white/0 border-[0.3svh] border-black/0 w-[65vw] h-[75svh] mx-auto top-[25svh] portrait:w-full portrait:h-[80svh] portrait:top-[20svh] relative">
 					{children}
 				</main>
 
 				{/* Background */}
-				<div className="-z-10 fixed top-0 left-0 h-screen w-screen">
+				<div className="-z-10 fixed top-0 left-0 h-svh w-screen">
 					{pageLoaded && (
 						<img
 							src={asset("/imgs/paper-bg-2560.webp")}

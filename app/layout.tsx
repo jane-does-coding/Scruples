@@ -56,6 +56,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
 	width: "device-width",
 	initialScale: 1,
+	// Fill the whole screen on phones with rounded corners / notches
+	viewportFit: "cover",
+	// The browser bar's colour on phones - the white of the paper
+	themeColor: "#ffffff",
 };
 
 // Describes the site for search engines

@@ -5,6 +5,7 @@ import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import type { Frame } from "@/lib/frames";
 import { asset } from "@/lib/asset";
+import usePortrait from "@/components/usePortrait";
 
 const DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 
@@ -14,7 +15,7 @@ const slideIn = (shown: boolean, from: "top" | "bottom", delay = 0) => ({
 	visibility: shown ? ("visible" as const) : ("hidden" as const),
 	transform: shown
 		? "translateY(0)"
-		: `translateY(${from === "top" ? "-100vh" : "100vh"})`,
+		: `translateY(${from === "top" ? "-100svh" : "100svh"})`,
 });
 
 // A single painting's page, opened by clicking its frame in the marquee
@@ -55,40 +56,49 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 	// stay 3vw from the screen's edges, hanging in front of the curtains)
 	const clear = `(${paintingWidth / 2}px + 2vw)`;
 	const cardWidth = `min(19vw, calc(50vw - ${clear} - 3vw))`;
+	// On portrait screens there's no room beside the painting: the painting
+	// goes smaller at the top, its title under it, and the two cards side by
+	// side below that
+	const portrait = usePortrait();
+	const aboutPlace = portrait
+		? { left: "4vw", top: "39.5svh", width: "44vw" }
+		: { right: `calc(50% + ${clear})`, width: cardWidth };
+	const factsPlace = portrait
+		? { left: "52vw", top: "39.5svh", width: "44vw" }
+		: { left: `calc(50% + ${clear})`, width: cardWidth };
 
 	return (
-		<div className="h-full flex flex-col items-center justify-center gap-[2vh]">
-			{/* Tall frames sit 5vw in from the left, 2vh higher, and can be
-			    taller (60vh) than the wide ones (50vh) */}
+		<div className="h-full flex flex-col items-center justify-center gap-[2svh]">
+			{/* Tall frames sit 5vw in from the left, 2svh higher, and can be
+			    taller (60svh) than the wide ones (50svh) */}
 			{/* Painting drops in from the top */}
 			<div
-				className={`absolute ${tall ? "top-[-6vh] left-[50%] translate-x-[-50%] scale-y-90" : "top-[-2vh] left-[50%] translate-x-[-50%]"}`}
+				className={`absolute ${tall ? "top-[-6svh] left-[50%] translate-x-[-50%] scale-y-90" : "top-[-2svh] left-[50%] translate-x-[-50%]"} portrait:top-[-4svh]`}
 				style={slideIn(shown, "top")}
 			>
 				<img
 					ref={paintingRef}
 					onLoad={measurePainting}
 					src={frame.src}
-					className={`${tall ? "max-h-[65vh] top-[-3vh]" : "max-h-[45vh]"} max-w-[40vw] test-shadow z-2 relative`}
+					className={`${tall ? "max-h-[65svh] top-[-3svh]" : "max-h-[45svh]"} max-w-[40vw] portrait:max-h-[29svh] portrait:max-w-[80vw] portrait:top-0 test-shadow z-2 relative`}
 					alt={`${frame.label} by ${frame.artist}, in a picture frame`}
 				/>
-				<span className="w-[0.1vw] bg-black/60 h-[30vh] top-[-25vh] left-[3vw] absolute z-1"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[30vh] top-[-25vh] right-[3vw] absolute z-1"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[30svh] top-[-25svh] left-[3vw] absolute z-1"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[30svh] top-[-25svh] right-[3vw] absolute z-1"></span>
 			</div>
 
 			{/* About the painting - hangs on the left of it, just after it */}
 			<div
-				className="absolute top-[-4vh] bg-white border-[0.2vh] border-black px-[1vw] py-[1.2vh] test-shadow z-[11]"
+				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-[11]"
 				style={{
-					right: `calc(50% + ${clear})`,
-					width: cardWidth,
+					...aboutPlace,
 					...slideIn(shown && paintingWidth > 0, "top", 300),
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-[1vw] absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-[1vw] absolute"></span>
-				<h2 className="text-[2.6vh] mb-[0.8vh]">About it</h2>
-				<dl className="text-[1.9vh] leading-snug flex flex-col gap-[1vh]">
+				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-[1vw] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-[1vw] absolute"></span>
+				<h2 className="text-[2.6svh] portrait:text-[2svh] mb-[0.8svh]">About it</h2>
+				<dl className="text-[1.9svh] portrait:text-[1.45svh] leading-snug flex flex-col gap-[1svh]">
 					{(
 						[
 							["Painted in", year],
@@ -109,17 +119,16 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 
 			{/* Fun facts - hang on the right of it, a moment later */}
 			<div
-				className="absolute top-[-4vh] bg-white border-[0.2vh] border-black px-[1vw] py-[1.2vh] test-shadow z-[11]"
+				className="absolute top-[-4svh] bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[1.2svh] test-shadow z-[11]"
 				style={{
-					left: `calc(50% + ${clear})`,
-					width: cardWidth,
+					...factsPlace,
 					...slideIn(shown && paintingWidth > 0, "top", 450),
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-[1vw] absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-[1vw] absolute"></span>
-				<h2 className="text-[2.6vh] mb-[0.8vh]">Fun facts</h2>
-				<ul className="text-[1.9vh] leading-snug flex flex-col gap-[1vh] list-['*_'] pl-[1.2vw]">
+				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-[1vw] absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-[1vw] absolute"></span>
+				<h2 className="text-[2.6svh] portrait:text-[2svh] mb-[0.8svh]">Fun facts</h2>
+				<ul className="text-[1.9svh] portrait:text-[1.45svh] leading-snug flex flex-col gap-[1svh] list-['*_'] pl-[1.2vw] portrait:pl-[3vw]">
 					{frame.facts.map((fact) => (
 						<li key={fact}>{fact}</li>
 					))}
@@ -129,33 +138,37 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			{/* Doll */}
 			{/* 	<img
 				src={asset("/imgs/doll2.png")}
-				className="h-[80vh] absolute top-[-30vh] right-[-6vw] test-shadow-darker z-5 -scale-x-[1]"
+				className="h-[80svh] absolute top-[-30svh] right-[-6vw] test-shadow-darker z-5 -scale-x-[1]"
 				alt=""
 			/> */}
 
 			{/* Labels rise in from the bottom */}
 			<div
-				className="absolute bottom-[6vh] right-[-3vw] test-shadow"
+				className="absolute bottom-[6svh] right-[-3vw] portrait:bottom-auto portrait:top-[27svh] portrait:right-auto portrait:left-[50%] portrait:-translate-x-[50%] portrait:w-max test-shadow"
 				style={slideIn(shown, "bottom", 200)}
 			>
-				<h1 className="border-[0.2vh] bg-white px-[1.5vw] py-[1vh] text-[3vh] text-center relative z-2 w-fit mx-auto">
+				<h1 className="border-[0.2svh] bg-white px-[1.5vw] portrait:px-[3vw] py-[1svh] text-[3svh] portrait:text-[2.2svh] text-center relative z-2 w-fit mx-auto">
 					{frame.label}
 				</h1>
-				<p className="border-[0.2vh] bg-white px-[1.5vw] py-[1vh] text-[3vh] text-center relative z-2 mt-[2vh] w-fit mx-auto">
+				<p className="border-[0.2svh] bg-white px-[1.5vw] portrait:px-[3vw] py-[1svh] text-[3svh] portrait:text-[2.2svh] text-center relative z-2 mt-[2svh] portrait:mt-[1svh] w-fit mx-auto">
 					by {frame.artist}
 				</p>
 				{/* popsicle-stick.png is popsicle.png trimmed to just the stick, so
 				    w-/h- here are the stick's real size */}
 				<img
 					src={asset("/imgs/popsicle-stick.webp")}
-					className="absolute w-[2.3vw] h-[38vh] max-w-none bottom-[-19vh] left-[50%] -translate-x-[50%] z-0"
+					className="absolute w-[2.3vw] h-[38svh] max-w-none bottom-[-19svh] left-[50%] -translate-x-[50%] z-0"
 					alt="Wooden popsicle stick holding up the labels"
 				/>
 			</div>
 
 			<PopsicleButton
 				onClick={() => goTo("/page2")}
+				href="/page2"
 				side="left"
+				// On portrait screens the cards need the room, and the round
+				// "<-" in the corner goes back to the gallery too
+				className="portrait:hidden"
 				style={slideIn(shown, "bottom", 400)}
 			>
 				{"<-"} Back

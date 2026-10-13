@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import usePortrait from "@/components/usePortrait";
 
 type PageProps = {
 	nextPage: () => void;
@@ -33,36 +34,36 @@ const hang = (
 	transition: `transform ${ms}ms ${easing} ${inPlace ? delay : exitDelay}ms`,
 	transform: inPlace
 		? "translateY(0)"
-		: `translateY(${from === "top" ? "-100vh" : "100vh"})`,
+		: `translateY(${from === "top" ? "-100svh" : "100svh"})`,
 });
 
 // A label's face, without its shadow (the shadow goes on the whole hanging
 // label, so it doesn't flip with it)
 const FACE =
-	"pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh]";
+	"pt-serif text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh]";
 
 const LABEL =
-	" pt-serif text-center scribbler bg-white border-[0.2vh] border-black px-[1vw] py-[0.5vh] drop-shadow-md drop-shadow-black/40 test-shadow-darkest";
-const BUTTON = `${LABEL.replace("border-[0.2vh]", "border-[0.3vh]")} border-dashed cursor-pointer disabled:cursor-default`;
+	" pt-serif text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darkest";
+const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer disabled:cursor-default`;
 
 // A label's two hanging strings
 const Strings = () => (
 	<>
-		<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] left-0 absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-[100vh] top-[-100vh] right-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
+		<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
 	</>
 );
 
 // The labels around Zhenya, in the order they drop in (and leave)
 const LABELS = [
-	{ text: "Magic Button is Horrible!", top: "-2vh", left: "20%" },
-	{ text: "Did YOU ever use it?", top: "3.5vh", left: "80%" },
-	{ text: "It DESTROYS creativity", top: "17vh", left: "7%" },
-	{ text: "Magic Button isn't real art!", top: "19vh", left: "92%" },
-	{ text: "F*ck Magic Button!", top: "34vh", left: "7%" },
-	{ text: "Art is human.", top: "33vh", left: "92%" },
-	{ text: "Magic button is Soulless", top: "48vh", left: "90%" },
-	{ text: "Human art is REAL art", top: "52vh", left: "15%" },
+	{ text: "Magic Button is Horrible!", top: "-2svh", left: "20%" },
+	{ text: "Did YOU ever use it?", top: "3.5svh", left: "80%" },
+	{ text: "It DESTROYS creativity", top: "17svh", left: "7%" },
+	{ text: "Magic Button isn't real art!", top: "19svh", left: "92%" },
+	{ text: "F*ck Magic Button!", top: "34svh", left: "7%" },
+	{ text: "Art is human.", top: "33svh", left: "92%" },
+	{ text: "Magic button is Soulless", top: "48svh", left: "90%" },
+	{ text: "Human art is REAL art", top: "52svh", left: "15%" },
 ];
 // How far apart they drop in, and lift away
 const LABEL_STAGGER_MS = 250;
@@ -98,6 +99,17 @@ export default function Page7({ curtainsOpen }: PageProps) {
 	// The labels all flip over to "But why?" together, 2s after the last
 	// one has landed
 	const [flipped, setFlipped] = useState(false);
+	// Phones held upright: a smaller Zhenya and spotlight, and the labels in
+	// two columns either side of her (left, right, left, right…) instead of
+	// scattered around
+	const portrait = usePortrait();
+	const labelPlace = (i: number, top: string, left: string) =>
+		portrait
+			? {
+					top: `${-1 + Math.floor(i / 2) * 12 + (i % 2) * 4}svh`,
+					left: i % 2 ? "81%" : "19%",
+				}
+			: { top, left };
 	useEffect(() => {
 		if (step < 2) return;
 		const timer = setTimeout(
@@ -125,7 +137,9 @@ export default function Page7({ curtainsOpen }: PageProps) {
 					opacity: step >= 2 && stage < 2 ? 1 : 0,
 					transition: "opacity 250ms ease-out",
 					background:
-						"radial-gradient(circle at 50% 60%, transparent 0, transparent 33vh, rgba(0, 0, 0, 0.72) 34vh)",
+						portrait
+							? "radial-gradient(circle at 50% 52%, transparent 0, transparent min(30svh, 46vw), rgba(0, 0, 0, 0.72) calc(min(30svh, 46vw) + 1svh))"
+							: "radial-gradient(circle at 50% 60%, transparent 0, transparent 33svh, rgba(0, 0, 0, 0.72) 34svh)",
 				}}
 			/>
 
@@ -137,10 +151,12 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			{LABELS.map(({ text, top, left }, i) => (
 				<div
 					key={text}
-					className="absolute -translate-x-[50%] text-[4vh] w-max z-20 drop-shadow-md drop-shadow-black/40 test-shadow-darkest perspective-[100vh]"
+					className="absolute -translate-x-[50%] text-[4svh] portrait:text-[2.1svh] w-max portrait:max-w-[35vw] z-20 drop-shadow-md drop-shadow-black/40 test-shadow-darkest perspective-[100svh]"
 					style={{
-						top,
-						left,
+						...labelPlace(i, top, left),
+						// Earlier (higher up) labels in front, so the strings of the
+						// ones below run behind them
+						zIndex: 20 + LABELS.length - i,
 						...hang(step >= 2, step >= 2 && stage < 1, "top", {
 							delay: i * LABEL_STAGGER_MS,
 							exitDelay: i * LABEL_EXIT_STAGGER_MS,
@@ -182,7 +198,7 @@ export default function Page7({ curtainsOpen }: PageProps) {
 						delay: WHAAA_MS,
 					}),
 					right: "-4vw",
-					bottom: "-4vh",
+					bottom: "-4svh",
 					scale: "0.85",
 					transformOrigin: "100% 100%",
 					filter: "drop-shadow(12px 12px 2px #000000a0)",
@@ -198,7 +214,7 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			    outside the spotlight (the strings at the top) is in the dark */}
 			<img
 				src={blinkSrc}
-				className="h-[100vh] w-auto max-w-none absolute top-[-28vh] -translate-x-[50%] z-[9]"
+				className="h-[100svh] w-auto max-w-none absolute top-[-28svh] portrait:h-[60svh] portrait:top-[-8svh] -translate-x-[50%] z-[9]"
 				style={{
 					// Once the spotlight is off: her shadow goes back to the usual
 					// one, she's pulled up a little, turns round (the scale flips
@@ -211,12 +227,12 @@ export default function Page7({ curtainsOpen }: PageProps) {
 					transition: `transform 900ms ${DOLL_DROP}, filter 600ms ease, scale 600ms ease-in-out 300ms, left 1200ms ease-in-out 600ms`,
 					transform:
 						step < 1
-							? "translateY(-120vh)"
+							? "translateY(-120svh)"
 							: stage >= 2
-								? "translateY(-4vh)"
+								? "translateY(-4svh)"
 								: "translateY(0)",
 					scale: stage >= 2 ? "-1 1" : "1 1",
-					left: stage >= 2 ? "78%" : "50%",
+					left: stage >= 2 ? (portrait ? "70%" : "78%") : "50%",
 				}}
 				alt="Zhenya, a marionette doll on strings, standing in a spotlight"
 			/>

@@ -9,9 +9,10 @@ import { asset } from "@/lib/asset";
 const FRAME_SIZES: Record<FrameSize, string> = {
 	// Squashed to 90% height (1229 × 0.9 ≈ 1106) - aspect-ratio rather than
 	// scale-y, so the layout box matches and labels sit right under it
-	tall: "w-[17vw] aspect-[800/1106]",
-	wide: "w-[20vw] mt-[0vh]",
-	"extra-wide": "w-[21vw] mt-[0vh]",
+	// (On portrait screens they're sized by height instead, as vw is tiny)
+	tall: "w-[17vw] portrait:w-[19svh] aspect-[800/1106]",
+	wide: "w-[20vw] portrait:w-[25svh] mt-[0svh]",
+	"extra-wide": "w-[21vw] portrait:w-[27svh] mt-[0svh]",
 };
 
 type PageProps = {
@@ -134,34 +135,34 @@ export default function Page2({
 			{/* Doll */}
 			<img
 				src={dollImage}
-				className="h-[100vh] absolute top-[-27vh] left-[-8vw] test-shadow-darker z-5"
+				className="h-[100svh] absolute top-[-27svh] left-[-8vw] portrait:h-[62svh] portrait:top-[-10svh] portrait:left-[-22vw] max-w-none test-shadow-darker z-5"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
-					transform: step >= 1 ? "translateY(0)" : "translateY(-120vh)",
+					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",
 				}}
 				alt="Zhenya, a marionette doll on strings"
 			/>
 
 			<h1
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[-7vh] right-[25vw] bg-white border-[0.2vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[3svh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[-7svh] right-[25vw] portrait:top-[0svh] portrait:right-[12vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 2),
-					transform: step >= 2 ? "translateY(0)" : "translateY(-60vh)",
+					transform: step >= 2 ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] right-0 absolute"></span>
 				Zhenya likes art
 			</h1>
 			<p
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[1vh] right-[13vw] bg-white border-[0.2vh] border-black px-[2vw] py-[1vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
+				className="text-[3svh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute top-[1svh] right-[13vw] portrait:top-[8svh] portrait:right-[16vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
 					...drop(step >= 3),
-					transform: step >= 3 ? "translateY(0)" : "translateY(-60vh)",
+					transform: step >= 3 ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[15vh] top-[-15vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] right-0 absolute"></span>
 				Click on some pieces
 			</p>
 
@@ -169,7 +170,7 @@ export default function Page2({
 			    (-50%), so the loop is seamless */}
 			<div
 				ref={marqueeRef}
-				className="absolute top-[15vh] left-0 flex w-max marquee"
+				className="absolute top-[15svh] portrait:top-[21svh] left-0 flex w-max marquee"
 				onMouseEnter={() => {
 					slowDownTimer.current = setTimeout(() => easeMarqueeTo(0.3), 1000);
 					setHoveringArt(true);
@@ -183,7 +184,7 @@ export default function Page2({
 				{[0, 1].map((copy) => (
 					<div
 						key={copy}
-						className="flex items-center justify-center gap-[5vw] pr-[4vw] test-shadow"
+						className="flex items-center justify-center gap-[5vw] pr-[4vw] portrait:gap-[6svh] portrait:pr-[5svh] test-shadow"
 						aria-hidden={copy === 1}
 					>
 						{FRAMES.map(({ slug, src, size, label }) => (
@@ -206,7 +207,7 @@ export default function Page2({
 							>
 								<img
 									src={asset("/imgs/popsicle.webp")}
-									className="absolute top-[30%] left-[50%] -translate-x-[50%] h-[80vh] min-w-[22vw] z-1"
+									className="absolute top-[30%] left-[50%] -translate-x-[50%] h-[80svh] min-w-[22vw] portrait:min-w-[22svh] z-1"
 									alt="Wooden popsicle stick holding up the frame"
 								/>
 								<img
@@ -215,7 +216,7 @@ export default function Page2({
 									alt={`${label}, painting in a picture frame`}
 								/>
 								{/* Label - sits right under the frame image */}
-								<span className="border-[0.2vh] bg-white px-[1vw] py-[1vh] text-[2vh] left-[50%] -translate-x-[50%] absolute top-full mt-[1vh] z-5 w-max max-w-[22vw] text-center">
+								<span className="border-[0.2svh] bg-white px-[1vw] py-[1svh] text-[2svh] left-[50%] -translate-x-[50%] absolute top-full mt-[1svh] z-5 w-max max-w-[22vw] portrait:max-w-[24svh] portrait:px-[1.5svh] text-center">
 									{label}
 								</span>
 							</a>
@@ -233,22 +234,23 @@ export default function Page2({
 			{/* <img
 				src={asset("/imgs/popsicle.webp")}
 				alt=""
-				className="absolute w-[15vw] mx-auto bottom-[-13vh] z-[-5]"
+				className="absolute w-[15vw] mx-auto bottom-[-13svh] z-[-5]"
 			/>
 			<button
 				onClick={nextPage}
-				className="absolute bottom-[3vh] cursor-pointer mx-auto border-[0.3vh] border-black px-6 py-2 z-20 bg-white border-[0.3vh] border-black border-dashed px-[2vw] py-[1vh] text-[2.5vh]"
+				className="absolute bottom-[3svh] cursor-pointer mx-auto border-[0.3svh] border-black px-6 py-2 z-20 bg-white border-[0.3svh] border-black border-dashed px-[2vw] py-[1svh] text-[2.5svh]"
 			>
 				Inventory
 			</button> */}
 
 			<PopsicleButton
 				onClick={nextPage}
+				href="/page3"
 				style={{
 					...drop(step >= 4, 900, BUTTON_DROP),
 					// Inline so it beats the component's right-0
 					right: "-5vw",
-					transform: step >= 4 ? "translateY(0)" : "translateY(100vh)",
+					transform: step >= 4 ? "translateY(0)" : "translateY(100svh)",
 				}}
 			>
 				Continue {"->"}

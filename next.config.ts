@@ -8,6 +8,19 @@ const SHORT_CACHE = "public, max-age=3600, stale-while-revalidate=86400";
 // every deploy - so those can safely be cached for a year
 const LONG_CACHE = "public, max-age=31536000, immutable";
 
+// Don't let browsers guess file types, don't send full URLs to other sites,
+// don't allow the site to be framed by others, and switch off device
+// features it never uses
+const SECURITY_HEADERS = [
+	{ key: "X-Content-Type-Options", value: "nosniff" },
+	{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+	{ key: "X-Frame-Options", value: "SAMEORIGIN" },
+	{
+		key: "Permissions-Policy",
+		value: "camera=(), microphone=(), geolocation=(), payment=()",
+	},
+];
+
 const ASSET_PATHS = ["/imgs/:path*", "/scribbler-font/:path*", "/og.jpg"];
 
 const nextConfig: NextConfig = {
@@ -18,6 +31,11 @@ const nextConfig: NextConfig = {
 	},
 	headers() {
 		return [
+			// Basic security headers on every page and file
+			{
+				source: "/:path*",
+				headers: SECURITY_HEADERS,
+			},
 			...ASSET_PATHS.map((source) => ({
 				source,
 				headers: [{ key: "Cache-Control", value: SHORT_CACHE }],

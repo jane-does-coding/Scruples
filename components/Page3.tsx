@@ -163,10 +163,10 @@ export default function Page3({
 
 			<img
 				src={dollSrc ?? blinkSrc}
-				className="h-[100vh] absolute top-[-32.5vh] right-[-5vw] test-shadow-darker z-5 -scale-x-[1]"
+				className="h-[100svh] absolute top-[-32.5svh] right-[-5vw] portrait:h-[46svh] portrait:top-[-12svh] portrait:right-[-6svh] max-w-none test-shadow-darker z-5 -scale-x-[1]"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
-					transform: step >= 1 ? "translateY(0)" : "translateY(-120vh)",
+					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",
 				}}
 				alt="Zhenya, a marionette doll on strings"
 			/>
@@ -174,11 +174,11 @@ export default function Page3({
 			{/* Money - rises in from the bottom with the shop items as you enter
 			    (0.4s after the click), and sinks again on Exit */}
 			<div
-				className="absolute left-[35vw] bottom-[5vh] z-11 test-shadow-darker"
+				className="absolute left-[35vw] bottom-[5svh] portrait:left-[64vw] portrait:bottom-[31svh] z-11 portrait:z-[9] test-shadow-darker"
 				style={{
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: entered ? "400ms" : "0ms",
-					transform: entered ? "translateY(0)" : "translateY(100vh)",
+					transform: entered ? "translateY(0)" : "translateY(100svh)",
 				}}
 			>
 				<MoneyStick />
@@ -188,16 +188,16 @@ export default function Page3({
 			<button
 				onClick={enter}
 				disabled={entered}
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59vh] left-[28vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59svh] left-[28vw] portrait:bottom-[58svh] portrait:left-[10vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[3vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					...drop(step >= 2),
 					transitionDelay: leaving ? "900ms" : "0ms",
 					transform:
-						step >= 2 && !entered ? "translateY(0)" : "translateY(-60vh)",
+						step >= 2 && !entered ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
 				Click to enter
 			</button>
 
@@ -207,27 +207,27 @@ export default function Page3({
 				onClick={enter}
 				disabled={entered}
 				aria-label="Enter the souvenir shop"
-				className="absolute bottom-[5vh] left-[-3vw] test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="absolute bottom-[5svh] left-[-3vw] portrait:left-[2vw] test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
 					transitionDelay: leaving ? "400ms" : "0ms",
 					transform:
-						step >= 1 && !entered ? "translateY(0)" : "translateY(100vh)",
+						step >= 1 && !entered ? "translateY(0)" : "translateY(100svh)",
 				}}
 			>
 				<img
 					src={asset("/imgs/souvenir.webp")}
-					className="h-[70vh] z-5 relative"
+					className="h-[70svh] portrait:h-[42svh] max-w-none z-5 relative"
 					alt="Souvenir shop"
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] left-[-8vw] h-[60vh] min-w-[22vw] z-1"
+					className="absolute top-[50%] left-[-8vw] portrait:left-[-6svh] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the souvenir"
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] right-[-10vw] h-[60vh] min-w-[22vw] z-1"
+					className="absolute top-[50%] right-[-10vw] portrait:right-[-8svh] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the souvenir"
 				/>
 			</button>
@@ -235,26 +235,26 @@ export default function Page3({
 			{/* Button pins - rise in where the souvenir was, 0.4s after the click
 			    (or after "Next item"), and sink when another item comes up */}
 			<div
-				className="absolute bottom-[5vh] left-[4vw] test-shadow-darker"
+				className="absolute bottom-[5svh] left-[4vw] portrait:left-[8vw] test-shadow-darker"
 				style={{
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: pinsUp ? "400ms" : "0ms",
-					transform: pinsUp ? "translateY(0)" : "translateY(100vh)",
+					transform: pinsUp ? "translateY(0)" : "translateY(100svh)",
 				}}
 			>
 				<img
 					src={asset("/imgs/buttons2.png")}
-					className="h-[60vh] z-5 relative"
+					className="h-[60svh] portrait:h-[38svh] max-w-none z-5 relative"
 					alt="Art Gallery card of four button pins"
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] left-[-10vw] h-[60vh] min-w-[22vw] z-1"
+					className="absolute top-[50%] left-[-10vw] portrait:left-[-8svh] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the button pins"
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] right-[-10vw] h-[60vh] min-w-[22vw] z-1"
+					className="absolute top-[50%] right-[-10vw] portrait:right-[-8svh] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the button pins"
 				/>
 			</div>
@@ -262,63 +262,63 @@ export default function Page3({
 			{/* Pens - same as the pins: rise in 0.4s after "Next item", and sink
 			    when another item comes up */}
 			<div
-				className="absolute bottom-[5vh] left-[10vw] test-shadow-darker"
+				className="absolute bottom-[5svh] left-[10vw] portrait:left-[14vw] test-shadow-darker"
 				style={{
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: pensUp ? "400ms" : "0ms",
-					transform: pensUp ? "translateY(0)" : "translateY(100vh)",
+					transform: pensUp ? "translateY(0)" : "translateY(100svh)",
 				}}
 			>
 				<img
 					src={asset("/imgs/pens.webp")}
-					className="h-[70vh] z-5 relative"
+					className="h-[70svh] portrait:h-[42svh] max-w-none z-5 relative"
 					alt="Pack of six Micron pens"
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60vh] min-w-[22vw] z-1"
+					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the pens"
 				/>
 			</div>
 
 			{/* Mona Lisa - same as the pins and pens */}
 			<div
-				className="absolute bottom-[5vh] left-[5vw] test-shadow-darker"
+				className="absolute bottom-[5svh] left-[5vw] portrait:left-[10vw] test-shadow-darker"
 				style={{
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: monaUp ? "400ms" : "0ms",
-					transform: monaUp ? "translateY(0)" : "translateY(100vh)",
+					transform: monaUp ? "translateY(0)" : "translateY(100svh)",
 				}}
 			>
 				<img
 					src={asset("/imgs/mona_lisa.webp")}
-					className="h-[60vh] z-5 relative"
+					className="h-[60svh] portrait:h-[38svh] max-w-none z-5 relative"
 					alt="The Mona Lisa in a picture frame"
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60vh] min-w-[22vw] z-1"
+					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the Mona Lisa"
 				/>
 			</div>
 
 			{/* Notebook - same as the pins and pens */}
 			<div
-				className="absolute bottom-[1vh] left-[9vw] test-shadow-darker"
+				className="absolute bottom-[1svh] left-[9vw] portrait:left-[12vw] test-shadow-darker"
 				style={{
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: notebookUp ? "400ms" : "0ms",
-					transform: notebookUp ? "translateY(0)" : "translateY(100vh)",
+					transform: notebookUp ? "translateY(0)" : "translateY(100svh)",
 				}}
 			>
 				<img
 					src={asset("/imgs/notebook.webp")}
-					className="h-[60vh] z-5 relative"
+					className="h-[60svh] portrait:h-[38svh] max-w-none z-5 relative"
 					alt="Ruled notebook"
 				/>
 				<img
 					src={asset("/imgs/popsicle.webp")}
-					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60vh] min-w-[22vw] z-1"
+					className="absolute top-[50%] left-[50%] -translate-x-[50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the notebook"
 				/>
 			</div>
@@ -328,15 +328,15 @@ export default function Page3({
 				onClick={() => setItem((i) => (i + 1) % ITEM_COUNT)}
 				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59vh] left-[28vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
+				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[59svh] left-[28vw] portrait:bottom-[61svh] portrait:left-[8vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[3vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				style={{
 					...drop(opened),
 					transitionDelay: entered ? "900ms" : "0ms",
-					transform: entered ? "translateY(0)" : "translateY(-60vh)",
+					transform: entered ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
 				Next item
 			</button>
 			{/* "Buy the buttons" - down while the pins are up, lifts away when
@@ -345,16 +345,16 @@ export default function Page3({
 				onClick={() => tryBuy("pins")}
 				disabled={!pinsUp}
 				tabIndex={pinsUp ? undefined : -1}
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[22vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[22vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: pinsUp ? "400ms" : "0ms",
-					transform: pinsUp ? "translateY(0)" : "translateY(-60vh)",
+					transform: pinsUp ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
 				{buyText("pins", "Buy the buttons for $10", "You bought the buttons!")}
 			</button>
 
@@ -363,16 +363,16 @@ export default function Page3({
 				onClick={() => tryBuy("pens")}
 				disabled={!pensUp}
 				tabIndex={pensUp ? undefined : -1}
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[22vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[22vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: pensUp ? "400ms" : "0ms",
-					transform: pensUp ? "translateY(0)" : "translateY(-60vh)",
+					transform: pensUp ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
 				{buyText("pens", "Buy the pens for $16", "You bought the pens!")}
 			</button>
 
@@ -381,16 +381,16 @@ export default function Page3({
 				onClick={() => tryBuy("mona-lisa")}
 				disabled={!monaUp}
 				tabIndex={monaUp ? undefined : -1}
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: monaUp ? "400ms" : "0ms",
-					transform: monaUp ? "translateY(0)" : "translateY(-60vh)",
+					transform: monaUp ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
 				{buyText(
 					"mona-lisa",
 					"Buy the Mona Lisa for $1,000,000,000",
@@ -403,16 +403,16 @@ export default function Page3({
 				onClick={() => tryBuy("notebook")}
 				disabled={!notebookUp}
 				tabIndex={notebookUp ? undefined : -1}
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67vh] left-[17vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
 					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: notebookUp ? "400ms" : "0ms",
-					transform: notebookUp ? "translateY(0)" : "translateY(-60vh)",
+					transform: notebookUp ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
 				{buyText(
 					"notebook",
 					"Buy the notebook for $8",
@@ -422,46 +422,47 @@ export default function Page3({
 
 			{/* "Exit" - drops in on the left, 1.1s after the click */}
 			<button
-				className="text-[3vh] pt-serif max-w-[70%] cursor-pointer mx-auto text-center scribbler absolute bottom-[59vh] left-[2vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] cursor-pointer mx-auto text-center scribbler absolute bottom-[59svh] left-[2vw] portrait:bottom-[69svh] portrait:left-[8vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				onClick={() => setEntered(!entered)}
 				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
 				style={{
 					...drop(opened),
 					transitionDelay: entered ? "1100ms" : "0ms",
-					transform: entered ? "translateY(0)" : "translateY(-60vh)",
+					transform: entered ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
 				Exit
 			</button>
 
 			{/* "Prev item" - under "Exit", drops in 1.3s after the click */}
 			<button
-				className="text-[3vh] pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[51vh] left-[-1vw] bg-white border-[0.3vh] border-black border-dashed px-[1vw] py-[0.5vh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
+				className="text-[3svh] portrait:text-[2.4svh] portrait:z-6 pt-serif max-w-[70%] mx-auto text-center scribbler absolute bottom-[51svh] left-[-1vw] portrait:bottom-[69svh] portrait:left-[28vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				onClick={() => setItem((i) => (i - 1 + ITEM_COUNT) % ITEM_COUNT)}
 				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
 				style={{
 					...drop(opened),
 					transitionDelay: entered ? "1300ms" : "0ms",
-					transform: entered ? "translateY(0)" : "translateY(-60vh)",
+					transform: entered ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25vh] top-[-25vh] right-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
 				Prev item
 			</button>
 
 			<div className="z-10">
 				<PopsicleButton
 					onClick={nextPage}
+					href="/page4"
 					style={{
 						...drop(step >= 3, 900, BUTTON_DROP),
 						// Inline so it beats the component's right-0
 						right: "-5vw",
-						transform: step >= 3 ? "translateY(0)" : "translateY(100vh)",
+						transform: step >= 3 ? "translateY(0)" : "translateY(100svh)",
 					}}
 				>
 					Continue {"->"}
