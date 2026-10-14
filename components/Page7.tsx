@@ -3,6 +3,7 @@ import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import usePortrait from "@/components/usePortrait";
+import { asset } from "@/lib/asset";
 import * as sound from "@/lib/sound";
 
 type PageProps = {
@@ -22,6 +23,13 @@ const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 // Once the curtains have opened: Zhenya drops in, then the spotlight
 // switches on
 const SPOTLIGHT_MS = 900;
+
+// Zhenya's tweaking: tweaking-enter and tweaking-exit are 18 frames × 50ms
+// (the same length as the spotlight sputtering on and off), tweaking loops
+const TWEAK_ENTER = asset("/imgs/tweaking-enter.webp");
+const TWEAK_EXIT = asset("/imgs/tweaking-exit.webp");
+const TWEAK_LOOP = asset("/imgs/tweaking.webp");
+const TWEAK_MS = 900;
 
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const BUTTON_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
@@ -107,6 +115,41 @@ export default function Page7({ curtainsOpen }: PageProps) {
 		if (step === 2) sound.thunder();
 	}, [step]);
 
+	// Zhenya tweaks out under the spotlight: tweaking-enter as it sputters
+	// on (normal face to dizzy spiral eyes), the tweaking loop while it's on,
+	// then tweaking-exit as it sputters out (back to normal) - then her usual
+	// blinking. A browser won't restart an animated image it has already
+	// shown, so enter and exit are loaded once as blobs and get a fresh
+	// object URL each time they play
+	const [tweakSrc, setTweakSrc] = useState<string | null>(null);
+	const tweakBlobs = useRef<{ enter?: Blob; exit?: Blob }>({});
+	const tweakUrl = useRef<string | null>(null);
+	useEffect(() => {
+		fetch(TWEAK_ENTER, { priority: "low" })
+			.then((res) => res.blob())
+			.then((b) => (tweakBlobs.current.enter = b));
+		fetch(TWEAK_EXIT, { priority: "low" })
+			.then((res) => res.blob())
+			.then((b) => (tweakBlobs.current.exit = b));
+		new Image().src = TWEAK_LOOP;
+		return () => {
+			if (tweakUrl.current) URL.revokeObjectURL(tweakUrl.current);
+		};
+	}, []);
+	const playOnce = (blob: Blob | undefined, fallback: string) => {
+		if (tweakUrl.current) URL.revokeObjectURL(tweakUrl.current);
+		tweakUrl.current = blob ? URL.createObjectURL(blob) : null;
+		setTweakSrc(tweakUrl.current ?? fallback);
+	};
+	useEffect(() => {
+		if (step !== 2) return;
+		const timers = [
+			setTimeout(() => playOnce(tweakBlobs.current.enter, TWEAK_ENTER), 0),
+			setTimeout(() => setTweakSrc(TWEAK_LOOP), TWEAK_MS),
+		];
+		return () => timers.forEach(clearTimeout);
+	}, [step]);
+
 	// The labels all flip over to "But why?" together when "Whaaa-" is
 	// clicked
 	const [flipped, setFlipped] = useState(false);
@@ -131,7 +174,15 @@ export default function Page7({ curtainsOpen }: PageProps) {
 		setFlipped(true);
 		timers.current.push(
 			setTimeout(() => setStage(1), LABELS_OUT_MS),
-			setTimeout(() => setStage(2), LABELS_OUT_MS + SPOTLIGHT_OFF_MS),
+			setTimeout(() => {
+				setStage(2);
+				// …and she comes out of it as the light sputters out
+				playOnce(tweakBlobs.current.exit, TWEAK_EXIT);
+			}, LABELS_OUT_MS + SPOTLIGHT_OFF_MS),
+			setTimeout(
+				() => setTweakSrc(null),
+				LABELS_OUT_MS + SPOTLIGHT_OFF_MS + TWEAK_MS,
+			),
 		);
 	};
 
@@ -145,13 +196,14 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			    outside it */}
 			<div
 				aria-hidden
-				className="fixed inset-0 z-11 pointer-events-none"
+				// Like a faulty stage light: it sputters on (.spot-on, with a
+				// buzzy flicker the whole time it's on), and sputters out after
+				// "Whaaa-", once the labels have gone (.spot-off)
+				className={`fixed inset-0 z-11 pointer-events-none ${
+					step >= 2 ? (stage < 2 ? "spot-on" : "spot-off") : ""
+				}`}
 				style={{
-					// Switches on quickly (a quarter of a second, not instantly),
-					// and off the same way after "Whaaa-", once the labels have
-					// gone
 					opacity: step >= 2 && stage < 2 ? 1 : 0,
-					transition: "opacity 250ms ease-out",
 					background: portrait
 						? "radial-gradient(circle at 50% 52%, transparent 0, transparent min(30svh, 46vw), rgba(0, 0, 0, 0.72) calc(min(30svh, 46vw) + 1svh))"
 						: "radial-gradient(circle at 50% 60%, transparent 0, transparent 33svh, rgba(0, 0, 0, 0.72) 34svh)",
@@ -244,7 +296,7 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			    the other pages, with an extra dark shadow. Whatever of her is
 			    outside the spotlight (the strings at the top) is in the dark */}
 			<img
-				src={blinkSrc}
+				src={tweakSrc ?? blinkSrc}
 				className="h-svh w-auto max-w-none absolute top-[-28svh] portrait:h-[60svh] portrait:top-[-8svh] translate-x-[-50%] z-9"
 				style={{
 					// Once the spotlight is off: her shadow goes back to the usual
@@ -255,7 +307,8 @@ export default function Page7({ curtainsOpen }: PageProps) {
 							? "drop-shadow(12px 12px 2px #28282857)"
 							: "drop-shadow(20px 30px 3px #000000e6)",
 					visibility: step >= 1 ? "visible" : "hidden",
-					transition: `transform 900ms ${DOLL_DROP}, filter 600ms ease, scale 600ms ease-in-out 300ms, left 1200ms ease-in-out 600ms`,
+					// (turning and walking off wait for tweaking-exit to finish)
+					transition: `transform 900ms ${DOLL_DROP}, filter 600ms ease, scale 600ms ease-in-out ${TWEAK_MS}ms, left 1200ms ease-in-out ${TWEAK_MS + 300}ms`,
 					transform:
 						step < 1
 							? "translateY(-120svh)"

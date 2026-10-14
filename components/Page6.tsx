@@ -510,7 +510,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			>
 				<Strings />
 				{tools.length
-					? `Zhenya has the ${tools.join(" and ")} from the shop - draw something in the frame!`
+					? `Daphne lends Zhenya her palette - draw something in the frame!`
 					: "Daphne lends Zhenya her palette - draw something in the frame!"}
 			</p>
 
