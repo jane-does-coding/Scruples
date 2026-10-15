@@ -290,10 +290,7 @@ export const startMusic = () => {
 	const audio = ctx;
 	const bus = audio.createGain();
 	bus.gain.setValueAtTime(0.0001, audio.currentTime);
-	bus.gain.exponentialRampToValueAtTime(
-		MUSIC_VOLUME,
-		audio.currentTime + 6,
-	);
+	bus.gain.exponentialRampToValueAtTime(MUSIC_VOLUME, audio.currentTime + 6);
 	// Warm it up: roll off the highs
 	const warm = audio.createBiquadFilter();
 	warm.type = "lowpass";
@@ -335,4 +332,163 @@ export const startMusic = () => {
 	};
 	schedule();
 	music = { bus, timer: setInterval(schedule, 300) };
+};
+
+// Fades the lullaby out (e.g. for the storm on Page 7) and back in again
+export const pauseMusic = (paused: boolean) => {
+	if (!ctx || !music) return;
+	const now = ctx.currentTime;
+	music.bus.gain.cancelScheduledValues(now);
+	music.bus.gain.setValueAtTime(Math.max(music.bus.gain.value, 0.0001), now);
+	music.bus.gain.exponentialRampToValueAtTime(
+		paused ? 0.0001 : MUSIC_VOLUME,
+		now + (paused ? 0.6 : 3),
+	);
+};
+
+// ---------- Storm music ----------
+// For Zhenya tweaking under the spotlight: a dark, uneasy drone - two low
+// detuned notes a semitone apart, with a slow wobble - and distant thunder
+// rolling in every few seconds. Starts and stops with a fade
+const STORM_VOLUME = 0.22;
+let storm: {
+	bus: GainNode;
+	stop: () => void;
+} | null = null;
+
+export const startStorm = () => {
+	if (!ctx || !master || storm) return;
+	const audio = ctx;
+	const now = audio.currentTime;
+	const bus = audio.createGain();
+	bus.gain.setValueAtTime(0.0001, now);
+	bus.gain.exponentialRampToValueAtTime(STORM_VOLUME, now + 1.2);
+	const low = audio.createBiquadFilter();
+	low.type = "lowpass";
+	low.frequency.value = 420;
+	low.connect(bus).connect(master);
+
+	// The drone: D and E-flat, low down, each doubled slightly out of tune
+	const oscs = [38, 39, 26].flatMap((midi) =>
+		[-8, 8].map((detune) => {
+			const osc = audio.createOscillator();
+			osc.type = "sawtooth";
+			osc.frequency.value = freq(midi);
+			osc.detune.value = detune;
+			const gain = audio.createGain();
+			gain.gain.value = midi === 26 ? 0.22 : 0.1;
+			osc.connect(gain).connect(low);
+			osc.start(now);
+			return osc;
+		}),
+	);
+	// A slow wobble in the filter, so it breathes uneasily
+	const lfo = audio.createOscillator();
+	lfo.frequency.value = 0.18;
+	const lfoGain = audio.createGain();
+	lfoGain.gain.value = 160;
+	lfo.connect(lfoGain).connect(low.frequency);
+	lfo.start(now);
+
+	// Distant thunder every few seconds
+	let rumbleTimer: ReturnType<typeof setTimeout>;
+	const rumble = () => {
+		if (!noise) return;
+		const at = audio.currentTime;
+		const source = audio.createBufferSource();
+		source.buffer = noise;
+		source.loop = true;
+		const filter = audio.createBiquadFilter();
+		filter.type = "lowpass";
+		filter.frequency.value = 160;
+		const gain = audio.createGain();
+		gain.gain.setValueAtTime(0.0001, at);
+		gain.gain.exponentialRampToValueAtTime(0.9, at + 0.4);
+		gain.gain.exponentialRampToValueAtTime(0.0001, at + 2.8);
+		source.connect(filter).connect(gain).connect(bus);
+		source.start(at, Math.random() * 0.5);
+		source.stop(at + 3);
+		rumbleTimer = setTimeout(rumble, 3500 + Math.random() * 3500);
+	};
+	rumbleTimer = setTimeout(rumble, 2000);
+
+	storm = {
+		bus,
+		stop: () => {
+			clearTimeout(rumbleTimer);
+			const end = audio.currentTime;
+			bus.gain.cancelScheduledValues(end);
+			bus.gain.setValueAtTime(Math.max(bus.gain.value, 0.0001), end);
+			bus.gain.exponentialRampToValueAtTime(0.0001, end + 1.2);
+			[...oscs, lfo].forEach((osc) => osc.stop(end + 1.3));
+		},
+	};
+};
+
+export const stopStorm = () => {
+	storm?.stop();
+	storm = null;
+};
+
+// The souvenir shop's door: a little shop bell, two quick dings with a
+// shimmery ring
+export const shopBell = () => {
+	const audio = ready();
+	if (!audio || !master) return;
+	[0, 0.16].forEach((offset, strike) => {
+		const at = audio.currentTime + offset;
+		// A bell's partials aren't in tune with each other - that's the ring
+		[1, 2.76, 5.4].forEach((ratio, i) => {
+			const osc = audio.createOscillator();
+			osc.type = "sine";
+			osc.frequency.value = (strike ? 1480 : 1320) * ratio;
+			const gain = audio.createGain();
+			gain.gain.setValueAtTime(0.0001, at);
+			gain.gain.exponentialRampToValueAtTime([0.18, 0.07, 0.03][i], at + 0.004);
+			gain.gain.exponentialRampToValueAtTime(0.0001, at + [1.4, 0.8, 0.4][i]);
+			osc.connect(gain).connect(master!);
+			osc.start(at);
+			osc.stop(at + 1.5);
+		});
+	});
+};
+
+// Opening a mystery box: a cardboard rustle as the flaps open, then a
+// little rising "ta-da" of chimes
+export const unbox = () => {
+	const audio = ready();
+	if (!audio || !master) return;
+	const now = audio.currentTime;
+
+	// Two quick scrapes of cardboard
+	[0, 0.12].forEach((offset) => {
+		const at = now + offset;
+		const scrape = noiseSource(audio);
+		const band = audio.createBiquadFilter();
+		band.type = "bandpass";
+		band.frequency.value = 1800;
+		band.Q.value = 0.8;
+		const gain = audio.createGain();
+		gain.gain.setValueAtTime(0.0001, at);
+		gain.gain.exponentialRampToValueAtTime(0.25, at + 0.02);
+		gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.11);
+		scrape.connect(band).connect(gain).connect(master!);
+		scrape.start(at, Math.random() * 0.5);
+		scrape.stop(at + 0.12);
+	});
+
+	// C, E, G, C - up, like something being revealed
+	[523, 659, 784, 1047].forEach((freq, i) => {
+		const at = now + 0.3 + i * 0.09;
+		const osc = audio.createOscillator();
+		osc.type = "triangle";
+		osc.frequency.value = freq;
+		const gain = audio.createGain();
+		gain.gain.setValueAtTime(0.0001, at);
+		gain.gain.exponentialRampToValueAtTime(0.16, at + 0.01);
+		gain.gain.exponentialRampToValueAtTime(0.0001, at + (i === 3 ? 0.9 : 0.35));
+		osc.connect(gain).connect(master!);
+		osc.start(at);
+		osc.stop(at + 1);
+	});
 };

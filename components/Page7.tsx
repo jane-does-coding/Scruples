@@ -5,6 +5,7 @@ import useBlinkingDoll from "@/components/useBlinkingDoll";
 import usePortrait from "@/components/usePortrait";
 import { asset } from "@/lib/asset";
 import * as sound from "@/lib/sound";
+import Zhenya from "@/components/Zhenya";
 
 type PageProps = {
 	nextPage: () => void;
@@ -110,10 +111,22 @@ export default function Page7({ curtainsOpen }: PageProps) {
 
 	const [stage, setStage] = useState(0);
 
-	// A thunderclap as the spotlight switches on
+	// A thunderclap as the spotlight switches on - and the lullaby gives way
+	// to storm music while Zhenya tweaks (back to the lullaby once the
+	// spotlight's off, or if the page is left in the middle of it)
 	useEffect(() => {
-		if (step === 2) sound.thunder();
+		if (step !== 2) return;
+		sound.thunder();
+		sound.pauseMusic(true);
+		sound.startStorm();
 	}, [step]);
+	useEffect(
+		() => () => {
+			sound.stopStorm();
+			sound.pauseMusic(false);
+		},
+		[],
+	);
 
 	// Zhenya tweaks out under the spotlight: tweaking-enter as it sputters
 	// on (normal face to dizzy spiral eyes), the tweaking loop while it's on,
@@ -176,6 +189,8 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			setTimeout(() => setStage(1), LABELS_OUT_MS),
 			setTimeout(() => {
 				setStage(2);
+				sound.stopStorm();
+				sound.pauseMusic(false);
 				// …and she comes out of it as the light sputters out
 				playOnce(tweakBlobs.current.exit, TWEAK_EXIT);
 			}, LABELS_OUT_MS + SPOTLIGHT_OFF_MS),
@@ -295,7 +310,7 @@ export default function Page7({ curtainsOpen }: PageProps) {
 			{/* Zhenya - drops into the middle, under the curtains (z-10) like on
 			    the other pages, with an extra dark shadow. Whatever of her is
 			    outside the spotlight (the strings at the top) is in the dark */}
-			<img
+			<Zhenya
 				src={tweakSrc ?? blinkSrc}
 				className="h-svh w-auto max-w-none absolute top-[-28svh] portrait:h-[60svh] portrait:top-[-8svh] translate-x-[-50%] z-9"
 				style={{

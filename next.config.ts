@@ -24,6 +24,8 @@ const SECURITY_HEADERS = [
 const ASSET_PATHS = ["/imgs/:path*", "/scribbler-font/:path*", "/og.jpg"];
 
 const nextConfig: NextConfig = {
+	// The dev-only "N" badge goes bottom-right, out of the page marker's way
+	devIndicators: { position: "bottom-right" },
 	env: {
 		// The deploy's git commit on Vercel; empty locally (no versioning)
 		NEXT_PUBLIC_ASSET_VERSION:

@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useStage } from "@/components/Stage";
 import { FRAMES, type FrameSize } from "@/lib/frames";
 import { asset } from "@/lib/asset";
+import Zhenya from "@/components/Zhenya";
 
 // Extra-wide is sized so it's the same height as a wide frame
 // (frame4 is 1018×762, wide frames are 762×705)
@@ -133,7 +134,7 @@ export default function Page2({
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
 			{/* Doll */}
-			<img
+			<Zhenya
 				src={dollImage}
 				className="h-svh absolute top-[-27svh] left-[-8vw] portrait:h-[62svh] portrait:top-[-10svh] portrait:left-[-22vw] max-w-none test-shadow-darker z-5"
 				style={{

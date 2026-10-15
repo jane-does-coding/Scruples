@@ -41,6 +41,24 @@ export const ITEMS = {
 		description:
 			"A smiley face on an easel that Daphne drew for Zhenya, one stroke at a time.",
 	},
+	// Opened from the inventory, it turns into the four hats (one "hats"
+	// slot). After that it's sold out
+	"mystery-box": {
+		name: "Mystery box",
+		price: 10,
+		image: asset("/imgs/mystery-box2.webp"),
+		description: "A cardboard box with four hats inside. Open it to see them!",
+	},
+	// The four hats from the mystery box, kept together in one inventory
+	// slot. Clicking it opens the wardrobe (see HATS). Price 0 - they can't
+	// be sold
+	hats: {
+		name: "Hats",
+		price: 0,
+		image: asset("/imgs/hats-preview.webp"),
+		description:
+			"A sailor hat, devil horns, a princess crown and a backwards cap, from the mystery box.",
+	},
 	// Not for sale - it's what the magic button makes on Page 5. Price 0 means
 	// it can't be sold
 	"magic-drawing": {
@@ -54,6 +72,34 @@ export const ITEMS = {
 } as const;
 
 export type ItemId = keyof typeof ITEMS;
+
+// The hats in the mystery box, for Zhenya to try on in the wardrobe.
+// `image` is its preview drawing, cropped close (in the wardrobe's boxes);
+// `wear` is the hat drawn the same size as the doll's images, so it can be
+// laid right over her
+export const HATS = {
+	sailor: {
+		name: "Sailor hat",
+		image: asset("/imgs/hat-sailor-thumb.webp"),
+		wear: asset("/imgs/hat-sailor.webp"),
+	},
+	devil: {
+		name: "Devil horns",
+		image: asset("/imgs/hat-devil-thumb.webp"),
+		wear: asset("/imgs/hat-devil.webp"),
+	},
+	crown: {
+		name: "Princess crown",
+		image: asset("/imgs/hat-crown-thumb.webp"),
+		wear: asset("/imgs/hat-crown.webp"),
+	},
+	cap: {
+		name: "Backwards cap",
+		image: asset("/imgs/hat-cap-thumb.webp"),
+		wear: asset("/imgs/hat-cap.webp"),
+	},
+};
+export type HatId = keyof typeof HATS;
 
 // You start with three $5 bills
 export const STARTING_MONEY = 15;

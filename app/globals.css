@@ -300,6 +300,18 @@ button {
 	}
 }
 
+/* A hat being put on Zhenya - fades in (opacity only, so it doesn't fight
+   the doll's own transform and scale transitions) */
+.hat-on {
+	animation: hat-on 300ms ease both;
+}
+
+@keyframes hat-on {
+	from {
+		opacity: 0;
+	}
+}
+
 /* Vertical version for Page 4's posts - scrolls up */
 .marquee-up {
 	animation: marquee-up 40s linear infinite;

@@ -5,6 +5,7 @@ import { useStage } from "@/components/Stage";
 import { asset } from "@/lib/asset";
 import { useDrawings } from "@/lib/drawings";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import Zhenya from "@/components/Zhenya";
 
 // The last page - a curtain call. On the left, the story's ending scrolls
 // up a sentence at a time, the sentences threaded on two strings that stay
@@ -132,7 +133,7 @@ export default function LastPage() {
 
 			{/* Zhenya - on the very left, watching. Not on portrait screens,
 			    where there's no room */}
-			<img
+			<Zhenya
 				src={dollSrc}
 				className="h-svh w-auto max-w-none absolute top-[-30svh] left-[-12vw] portrait:hidden test-shadow-darker z-5"
 				style={hang(shown, "top", { ms: 900, easing: DROP })}

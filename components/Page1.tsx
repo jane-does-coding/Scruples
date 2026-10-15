@@ -3,6 +3,7 @@ import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import { asset } from "@/lib/asset";
 import usePortrait from "@/components/usePortrait";
+import Zhenya from "@/components/Zhenya";
 
 type PageProps = {
 	nextPage: () => void;
@@ -108,7 +109,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 			</p>
 
 			{/* Doll */}
-			<img
+			<Zhenya
 				src={moving ? asset("/imgs/moving.webp") : blinkSrc}
 				className="h-svh absolute top-[-30svh] left-[-5vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"
 				style={{

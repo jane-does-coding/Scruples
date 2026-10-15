@@ -2,9 +2,11 @@ import PopsicleButton from "@/components/PopsicleButton";
 import { useEffect, useRef, useState } from "react";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import MoneyStick from "@/components/MoneyStick";
+import * as sound from "@/lib/sound";
 import { useStage } from "@/components/Stage";
 import type { ItemId } from "@/lib/shop";
 import { asset } from "@/lib/asset";
+import Zhenya from "@/components/Zhenya";
 
 type PageProps = {
 	nextPage: () => void;
@@ -44,7 +46,7 @@ export default function Page3({
 	// screen instead of hiding them instantly
 	const [opened, setOpened] = useState(false);
 	// Which item is up while in the shop: 0 = button pins, 1 = pens,
-	// 2 = notebook, 3 = Mona Lisa.
+	// 2 = notebook, 3 = Mona Lisa, 4 = mystery box.
 	// "Next item" and "Prev item" cycle through them
 	// Buying from the shop. The "Buy…" labels are buttons: clicking one buys
 	// the item into your inventory (the "?" menu) if you can afford it, or
@@ -67,8 +69,10 @@ export default function Page3({
 				: text;
 
 	const [item, setItem] = useState(0);
-	const ITEM_COUNT = 4;
+	const ITEM_COUNT = 5;
 	const enter = () => {
+		// The shop door's bell
+		sound.shopBell();
 		setEntered(true);
 		setOpened(true);
 		setItem(0);
@@ -77,6 +81,10 @@ export default function Page3({
 	const pensUp = entered && item === 1;
 	const notebookUp = entered && item === 2;
 	const monaUp = entered && item === 3;
+	const boxUp = entered && item === 4;
+	// Once the box has been opened (and the hats are in the inventory), it's
+	// sold out
+	const soldOut = owned.includes("hats");
 	// The doll's animation. On the Mona Lisa it plays "wow" once as the
 	// painting rises, then holds "wow-idle"; leaving the Mona Lisa (Next, Prev
 	// or Exit) plays "wow-reverse" once, then goes back to blinking.
@@ -161,7 +169,7 @@ export default function Page3({
 			    itself shows it visually */}
 			<h1 className="sr-only">Zhenya&apos;s souvenir shop</h1>
 
-			<img
+			<Zhenya
 				src={dollSrc ?? blinkSrc}
 				className="h-svh absolute top-[-32.5svh] right-[-5vw] portrait:h-[46svh] portrait:top-[-12svh] portrait:right-[-6svh] max-w-none test-shadow-darker z-5 scale-x-[-1]"
 				style={{
@@ -323,6 +331,27 @@ export default function Page3({
 				/>
 			</div>
 
+			{/* Mystery box - same as the others */}
+			<div
+				className="absolute bottom-[9svh] left-[6vw] portrait:left-[8vw] test-shadow-darker"
+				style={{
+					...drop(opened, 900, DOLL_DROP),
+					transitionDelay: boxUp ? "400ms" : "0ms",
+					transform: boxUp ? "translateY(0)" : "translateY(100svh)",
+				}}
+			>
+				<img
+					src={asset("/imgs/mystery-box2.webp")}
+					className="h-[36svh] portrait:h-[20svh] max-w-none z-5 relative"
+					alt="A cardboard mystery box marked with a big question mark"
+				/>
+				<img
+					src={asset("/imgs/popsicle.webp")}
+					className="absolute top-[50%] left-[50%] translate-x-[-50%] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
+					alt="Wooden popsicle stick holding up the mystery box"
+				/>
+			</div>
+
 			{/* "Next item" - drops in 0.9s after the click */}
 			<button
 				onClick={() => setItem((i) => (i + 1) % ITEM_COUNT)}
@@ -418,6 +447,30 @@ export default function Page3({
 					"Buy the notebook for $8",
 					"You bought the notebook!",
 				)}
+			</button>
+
+			{/* "Buy a mystery box" - same, for the mystery box */}
+			<button
+				onClick={() => tryBuy("mystery-box")}
+				disabled={!boxUp || soldOut}
+				tabIndex={boxUp ? undefined : -1}
+				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+				style={{
+					// Same timing as the item: 0.4s delay, then the same 900ms drop
+					...drop(opened, 900, DOLL_DROP),
+					transitionDelay: boxUp ? "400ms" : "0ms",
+					transform: boxUp ? "translateY(0)" : "translateY(-60svh)",
+				}}
+			>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
+				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				{soldOut
+					? "Sold out - you have all the hats!"
+					: buyText(
+							"mystery-box",
+							"Buy a mystery box for $10",
+							"You bought it! Open it in the menu",
+						)}
 			</button>
 
 			{/* "Exit" - drops in on the left, 1.1s after the click */}

@@ -3,6 +3,7 @@ import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import { asset } from "@/lib/asset";
 import usePortrait from "@/components/usePortrait";
+import Zhenya from "@/components/Zhenya";
 
 type PageProps = {
 	nextPage: () => void;
@@ -117,7 +118,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
 			{/* Doll - on the left */}
-			<img
+			<Zhenya
 				src={dollSrc}
 				className="h-[97svh] absolute top-[-27svh] left-[-9vw] portrait:h-[55svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow-darker z-5"
 				style={{

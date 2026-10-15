@@ -20,6 +20,8 @@ import {
 	ITEMS,
 	STARTING_MONEY,
 	billsFor,
+	HATS,
+	type HatId,
 	type ItemId,
 } from "@/lib/shop";
 
@@ -87,6 +89,14 @@ type StageContextValue = {
 	// Adds a drawing made along the way (like yours on Page 6) to the
 	// inventory. Drawings can't be sold
 	keepDrawing: (drawing: Omit<Drawing, "key">) => void;
+	// The hat Zhenya is wearing (from a mystery box): its image, the same
+	// size as hers, to lay over her - or null
+	hat: string | null;
+	// Which hat that is, and putting one on (or null to take it off)
+	wearing: HatId | null;
+	equip: (hat: HatId | null) => void;
+	// Through the curtains to where the top-left "<-" goes
+	goBack: () => void;
 };
 
 // A drawing in the inventory that isn't from the shop
@@ -124,6 +134,10 @@ const PAGES = [
 	{ title: "Curtain call", href: "/lastpage" },
 ];
 
+// The inventory pop-up next to the "?"
+const NOTE =
+	"note-pop fixed top-[1svh] right-[4.8vw] portrait:top-[2vw] portrait:right-[16vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
+
 const StageContext = createContext<StageContextValue | null>(null);
 
 export const useStage = () => {
@@ -159,16 +173,40 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 	// Nav: header.png slides down from the top when "?" is clicked
 	const [navOpen, setNavOpen] = useState(false);
+	// A little "menu" tag hangs by the "?" until the menu has been opened
+	// once (remembered in this browser)
+	const [menuSeen, setMenuSeen] = useState(true);
+	useEffect(() => {
+		let seen = false;
+		try {
+			seen = localStorage.getItem("scruples-menu-seen") === "1";
+		} catch {}
+		const timer = setTimeout(() => setMenuSeen(seen), 0);
+		return () => clearTimeout(timer);
+	}, []);
+	useEffect(() => {
+		if (!navOpen || menuSeen) return;
+		try {
+			localStorage.setItem("scruples-menu-seen", "1");
+		} catch {}
+		const timer = setTimeout(() => setMenuSeen(true), 0);
+		return () => clearTimeout(timer);
+	}, [navOpen, menuSeen]);
 
 	// Inventory - money left and items bought
 	const [money, setMoney] = useState(STARTING_MONEY);
 	const [owned, setOwned] = useState<ItemId[]>([]);
 	// Every change to the inventory pops up a note next to the "?" button
 	// (see notify)
-	const [note, setNote] = useState<{ text: string; id: number } | null>(null);
+	// (`link` = it says "click to view" and opens the inventory)
+	const [note, setNote] = useState<{
+		text: string;
+		id: number;
+		link: boolean;
+	} | null>(null);
 	const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-	const notify = (text: string) => {
-		setNote((n) => ({ text, id: (n?.id ?? 0) + 1 }));
+	const notify = (text: string, link = true) => {
+		setNote((n) => ({ text, link, id: (n?.id ?? 0) + 1 }));
 		clearTimeout(noteTimer.current);
 		noteTimer.current = setTimeout(() => setNote(null), 5000);
 	};
@@ -192,6 +230,36 @@ export default function Stage({ children }: { children: ReactNode }) {
 		if (amount <= 0) return;
 		setMoney((m) => m - amount);
 		notify(`You gave Daphne $${amount}`);
+	};
+	// Opening a mystery box: it turns into the four hats, which share one
+	// inventory slot, and the wardrobe opens to try them on
+	const openBox = () => {
+		setOwned(owned.map((i) => (i === "mystery-box" ? "hats" : i)));
+		sound.unbox();
+		notify(`You found ${Object.keys(HATS).length} hats!`, false);
+		closeItem();
+		openWardrobe();
+	};
+	// The hat Zhenya has on (one at a time), and the wardrobe page where
+	// they're tried on - opened by clicking the hats in the inventory. Its
+	// Back goes to the page it was opened from
+	const [wearing, setWearing] = useState<HatId | null>(null);
+	const [wardrobeFrom, setWardrobeFrom] = useState("/page3");
+	const openWardrobe = () => {
+		setNavOpen(false);
+		if (pathname === "/wardrobe") return;
+		setWardrobeFrom(pathname);
+		goTo("/wardrobe");
+	};
+	const equip = (hat: HatId | null) => {
+		if (hat === wearing) return;
+		setWearing(hat);
+		notify(
+			hat
+				? `Zhenya is wearing the ${HATS[hat].name.toLowerCase()}`
+				: `Zhenya took off the ${HATS[wearing!].name.toLowerCase()}`,
+			false,
+		);
 	};
 	const sell = (item: ItemId) => {
 		setOwned(owned.filter((i) => i !== item));
@@ -656,7 +724,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 			goTo(href);
 		};
 
-	const back = backHref(pathname);
+	const back = pathname === "/wardrobe" ? wardrobeFrom : backHref(pathname);
+	// 1-8 on the story's pages, 0 elsewhere (paintings, the gallery)
+	const pageNumber = PAGES.findIndex((p) => p.href === pathname) + 1;
 	const goBack = () => {
 		// Only once the curtains are fully open (not mid-animation or behind
 		// the ticket), so it always goes through the curtains
@@ -684,6 +754,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 				give,
 				donate,
 				keepDrawing,
+				hat: wearing && owned.includes("hats") ? HATS[wearing].wear : null,
+				wearing,
+				equip,
+				goBack,
 			}}
 		>
 			<div className="relative h-svh overflow-clip">
@@ -696,6 +770,31 @@ export default function Stage({ children }: { children: ReactNode }) {
 				>
 					?
 				</button>
+
+				{/* "menu" - a tiny tag just left of the "?", only until the menu
+				    has been opened once, and not while a note is showing there */}
+				{!menuSeen && !note && ticket === "gone" && (
+					<button
+						onClick={() => setNavOpen(true)}
+						tabIndex={-1}
+						aria-hidden
+						className="note-pop fixed top-[1.2svh] right-[4.8vw] portrait:top-[2.4vw] portrait:right-[16vw] z-23 text-[2.5svh] portrait:text-[1.8svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[0.8vw] portrait:px-[2vw] py-[0.3svh] cursor-pointer drop-shadow-lg drop-shadow-black/60"
+					>
+						menu {"->"}
+					</button>
+				)}
+
+				{/* Which page this is - same look as the "?", in the bottom-left
+				    corner. Opens the menu (where the pages are listed) */}
+				{pageNumber > 0 && ticket === "gone" && (
+					<button
+						onClick={() => setNavOpen(true)}
+						aria-label={`Page ${pageNumber} of ${PAGES.length} - open the page list`}
+						className="fixed bottom-[0.5svh] left-[0.5vw] portrait:bottom-[1.5vw] portrait:left-[1.5vw] z-23 h-[3.5vw] min-h-11 px-[1vw] portrait:px-[3vw] text-[2.5svh] portrait:text-[1.8svh] scribbler cursor-pointer bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					>
+						page {pageNumber} of {PAGES.length}
+					</button>
+				)}
 
 				{/* Sound on/off - same look as the "?", just under it */}
 				<button
@@ -733,18 +832,24 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 				{/* Inventory pop-up - just left of the "?", whenever something is
 				    added, sold or given. Clicking it opens the inventory */}
-				{note && (
-					<button
-						key={note.id}
-						onClick={() => {
-							setNote(null);
-							setNavOpen(true);
-						}}
-						className="note-pop fixed top-[1svh] right-[4.8vw] portrait:top-[2vw] portrait:right-[16vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] cursor-pointer drop-shadow-lg drop-shadow-black/60"
-					>
-						{note.text}, click to view {"->"}
-					</button>
-				)}
+				{note &&
+					(note.link ? (
+						<button
+							key={note.id}
+							onClick={() => {
+								setNote(null);
+								setNavOpen(true);
+							}}
+							className={`${NOTE} border-dashed cursor-pointer`}
+						>
+							{note.text}, click to view {"->"}
+						</button>
+					) : (
+						// Just news - nothing to click
+						<p key={note.id} aria-hidden className={NOTE}>
+							{note.text}
+						</p>
+					))}
 
 				{/* Back - same look as the "?", in the top-left corner */}
 				{back && (
@@ -990,7 +1095,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 												>
 													{entry && (
 														<button
-															onClick={() => showItem(entry.key, i + 1)}
+															onClick={() => {
+																// The hats open the wardrobe instead
+																if (entry.item === "hats") openWardrobe();
+																else showItem(entry.key, i + 1);
+															}}
 															className="w-full h-full flex items-center justify-center cursor-pointer"
 															aria-label={`${entry.name} - details`}
 														>
@@ -1092,6 +1201,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 												) : (
 													// Art can be clicked to view it big
 													<img
+														// A new key when the box turns into a hat, so
+														// the hat pops in
+														key={opened.key}
 														src={opened.image}
 														onClick={
 															opened.art
@@ -1135,6 +1247,14 @@ export default function Stage({ children }: { children: ReactNode }) {
 															className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
 														>
 															Use
+														</button>
+													)}
+													{opened.item === "mystery-box" && (
+														<button
+															onClick={openBox}
+															className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
+														>
+															Open
 														</button>
 													)}
 													{opened.art && (

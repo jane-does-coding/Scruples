@@ -7,6 +7,7 @@ import MoneyStick from "@/components/MoneyStick";
 import usePortrait from "@/components/usePortrait";
 import { useStage } from "@/components/Stage";
 import useLeaving from "@/components/useLeaving";
+import Zhenya from "@/components/Zhenya";
 
 type PageProps = {
 	nextPage: () => void;
@@ -479,7 +480,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			    clicked it turns to face the other way (the scale flips through 0,
 			    like turning a cut-out round) and walks over to the left, playing
 			    wow-reverse and then going back to idle blinking */}
-			<img
+			<Zhenya
 				src={dollSrc}
 				className="h-svh absolute top-[-28svh] portrait:h-[52svh] portrait:top-[-12svh] max-w-none translate-x-[-50%] test-shadow-darker z-5"
 				style={{

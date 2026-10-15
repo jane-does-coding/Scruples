@@ -15,6 +15,7 @@ import {
 	pointsOn,
 	type Pen,
 } from "@/lib/stroke";
+import Zhenya from "@/components/Zhenya";
 
 type PageProps = {
 	nextPage: () => void;
@@ -193,6 +194,31 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 	// Daphne: idle blinking, or holding out her palette
 	const daphneBlink = useBlinkingDoll(DAPHNE);
 	const [daphnePaint, setDaphnePaint] = useState<string | null>(null);
+	// paint-out / paint-away are the same files as on Page 5, and a browser
+	// won't replay an animated image it has already shown - so they're loaded
+	// once as blobs and get a fresh object URL each time they play
+	const paintBlobs = useRef<{ out?: Blob; away?: Blob }>({});
+	const paintUrl = useRef<string | null>(null);
+	useEffect(() => {
+		fetch(PAINT_OUT)
+			.then((res) => res.blob())
+			.then((b) => (paintBlobs.current.out = b));
+		fetch(PAINT_AWAY)
+			.then((res) => res.blob())
+			.then((b) => (paintBlobs.current.away = b));
+		new Image().src = HOLDING_PALETTE;
+		return () => {
+			if (paintUrl.current) URL.revokeObjectURL(paintUrl.current);
+		};
+	}, []);
+	const playPaint = (which: "out" | "away") => {
+		const blob = paintBlobs.current[which];
+		if (paintUrl.current) URL.revokeObjectURL(paintUrl.current);
+		paintUrl.current = blob ? URL.createObjectURL(blob) : null;
+		setDaphnePaint(
+			paintUrl.current ?? (which === "out" ? PAINT_OUT : PAINT_AWAY),
+		);
+	};
 	const daphneSrc = daphnePaint ?? daphneBlink;
 
 	// --- Drawing ---
@@ -300,8 +326,8 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 		later(TOOLS_MS, () => {
 			if (tools.length) setToolsUp(true);
 			else {
-				// Daphne lends her palette instead
-				setDaphnePaint(PAINT_OUT);
+				// Daphne takes her palette out and lends it instead
+				playPaint("out");
 				later(PAINT_MS, () => setDaphnePaint(HOLDING_PALETTE));
 			}
 		});
@@ -330,7 +356,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 		setPenDown(false);
 		setToolsUp(false);
 		if (daphnePaint) {
-			setDaphnePaint(PAINT_AWAY);
+			playPaint("away");
 			later(PAINT_MS, () => setDaphnePaint(null));
 		}
 		later(900, () => setVerdict(true));
@@ -389,7 +415,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			<h1 className="sr-only">Every artist starts somewhere</h1>
 
 			{/* Zhenya - on the left, facing Daphne (as Page 5 left them) */}
-			<img
+			<Zhenya
 				src={zhenyaSrc}
 				className="h-svh absolute top-[-28svh] left-[5%] portrait:h-[48svh] portrait:top-[-12svh] portrait:left-[20%] max-w-none translate-x-[-50%] test-shadow-darker z-5"
 				style={hang(step >= 1, step >= 1, "top", {
