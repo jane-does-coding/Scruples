@@ -136,7 +136,7 @@ const PAGES = [
 
 // The inventory pop-up next to the "?"
 const NOTE =
-	"note-pop fixed top-[1svh] right-[4.8vw] portrait:top-[2vw] portrait:right-[16vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
+	"note-pop fixed top-[1svh] right-[calc(1.3vw+max(6.5vw,72px))] portrait:top-[2vw] portrait:right-[22vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
 
 const StageContext = createContext<StageContextValue | null>(null);
 
@@ -173,25 +173,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 	// Nav: header.png slides down from the top when "?" is clicked
 	const [navOpen, setNavOpen] = useState(false);
-	// A little "menu" tag hangs by the "?" until the menu has been opened
-	// once (remembered in this browser)
-	const [menuSeen, setMenuSeen] = useState(true);
-	useEffect(() => {
-		let seen = false;
-		try {
-			seen = localStorage.getItem("scruples-menu-seen") === "1";
-		} catch {}
-		const timer = setTimeout(() => setMenuSeen(seen), 0);
-		return () => clearTimeout(timer);
-	}, []);
-	useEffect(() => {
-		if (!navOpen || menuSeen) return;
-		try {
-			localStorage.setItem("scruples-menu-seen", "1");
-		} catch {}
-		const timer = setTimeout(() => setMenuSeen(true), 0);
-		return () => clearTimeout(timer);
-	}, [navOpen, menuSeen]);
 
 	// Inventory - money left and items bought
 	const [money, setMoney] = useState(STARTING_MONEY);
@@ -766,23 +747,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 					aria-expanded={navOpen}
 					aria-controls="nav"
 					aria-label={navOpen ? "Close menu" : "Open menu"}
-					className="fixed top-[0.5svh] right-[0.5vw] text-[4svh] font-extrabold cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:text-[2.6svh] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					className="fixed top-[0.5svh] font-semibold right-[0.5vw] scribbler text-[2.5svh] cursor-pointer z-23 w-[6.5vw] h-[3vw] min-w-18 min-h-11 portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:w-[18vw] portrait:text-[1.8svh] bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
-					?
+					menu
 				</button>
-
-				{/* "menu" - a tiny tag just left of the "?", only until the menu
-				    has been opened once, and not while a note is showing there */}
-				{!menuSeen && !note && ticket === "gone" && (
-					<button
-						onClick={() => setNavOpen(true)}
-						tabIndex={-1}
-						aria-hidden
-						className="note-pop fixed top-[1.2svh] right-[4.8vw] portrait:top-[2.4vw] portrait:right-[16vw] z-23 text-[2.5svh] portrait:text-[1.8svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[0.8vw] portrait:px-[2vw] py-[0.3svh] cursor-pointer drop-shadow-lg drop-shadow-black/60"
-					>
-						menu {"->"}
-					</button>
-				)}
 
 				{/* Which page this is - same look as the "?", in the bottom-left
 				    corner. Opens the menu (where the pages are listed) */}
@@ -790,7 +758,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					<button
 						onClick={() => setNavOpen(true)}
 						aria-label={`Page ${pageNumber} of ${PAGES.length} - open the page list`}
-						className="fixed bottom-[0.5svh] left-[0.5vw] portrait:bottom-[1.5vw] portrait:left-[1.5vw] z-23 h-[3.5vw] min-h-11 px-[1vw] portrait:px-[3vw] text-[2.5svh] portrait:text-[1.8svh] scribbler cursor-pointer bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+						className="fixed font-semibold bottom-[0.5svh] left-[0.5vw] portrait:bottom-[1.5vw] portrait:left-[1.5vw] z-23 h-[3.5vw] min-h-11 px-[1vw] portrait:px-[3vw] text-[2.5svh] portrait:text-[1.8svh] scribbler cursor-pointer bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 					>
 						page {pageNumber} of {PAGES.length}
 					</button>
@@ -805,7 +773,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					aria-pressed={!muted}
 					aria-label={muted ? "Turn sound on" : "Turn sound off"}
 					title={muted ? "Sound off" : "Sound on"}
-					className="fixed top-[calc(1.5svh+max(3.5vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3.5vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					className="fixed top-[calc(1.5svh+max(3vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 bg-white border-dashed border-[0.2vw] portrait:border-[0.6vw] rounded-full items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
 					{/* A music note, crossed out while sound is off */}
 					<svg
