@@ -24,7 +24,7 @@ export default function Zhenya({
 					key={hat}
 					src={hat}
 					// Without her shadow (the shadow classes, or a filter like
-					// Page 7's) - the hat is part of her silhouette already
+					// Page 9's) - the hat is part of her silhouette already
 					className={`${(className ?? "").replace(/\S*shadow\S*/g, "")} pointer-events-none hat-on`}
 					style={{ ...style, filter: "none" }}
 					alt=""

@@ -62,9 +62,9 @@ const backHref = (pathname: string) => {
 	if (page) return Number(page[1]) > 1 ? `/page${Number(page[1]) - 1}` : null;
 	// Paintings are opened from the marquee on Page 2
 	if (pathname.startsWith("/art-piece/")) return "/page2";
-	// The last page comes after Page 7 (for now), and the drawings wall is
+	// The last page comes after Page 9 (for now), and the drawings wall is
 	// opened from the last page
-	if (pathname === "/lastpage") return "/page7";
+	if (pathname === "/lastpage") return "/page9";
 	if (pathname === "/gallery") return "/lastpage";
 	return null;
 };
@@ -89,6 +89,8 @@ type StageContextValue = {
 	// Adds a drawing made along the way (like yours on Page 6) to the
 	// inventory. Drawings can't be sold
 	keepDrawing: (drawing: Omit<Drawing, "key">) => void;
+	// The last drawing kept that way (yours from Page 6), or null
+	myDrawing: string | null;
 	// The hat Zhenya is wearing (from a mystery box): its image, the same
 	// size as hers, to lay over her - or null
 	hat: string | null;
@@ -130,7 +132,9 @@ const PAGES = [
 	{ title: "Art on social media", href: "/page4" },
 	{ title: "Meet Daphne", href: "/page5" },
 	{ title: "Every artist starts somewhere", href: "/page6" },
-	{ title: "In the spotlight", href: "/page7" },
+	{ title: "Coming soon", href: "/page7" },
+	{ title: "Coming soon", href: "/page8" },
+	{ title: "In the spotlight", href: "/page9" },
 	{ title: "Curtain call", href: "/lastpage" },
 ];
 
@@ -735,6 +739,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				give,
 				donate,
 				keepDrawing,
+				myDrawing: drawings.at(-1)?.image ?? null,
 				hat: wearing && owned.includes("hats") ? HATS[wearing].wear : null,
 				wearing,
 				equip,
@@ -942,12 +947,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 						    portrait screens, one above the other */}
 						<div className="flex portrait:flex-col items-end portrait:items-center gap-[3vw] portrait:gap-[2.5svh]">
 							{/* Pages - a link to every page, with its title, in two
-							    columns. Same height as a row of the inventory (and as
-							    wide as the screen leaves room for). The page you're on
-							    is marked */}
+							    columns. Same height as a row of the inventory (taller only
+							    if a narrow screen makes the titles wrap), and as wide as
+							    the screen leaves room for. The page you're on is marked */}
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
 								<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
-								<ol className="h-(--slot) w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-cols-2 grid-rows-[repeat(4,auto)] grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.6svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.4svh] portrait:text-[2svh] leading-[1.2]">
+								<ol className="min-h-(--slot) w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-cols-2 grid-rows-[repeat(5,auto)] grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.4svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.2svh] portrait:text-[1.9svh] leading-[1.15]">
 									{PAGES.map(({ title, href }, i) => {
 										const n = i + 1;
 										const here = pathname === href;

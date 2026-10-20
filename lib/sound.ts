@@ -334,7 +334,7 @@ export const startMusic = () => {
 	music = { bus, timer: setInterval(schedule, 300) };
 };
 
-// Fades the lullaby out (e.g. for the storm on Page 7) and back in again
+// Fades the lullaby out (e.g. for the storm on Page 9) and back in again
 export const pauseMusic = (paused: boolean) => {
 	if (!ctx || !music) return;
 	const now = ctx.currentTime;

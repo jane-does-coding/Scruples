@@ -37,6 +37,12 @@ button {
 	outline-offset: 0.5svh;
 }
 
+/* Except on fields that show focus another way (like Page 7's form, whose
+   fields are already the line you write on) */
+.no-focus-ring:focus-visible {
+	outline: none;
+}
+
 /* On touch screens the hanging buttons can be small (especially on a phone
    held sideways), so each gets an invisible area a bit bigger than it to
    tap. Only on ones that are positioned, so the area stays around them */
@@ -121,7 +127,7 @@ button {
 		);
 }
 
-/* Page 7's spotlight, like a faulty stage light. It sputters on (snapping
+/* Page 9's spotlight, like a faulty stage light. It sputters on (snapping
    between bright and dark, step-end so each flash is sudden), then buzzes
    while it's on - a couple of quick flickers every few seconds - and
    sputters out again when it's switched off */

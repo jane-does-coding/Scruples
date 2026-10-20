@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { asset } from "@/lib/asset";
+import { useCompetitorName } from "@/lib/competitor";
 
 // Everyone's drawings from Page 6, for the last page's marquee and the
 // /gallery page.
@@ -22,6 +23,8 @@ const STORAGE_KEY = "scruples-drawings";
 // Each is ~50-100KB; browsers allow ~5MB, so the oldest go past this many
 const MAX_KEPT = 30;
 const CHANGE_EVENT = "scruples-drawings-changed";
+// Who a drawing made here is by, before a name's been given (on Page 7)
+const NO_NAME = "A visitor";
 
 // Shown even before anyone has drawn anything
 export const SAMPLE_DRAWINGS: Drawing[] = [
@@ -43,7 +46,7 @@ export const loadDrawings = (): Drawing[] => {
 
 // Newest first. If the browser is out of room, the oldest ones are dropped
 // until it fits
-export const saveDrawing = (image: string, by = "A visitor") => {
+export const saveDrawing = (image: string, by = NO_NAME) => {
 	const drawing: Drawing = {
 		id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
 		image,
@@ -63,8 +66,10 @@ export const saveDrawing = (image: string, by = "A visitor") => {
 };
 
 // The drawings to show: everyone's (newest first), then the samples. Empty
-// until the page is running in the browser
+// until the page is running in the browser. The ones made in this browser
+// show the name given on Page 7's form, once there is one
 export const useDrawings = () => {
+	const name = useCompetitorName();
 	const [drawings, setDrawings] = useState<Drawing[]>([]);
 	useEffect(() => {
 		const update = () => setDrawings([...loadDrawings(), ...SAMPLE_DRAWINGS]);
@@ -78,5 +83,7 @@ export const useDrawings = () => {
 			window.removeEventListener("storage", update);
 		};
 	}, []);
-	return drawings;
+	return name
+		? drawings.map((d) => (d.by === NO_NAME ? { ...d, by: name } : d))
+		: drawings;
 };

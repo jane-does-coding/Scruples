@@ -150,7 +150,8 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	const [buyNote, setBuyNote] = useState<string | null>(null);
 	// Can't pay ("poor") or clicked Cancel ("please"): Daphne asks to draw
 	// anyway, for free, and asks for a donation once it's done.
-	// pleaDone = her line lifts away as she starts drawing
+	// pleaDone = her line lifts away (as she starts drawing, or once the
+	// drawing is up for "poor")
 	const [plea, setPlea] = useState<"poor" | "please" | null>(null);
 	const [pleaDone, setPleaDone] = useState(false);
 	// The donation ask after a free drawing: the amounts offered (based on
@@ -254,9 +255,10 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	const buy = () => {
 		const result = buyItem("daphne-drawing");
 		if (result === "not-enough-money") {
-			// "Aww man, any donation would help" - then she draws anyway
+			// "Aww man, any donation would help" - then she draws anyway, with
+			// it still up
 			setPlea("poor");
-			later(2200, () => draw(true));
+			later(3000, () => draw(true, true));
 			return;
 		}
 		if (result !== "bought") {
@@ -271,9 +273,12 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	const cancel = () => setPlea("please");
 
 	// Daphne draws. `free` = she wasn't paid: the drawing is given to Zhenya
-	// once it's up, and she asks for a donation before the chat starts
-	const draw = (free: boolean) => {
-		setPleaDone(true);
+	// once it's up, and she asks for a donation before the chat starts.
+	// `keepPlea` = her line stays up the whole time she draws, and lifts away
+	// once the drawing is up (otherwise it goes as she starts)
+	const draw = (free: boolean, keepPlea = false) => {
+		if (keepPlea) later(SMILE_MS, () => setPleaDone(true));
+		else setPleaDone(true);
 		setBought(true);
 		// Daphne gets her palette out and holds it while she draws…
 		setDaphnePaint(PAINT_OUT);
@@ -665,7 +670,9 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			</button>
 
 			{/* Daphne's plea - where the price was, once Buy fails (not enough
-			    money) or Cancel is clicked; lifts away as she starts drawing */}
+			    money) or Cancel is clicked. "Pleeease…" lifts away as she starts
+			    drawing; "…any donation would help" stays up while she draws,
+			    until the drawing is up */}
 			<p
 				className="absolute bottom-[60svh] portrait:bottom-[44svh] left-[50%] translate-x-[-50%] w-max max-w-[26vw] portrait:max-w-[80vw] z-7 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(plea !== null, plea !== null && !pleaDone, "top", {

@@ -2,7 +2,7 @@
 
 **Exploring art - from the old masters to the magic button.**
 
-Scruples is a small interactive story told on a hand-drawn puppet stage. You tear a ticket, the curtains open, and you follow Zhenya, a marionette doll who loves art, through seven scenes: a gallery of famous paintings, a tiny souvenir shop, art on social media, meeting Daphne (a doll who'd rather draw than press a "magic button"), drawing something yourself, and a final moment in the spotlight.
+Scruples is a small interactive story told on a hand-drawn puppet stage. You tear a ticket, the curtains open, and you follow Zhenya, a marionette doll who loves art, through its scenes: a gallery of famous paintings, a tiny souvenir shop, art on social media, meeting Daphne (a doll who'd rather draw than press a "magic button"), drawing something yourself, and a final moment in the spotlight.
 
 Everything is drawn by hand, hangs on strings or stands on popsicle sticks, and moves like a real puppet theatre.
 
@@ -16,7 +16,9 @@ Everything is drawn by hand, hangs on strings or stands on popsicle sticks, and 
 | 4 | **Art on social media** - an endless feed of artists' posts |
 | 5 | **Meet Daphne** - the magic button makes a drawing instantly; Daphne draws one by hand, and explains why |
 | 6 | **Every artist starts somewhere** - you draw in a frame on the stage |
-| 7 | **In the spotlight** - "Magic Button is Horrible!" … "But why?" |
+| 7 | *Coming soon* |
+| 8 | *Coming soon* |
+| 9 | **In the spotlight** - "Magic Button is Horrible!" … "But why?" |
 
 ## Features
 
