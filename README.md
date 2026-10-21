@@ -16,8 +16,8 @@ Everything is drawn by hand, hangs on strings or stands on popsicle sticks, and 
 | 4 | **Art on social media** - an endless feed of artists' posts |
 | 5 | **Meet Daphne** - the magic button makes a drawing instantly; Daphne draws one by hand, and explains why |
 | 6 | **Every artist starts somewhere** - you draw in a frame on the stage |
-| 7 | *Coming soon* |
-| 8 | *Coming soon* |
+| 7 | **The art competition** - fill in the entry form, then choose: submit the magic button's painting, or your own |
+| 8 | **The results** - win with one click and hear from everyone who worked for weeks, or lose to a magic button and talk about how that feels |
 | 9 | **In the spotlight** - "Magic Button is Horrible!" … "But why?" |
 
 ## Features

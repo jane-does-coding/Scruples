@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/site";
 
 // Served as /sitemap.xml - the story pages and every painting's page
 export default function sitemap(): MetadataRoute.Sitemap {
-	const pages = [1, 2, 3, 4, 5, 6, 9].map((n) => ({
+	const pages = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({
 		url: `${SITE_URL}/page${n}`,
 		changeFrequency: "monthly" as const,
 		priority: n === 1 ? 1 : 0.8,

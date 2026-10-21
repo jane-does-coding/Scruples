@@ -132,8 +132,8 @@ const PAGES = [
 	{ title: "Art on social media", href: "/page4" },
 	{ title: "Meet Daphne", href: "/page5" },
 	{ title: "Every artist starts somewhere", href: "/page6" },
-	{ title: "Coming soon", href: "/page7" },
-	{ title: "Coming soon", href: "/page8" },
+	{ title: "The art competition", href: "/page7" },
+	{ title: "The results", href: "/page8" },
 	{ title: "In the spotlight", href: "/page9" },
 	{ title: "Curtain call", href: "/lastpage" },
 ];
@@ -436,28 +436,17 @@ export default function Stage({ children }: { children: ReactNode }) {
 	// it a tiny tug: it dips down a little and springs back. Hanging
 	// things are the ones with string spans (bg-black/60) as direct children,
 	// so this finds the nearest one around the clicked button. Solid-bordered
-	// labels aren't clickable, so they don't move
+	// labels aren't clickable, so they don't move. A button whose strings
+	// hang from something else (data-tug-with="that thing's id") tugs that
+	// along with it
 	useEffect(() => {
-		const onPointerDown = (e: PointerEvent) => {
-			const dashed =
-				e.target instanceof Element
-					? e.target.closest(".border-dashed:not(:disabled)")
-					: null;
-			// Things marked data-no-tug (like the notebook's colors) stay still
-			if (dashed?.closest("[data-no-tug]")) return;
-			let el = dashed;
-			while (el && el !== document.body) {
-				if (el.querySelector(':scope > span[class*="bg-black/60"]')) break;
-				el = el.parentElement;
-			}
-			if (!el || el === document.body) return;
-			if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+		const tug = (el: Element) => {
 			// "add" stacks the dip on top of the translate it already has (like
 			// -translate-x-[50%] for centring), so it never shifts sideways
 			el.getAnimations()
 				.filter((a) => a.id === "tug")
 				.forEach((a) => a.cancel());
-			const tug = el.animate(
+			const dip = el.animate(
 				[
 					{ translate: "0 0" },
 					{ translate: "0 0.8svh", offset: 0.25 },
@@ -467,7 +456,30 @@ export default function Stage({ children }: { children: ReactNode }) {
 				],
 				{ duration: 450, easing: "ease-out", composite: "add" },
 			);
-			tug.id = "tug";
+			dip.id = "tug";
+		};
+		const onPointerDown = (e: PointerEvent) => {
+			const dashed =
+				e.target instanceof Element
+					? e.target.closest(".border-dashed:not(:disabled)")
+					: null;
+			// Things marked data-no-tug (like the notebook's colors) stay still
+			if (!dashed || dashed.closest("[data-no-tug]")) return;
+			if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+			const partnerId = dashed.getAttribute("data-tug-with");
+			const partner = partnerId && document.getElementById(partnerId);
+			if (partner) {
+				tug(dashed);
+				tug(partner);
+				return;
+			}
+			let el: Element | null = dashed;
+			while (el && el !== document.body) {
+				if (el.querySelector(':scope > span[class*="bg-black/60"]')) break;
+				el = el.parentElement;
+			}
+			if (!el || el === document.body) return;
+			tug(el);
 		};
 		document.addEventListener("pointerdown", onPointerDown);
 		return () => document.removeEventListener("pointerdown", onPointerDown);

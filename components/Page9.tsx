@@ -236,8 +236,10 @@ export default function Page9({ curtainsOpen }: PageProps) {
 					style={{
 						...labelPlace(i, top, left),
 						// Earlier (higher up) labels in front, so the strings of the
-						// ones below run behind them
-						zIndex: 20 + LABELS.length - i,
+						// ones below run behind them. Between the spotlight's dark
+						// (z-11) and the menu's backdrop (z-21), so the menu still
+						// drops in over them
+						zIndex: 12 + LABELS.length - i,
 						...hang(step >= 2, step >= 2 && stage < 1, "top", {
 							delay: i * LABEL_STAGGER_MS,
 							exitDelay: i * LABEL_EXIT_STAGGER_MS,

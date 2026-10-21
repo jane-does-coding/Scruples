@@ -3,8 +3,8 @@ import StagePage from "@/components/StagePage";
 import { pageMetadata } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata(
-	"Page 8",
-	"A page of the Scruples story that's still being made.",
+	"The results",
+	"The results of the art competition - and how it feels to win, or lose, against a magic button.",
 	"/page8",
 );
 

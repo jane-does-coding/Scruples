@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
-
 // What was filled in on Page 7's competition form, and which painting was
 // submitted - kept in this browser (localStorage), so the form's filled in
-// next time and the name shows on the drawings made here
+// next time and Page 8 knows how the competition went
 
 export type Competitor = {
-	name: string;
+	age: number;
 	gender: string;
 	aiArt: string;
 	// The painting submitted to the competition
@@ -13,13 +11,13 @@ export type Competitor = {
 };
 
 const STORAGE_KEY = "scruples-competitor";
-const CHANGE_EVENT = "scruples-competitor-changed";
 
-// Each answer's shortest and longest length
+// The youngest and oldest age, and each written answer's shortest and
+// longest length
 export const LIMITS = {
-	name: { min: 2, max: 30 },
+	age: { min: 1, max: 120 },
 	gender: { min: 1, max: 30 },
-	aiArt: { min: 10, max: 200 },
+	aiArt: { min: 2, max: 200 },
 } as const;
 
 export const loadCompetitor = (): Partial<Competitor> => {
@@ -37,24 +35,4 @@ export const saveCompetitor = (changes: Partial<Competitor>) => {
 			JSON.stringify({ ...loadCompetitor(), ...changes }),
 		);
 	} catch {}
-	window.dispatchEvent(new Event(CHANGE_EVENT));
-};
-
-// The name given on the form, or null. Empty until the page is running in
-// the browser
-export const useCompetitorName = () => {
-	const [name, setName] = useState<string | null>(null);
-	useEffect(() => {
-		const update = () => setName(loadCompetitor().name?.trim() || null);
-		const timer = setTimeout(update, 0);
-		window.addEventListener(CHANGE_EVENT, update);
-		// Changed in another tab
-		window.addEventListener("storage", update);
-		return () => {
-			clearTimeout(timer);
-			window.removeEventListener(CHANGE_EVENT, update);
-			window.removeEventListener("storage", update);
-		};
-	}, []);
-	return name;
 };

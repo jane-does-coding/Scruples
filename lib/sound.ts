@@ -9,6 +9,10 @@
 //   menu(open)  - the "?" menu dropping down (and landing) or lifting away
 //   thunder()   - a thunderclap, for the spotlight switching on
 //   startMusic()- a quiet, slow lullaby in the background, on a loop
+//   drumroll(ms)- a snare roll building up, before a result
+//   fanfare()   - a little "ta-da" for winning
+//   sadTrombone()- a soft "wah-wah-wah-waaah" for losing
+//   click()     - a soft click, for picking something
 
 const STORAGE_KEY = "scruples-sound";
 const VOLUME = 1;
@@ -491,4 +495,116 @@ export const unbox = () => {
 		osc.start(at);
 		osc.stop(at + 1);
 	});
+};
+
+// A snare roll: quick taps of filtered noise, getting louder, then a
+// last hit
+export const drumroll = (ms = 1400) => {
+	const audio = ready();
+	if (!audio || !master) return;
+	const now = audio.currentTime;
+	const end = ms / 1000;
+	const tap = (at: number, level: number) => {
+		const hit = noiseSource(audio);
+		const band = audio.createBiquadFilter();
+		band.type = "bandpass";
+		band.frequency.value = 2400;
+		band.Q.value = 0.7;
+		const gain = audio.createGain();
+		gain.gain.setValueAtTime(0.0001, at);
+		gain.gain.exponentialRampToValueAtTime(level, at + 0.004);
+		gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.07);
+		hit.connect(band).connect(gain).connect(master!);
+		hit.start(at, Math.random() * 0.5);
+		hit.stop(at + 0.08);
+	};
+	for (let t = 0; t < end; t += 0.035)
+		tap(now + t, 0.05 + 0.2 * (t / end) * (0.8 + Math.random() * 0.4));
+	tap(now + end, 0.4);
+};
+
+// A short brass-ish "ta-da": two quick notes, then a held chord
+export const fanfare = () => {
+	const audio = ready();
+	if (!audio || !master) return;
+	const now = audio.currentTime;
+	const note = (freq: number, at: number, length: number, level = 0.12) => {
+		const osc = audio.createOscillator();
+		osc.type = "sawtooth";
+		osc.frequency.value = freq;
+		const soft = audio.createBiquadFilter();
+		soft.type = "lowpass";
+		soft.frequency.value = 2200;
+		const gain = audio.createGain();
+		gain.gain.setValueAtTime(0.0001, now + at);
+		gain.gain.exponentialRampToValueAtTime(level, now + at + 0.02);
+		gain.gain.setValueAtTime(level, now + at + length - 0.08);
+		gain.gain.exponentialRampToValueAtTime(0.0001, now + at + length);
+		osc.connect(soft).connect(gain).connect(master!);
+		osc.start(now + at);
+		osc.stop(now + at + length + 0.02);
+	};
+	// G, G, then C major
+	note(392, 0, 0.14);
+	note(392, 0.16, 0.14);
+	for (const f of [523, 659, 784]) note(f, 0.32, 0.9, 0.08);
+};
+
+// A sad trombone: three notes stepping down, then a long one that wobbles
+// and sinks
+export const sadTrombone = () => {
+	const audio = ready();
+	if (!audio || !master) return;
+	const now = audio.currentTime;
+	const steps = [
+		[294, 0, 0.32],
+		[277, 0.36, 0.32],
+		[262, 0.72, 0.32],
+		[247, 1.08, 1.1],
+	] as const;
+	for (const [freq, at, length] of steps) {
+		const osc = audio.createOscillator();
+		osc.type = "sawtooth";
+		osc.frequency.setValueAtTime(freq, now + at);
+		if (length > 0.5) {
+			// The last one wobbles and sinks
+			const wobble = audio.createOscillator();
+			wobble.frequency.value = 5;
+			const depth = audio.createGain();
+			depth.gain.value = 6;
+			wobble.connect(depth).connect(osc.frequency);
+			wobble.start(now + at);
+			wobble.stop(now + at + length);
+			osc.frequency.linearRampToValueAtTime(freq * 0.94, now + at + length);
+		}
+		const soft = audio.createBiquadFilter();
+		soft.type = "lowpass";
+		soft.frequency.value = 900;
+		const gain = audio.createGain();
+		gain.gain.setValueAtTime(0.0001, now + at);
+		gain.gain.exponentialRampToValueAtTime(0.14, now + at + 0.05);
+		gain.gain.setValueAtTime(0.14, now + at + length - 0.1);
+		gain.gain.exponentialRampToValueAtTime(0.0001, now + at + length);
+		osc.connect(soft).connect(gain).connect(master!);
+		osc.start(now + at);
+		osc.stop(now + at + length + 0.02);
+	}
+};
+
+// A soft click, like a card being tapped
+export const click = () => {
+	const audio = ready();
+	if (!audio || !master) return;
+	const now = audio.currentTime;
+	const osc = audio.createOscillator();
+	osc.type = "triangle";
+	osc.frequency.setValueAtTime(1100, now);
+	osc.frequency.exponentialRampToValueAtTime(600, now + 0.05);
+	const gain = audio.createGain();
+	gain.gain.setValueAtTime(0.0001, now);
+	gain.gain.exponentialRampToValueAtTime(0.25, now + 0.004);
+	gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+	osc.connect(gain).connect(master);
+	osc.start(now);
+	osc.stop(now + 0.1);
 };
