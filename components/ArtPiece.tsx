@@ -149,7 +149,7 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 				{/* popsicle-stick.webp is just the stick, so w-/h- here are its
 				    real size */}
 				<img
-					src={asset("/imgs/popsicle-stick.webp")}
+					src={asset("/imgs/stage/popsicle-stick.webp")}
 					className="absolute w-[2.3vw] portrait:w-[2.5svh] h-[38svh] max-w-none bottom-[-19svh] left-[50%] translate-x-[-50%] z-0"
 					alt="Wooden popsicle stick holding up the labels"
 				/>

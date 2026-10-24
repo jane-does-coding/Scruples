@@ -33,7 +33,7 @@ const ROUTE_OPEN_DELAY_MS = 150;
 
 const frames = (name: string, count: number) =>
 	Array.from({ length: count }, (_, i) =>
-		asset(`/imgs/${name}/${String(i).padStart(2, "0")}.webp`),
+		asset(`/imgs/stage/${name}/${String(i).padStart(2, "0")}.webp`),
 	);
 
 const CLOSING_FRAMES = frames("closing", 10);
@@ -494,8 +494,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 	}, [navOpen]);
 
 	// The GIFs are too big for browsers to animate reliably, so they're
-	// split into frames (public/imgs/closing, public/imgs/opening,
-	// public/imgs/ripping). Every frame is decoded up front and drawn to a
+	// split into frames (public/imgs/stage/closing, .../opening and
+	// .../ripping). Every frame is decoded up front and drawn to a
 	// canvas, so playback starts the instant the button is clicked.
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const bitmaps = useRef<{ closing: ImageBitmap[]; opening: ImageBitmap[] }>({
@@ -892,7 +892,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					    the nav settles. Keep the two in sync: see .nav-bounce */}
 					{pageLoaded && (
 						<img
-							src={asset("/imgs/hidden-scribble.webp")}
+							src={asset("/imgs/stage/hidden-scribble.webp")}
 							fetchPriority="low"
 							className="absolute bottom-[90svh] left-0 w-screen h-[8svh] max-w-none pointer-events-none"
 							// Gone at once while it's dropped further for "View all" -
@@ -913,11 +913,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 					{pageLoaded && (
 						<img
-							src={asset("/imgs/header.webp")}
+							src={asset("/imgs/stage/header.webp")}
 							srcSet={srcSet([
-								["/imgs/header-1200.webp", 1200],
-								["/imgs/header-1600.webp", 1600],
-								["/imgs/header.webp", 2360],
+								["/imgs/stage/header-1200.webp", 1200],
+								["/imgs/stage/header-1600.webp", 1600],
+								["/imgs/stage/header.webp", 2360],
 							])}
 							sizes="100vw"
 							fetchPriority="low"
@@ -940,10 +940,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 					>
 						{/* 	{pageLoaded && (
 							<img
-								src={asset("/imgs/bag.webp")}
+								src={asset("/imgs/stage/bag.webp")}
 								srcSet={srcSet([
-									["/imgs/bag-450.webp", 450],
-									["/imgs/bag.webp", 900],
+									["/imgs/stage/bag-450.webp", 450],
+									["/imgs/stage/bag.webp", 900],
 								])}
 								sizes="18vw"
 								fetchPriority="low"
@@ -1287,11 +1287,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 				{/* Normal open state */}
 				{pageLoaded && (
 					<img
-						src={asset("/imgs/open.webp")}
+						src={asset("/imgs/stage/open.webp")}
 						srcSet={srcSet([
-							["/imgs/open-1200.webp", 1200],
-							["/imgs/open-1600.webp", 1600],
-							["/imgs/open.webp", 2360],
+							["/imgs/stage/open-1200.webp", 1200],
+							["/imgs/stage/open-1600.webp", 1600],
+							["/imgs/stage/open.webp", 2360],
 						])}
 						sizes="100vw"
 						fetchPriority="low"
@@ -1306,12 +1306,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 				{/* Closed curtains until the ticket is clicked and the opening frames load */}
 				{animationStage === "loading" && (
 					<img
-						src={asset("/imgs/closed.webp")}
+						src={asset("/imgs/stage/closed.webp")}
 						// Smaller screens get a smaller copy (147KB at 1200px vs 522KB)
 						srcSet={srcSet([
-							["/imgs/closed-1200.webp", 1200],
-							["/imgs/closed-1600.webp", 1600],
-							["/imgs/closed.webp", 2360],
+							["/imgs/stage/closed-1200.webp", 1200],
+							["/imgs/stage/closed-1600.webp", 1600],
+							["/imgs/stage/closed.webp", 2360],
 						])}
 						sizes="100vw"
 						fetchPriority="high"
@@ -1329,12 +1329,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 						aria-label="Enter"
 					>
 						<img
-							src={asset("/imgs/ticket2.webp")}
+							src={asset("/imgs/stage/ticket2.webp")}
 							// Shown at 50vw (80vw on portrait screens) - smaller screens get the
 							// 700px version
 							srcSet={srcSet([
-								["/imgs/ticket2-700.webp", 700],
-								["/imgs/ticket2.webp", 1400],
+								["/imgs/stage/ticket2-700.webp", 700],
+								["/imgs/stage/ticket2.webp", 1400],
 							])}
 							sizes="(orientation: portrait) 80vw, 50vw"
 							fetchPriority="high"
@@ -1372,11 +1372,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 				<div className="-z-10 fixed top-0 left-0 h-svh w-screen">
 					{pageLoaded && (
 						<img
-							src={asset("/imgs/paper-bg-2560.webp")}
+							src={asset("/imgs/stage/paper-bg-2560.webp")}
 							srcSet={srcSet([
-								["/imgs/paper-bg-1280.webp", 1280],
-								["/imgs/paper-bg-1920.webp", 1920],
-								["/imgs/paper-bg-2560.webp", 2560],
+								["/imgs/stage/paper-bg-1280.webp", 1280],
+								["/imgs/stage/paper-bg-1920.webp", 1920],
+								["/imgs/stage/paper-bg-2560.webp", 2560],
 							])}
 							sizes="100vw"
 							fetchPriority="low"

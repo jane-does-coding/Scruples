@@ -71,7 +71,9 @@ export default function Page2({
 		let blinkEnd: ReturnType<typeof setTimeout>;
 		const interval = setInterval(() => {
 			setBlinking(true);
-			blinkEnd = setTimeout(() => setBlinking(false), 1000);
+			// blink2.webp is one 700ms blink (it loops, so it's swapped out
+			// after one)
+			blinkEnd = setTimeout(() => setBlinking(false), 700);
 		}, 3000);
 
 		return () => {
@@ -82,10 +84,10 @@ export default function Page2({
 		};
 	}, [hoveringArt]);
 	const dollImage = !hoveringArt
-		? asset("/imgs/wiggle.webp")
+		? asset("/imgs/zhenya/wiggle.webp")
 		: blinking
-			? asset("/imgs/blink.webp")
-			: asset("/imgs/doll3.webp");
+			? asset("/imgs/zhenya/blink2.webp")
+			: asset("/imgs/zhenya/doll3.webp");
 
 	// Marquee eases down to 30% speed on hover. playbackRate is changed
 	// rather than the CSS duration, so the strip keeps its place instead of jumping
@@ -207,7 +209,7 @@ export default function Page2({
 								tabIndex={copy === 1 ? -1 : undefined}
 							>
 								<img
-									src={asset("/imgs/popsicle.webp")}
+									src={asset("/imgs/stage/popsicle.webp")}
 									className="absolute top-[30%] left-[50%] translate-x-[-50%] h-[80svh] min-w-[22vw] portrait:min-w-[22svh] z-1"
 									alt="Wooden popsicle stick holding up the frame"
 								/>
@@ -234,7 +236,7 @@ export default function Page2({
 			</div>
  */}
 			{/* <img
-				src={asset("/imgs/popsicle.webp")}
+				src={asset("/imgs/stage/popsicle.webp")}
 				alt=""
 				className="absolute w-[15vw] mx-auto bottom-[-13svh] z-[-5]"
 			/>

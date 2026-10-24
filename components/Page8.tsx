@@ -249,10 +249,9 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				{latestLine}
 			</p>
 
-			{/* Zhenya - on the left, like on Page 1 */}
 			<Zhenya
 				src={wow.src ?? blinkSrc}
-				className="h-svh absolute top-[-30svh] left-[-7vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"
+				className="h-svh absolute top-[-30svh] left-[-9vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"
 				style={{
 					...hang(step >= 1, step >= 1, "top", {
 						ms: 900,
@@ -292,7 +291,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[85%] right-[25%] absolute z-2"></span>
 				{/* eslint-disable-next-line @next/next/no-img-element */}
 				<img
-					src={asset("/imgs/drawing-lilies.webp")}
+					src={asset("/imgs/art/drawing-lilies.webp")}
 					className="relative z-2 h-[32svh] portrait:h-[20svh] w-auto max-w-none test-shadow-darker"
 					alt="The magic button's drawing of lilies, in a picture frame"
 				/>
@@ -319,7 +318,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 					<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[85%] right-[25%] absolute z-2"></span>
 					{/* eslint-disable-next-line @next/next/no-img-element */}
 					<img
-						src={yours ?? asset("/imgs/empty_square_frame.webp")}
+						src={yours ?? asset("/imgs/art/empty_square_frame.webp")}
 						className="relative z-2 h-[26svh] portrait:h-[16svh] w-auto max-w-none test-shadow-darker"
 						alt={
 							yours
@@ -340,7 +339,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 			    everyone's had their say */}
 			{won && (
 				<p
-					className={`${LABEL} absolute top-[1svh] left-[15vw] portrait:left-[4vw] portrait:top-[auto] portrait:bottom-[20svh] w-max max-w-[19vw] portrait:max-w-[60vw] text-[2.8svh] portrait:text-[2svh] z-7`}
+					className={`${LABEL} absolute top-[47svh] left-[38vw] portrait:left-[4vw] portrait:top-[auto] portrait:bottom-[20svh] w-max max-w-[19vw] portrait:max-w-[60vw] text-[2.8svh] portrait:text-[2svh] z-5`}
 					style={hang(
 						complaints > COMPLAINTS.length,
 						complaints > COMPLAINTS.length,

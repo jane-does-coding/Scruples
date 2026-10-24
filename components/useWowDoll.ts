@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { asset } from "@/lib/asset";
 
-const WOW = asset("/imgs/wow.webp");
-const WOW_REVERSE = asset("/imgs/wow-reverse.webp");
-const WOW_IDLE = asset("/imgs/wow-idle.webp");
+const WOW = asset("/imgs/zhenya/wow.webp");
+const WOW_REVERSE = asset("/imgs/zhenya/wow-reverse.webp");
+const WOW_IDLE = asset("/imgs/zhenya/wow-idle.webp");
 // wow.webp and wow-reverse.webp are both 18 frames × 60ms
 const WOW_MS = 1080;
 const WOW_REVERSE_MS = 1080;

@@ -239,7 +239,7 @@ export default function LastPage() {
 				>
 					{/* The stick, going down off the bottom of the screen */}
 					<img
-						src={asset("/imgs/popsicle-stick.webp")}
+						src={asset("/imgs/stage/popsicle-stick.webp")}
 						className="absolute w-[2vw] portrait:w-[2.5svh] h-[30svh] max-w-none left-[50%] translate-x-[-50%] top-[60%] z-0"
 						alt=""
 						aria-hidden

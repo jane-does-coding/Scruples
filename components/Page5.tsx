@@ -61,9 +61,9 @@ const SMILE_MS = SPIRAL2_GONE_MS + 500;
 // Daphne while she draws: paint-out brings out her palette (13 frames ×
 // 70ms), then she holds it (its last frame) until the drawing is done, then
 // paint-away puts it back and she returns to idle blinking
-const PAINT_OUT = asset("/imgs/paint-out.webp");
-const PAINT_AWAY = asset("/imgs/paint-away.webp");
-const HOLDING_PALETTE = asset("/imgs/daphne-palette.webp");
+const PAINT_OUT = asset("/imgs/daphne/paint-out.webp");
+const PAINT_AWAY = asset("/imgs/daphne/paint-away.webp");
+const HOLDING_PALETTE = asset("/imgs/daphne/daphne-palette.webp");
 const PAINT_MS = 910;
 
 // After the drawing appears: "I love it!" / "I dislike it..." pop up near
@@ -403,12 +403,12 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			>
 				{/* popsicle-stick.webp is just the stick, so w-/h- are its real size */}
 				<img
-					src={asset("/imgs/popsicle-stick.webp")}
+					src={asset("/imgs/stage/popsicle-stick.webp")}
 					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the frame"
 				/>
 				<img
-					src={asset("/imgs/empty_square_frame.webp")}
+					src={asset("/imgs/art/empty_square_frame.webp")}
 					className="h-[38svh] portrait:h-[28svh] w-auto max-w-none relative z-1"
 					alt="An empty picture frame"
 				/>
@@ -434,7 +434,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				>
 					<span className="w-[0.1vw] bg-black/60 h-svh bottom-[50%] left-[50%] translate-x-[-50%] absolute z-1"></span>
 					<img
-						src={asset("/imgs/spiral.webp")}
+						src={asset("/imgs/art/spiral.webp")}
 						className="h-[16svh] portrait:h-[12svh] w-auto max-w-none spiral-spin"
 						alt="A cute spiral drawing"
 					/>
@@ -452,12 +452,12 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				}}
 			>
 				<img
-					src={asset("/imgs/popsicle-stick.webp")}
+					src={asset("/imgs/stage/popsicle-stick.webp")}
 					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the frame"
 				/>
 				<img
-					src={asset("/imgs/drawing-lilies.webp")}
+					src={asset("/imgs/art/drawing-lilies.webp")}
 					className="h-[38svh] portrait:h-[28svh] w-auto max-w-none relative z-1"
 					alt="A drawing of lilies, in a picture frame"
 				/>
@@ -565,12 +565,12 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				})}
 			>
 				<img
-					src={asset("/imgs/popsicle-stick.webp")}
+					src={asset("/imgs/stage/popsicle-stick.webp")}
 					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the frame"
 				/>
 				<img
-					src={asset("/imgs/empty_square_frame.webp")}
+					src={asset("/imgs/art/empty_square_frame.webp")}
 					className="h-[38svh] portrait:h-[28svh] w-auto max-w-none relative z-1"
 					alt="An empty picture frame"
 				/>
@@ -588,7 +588,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				>
 					<span className="w-[0.1vw] bg-black/60 h-svh bottom-[50%] left-[50%] translate-x-[-50%] absolute z-1"></span>
 					<img
-						src={asset("/imgs/spiral.webp")}
+						src={asset("/imgs/art/spiral.webp")}
 						className="h-[16svh] portrait:h-[12svh] w-auto max-w-none spiral-spin"
 						alt="A spiral, Daphne drawing"
 					/>
@@ -606,12 +606,12 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				})}
 			>
 				<img
-					src={asset("/imgs/popsicle-stick.webp")}
+					src={asset("/imgs/stage/popsicle-stick.webp")}
 					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the drawing"
 				/>
 				<img
-					src={asset("/imgs/drawing-smile.webp")}
+					src={asset("/imgs/art/drawing-smile.webp")}
 					className="h-[38svh] portrait:h-[28svh] w-auto max-w-none relative z-1"
 					alt="Daphne's drawing of a smiley face on an easel, in a picture frame"
 				/>

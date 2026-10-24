@@ -27,9 +27,9 @@ const SPOTLIGHT_MS = 900;
 
 // Zhenya's tweaking: tweaking-enter and tweaking-exit are 18 frames × 50ms
 // (the same length as the spotlight sputtering on and off), tweaking loops
-const TWEAK_ENTER = asset("/imgs/tweaking-enter.webp");
-const TWEAK_EXIT = asset("/imgs/tweaking-exit.webp");
-const TWEAK_LOOP = asset("/imgs/tweaking.webp");
+const TWEAK_ENTER = asset("/imgs/zhenya/tweaking-enter.webp");
+const TWEAK_EXIT = asset("/imgs/zhenya/tweaking-exit.webp");
+const TWEAK_LOOP = asset("/imgs/zhenya/tweaking.webp");
 const TWEAK_MS = 900;
 
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";

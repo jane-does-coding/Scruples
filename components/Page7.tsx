@@ -74,7 +74,7 @@ const LABEL =
 	"text-[3svh] portrait:text-[2svh] max-w-[70%] mx-auto text-center scribbler absolute portrait:max-w-[50vw] bg-white border-black px-[2vw] portrait:px-[3vw] py-[1svh] portrait:py-[0.7svh] drop-shadow-md drop-shadow-black/40 test-shadow";
 
 // "Sign up here" (and the invisible copy of it its strings hang from)
-const SIGN_UP = `${LABEL} border-[0.3svh] border-dashed top-[30svh] right-[13vw] portrait:right-[14vw] portrait:top-[21.5svh]`;
+const SIGN_UP = `${LABEL} border-[0.3svh] border-dashed top-[39svh] right-[13vw] portrait:right-[14vw] portrait:top-[21.5svh]`;
 
 // The form's questions: which answer, the question, and what's written in
 // grey until something's typed. All of them have to be answered, within
@@ -275,29 +275,51 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 
 	return (
 		<div className="h-full flex flex-col items-center justify-center relative">
-			{/* Step 1: the empty frame, and the competition's words in it */}
+			{/* Step 1: the TV on its popsicle sticks, rising up from the bottom
+			    (and sinking back down after), and the competition's words in it */}
 			<div
-				className="absolute top-[-3svh] right-[0vw] portrait:top-[1svh] portrait:right-[3vw] z-5 test-shadow-darker"
-				style={hang(step >= 1, framed, "top", { ms: 900, easing: DOLL_DROP })}
+				className="absolute top-[10svh] right-[0vw] portrait:top-[1svh] portrait:right-[3vw] z-5 test-shadow-darker"
+				style={hang(step >= 1, framed, "bottom", {
+					ms: 900,
+					easing: DOLL_DROP,
+				})}
 			>
-				<FrameStrings />
 				{/* eslint-disable-next-line @next/next/no-img-element */}
+				<div
+					className={`absolute bottom-[-38svh] left-[-7vw] z-[-5] drop-shadow-md drop-shadow-black/40`}
+				>
+					<img
+						src={asset("/imgs/stage/popsicle.webp")}
+						alt="Wooden popsicle stick holding up the sign"
+						className="w-[30vw] portrait:w-[24svh] max-w-none"
+					/>
+				</div>
+				<div
+					className={`absolute bottom-[-38svh] right-[-7vw] z-[-5] drop-shadow-md drop-shadow-black/40`}
+				>
+					<img
+						src={asset("/imgs/stage/popsicle.webp")}
+						alt="Wooden popsicle stick holding up the sign"
+						className="w-[30vw] portrait:w-[24svh] max-w-none"
+					/>
+				</div>
+
 				<img
-					src={asset("/imgs/empty_square_frame.webp")}
-					className="h-[55svh] w-[45svw] portrait:h-[30svh] portrait:w-[58vw] max-w-none relative z-1"
-					alt="An empty picture frame"
+					src={asset("/imgs/stage/tv.webp")}
+					className="h-[50svh] w-[40svw] portrait:h-[30svh] portrait:w-[58vw] max-w-none relative z-1"
+					alt="A TV on two popsicle sticks"
 				/>
 			</div>
 
 			<h2
-				className={`${LABEL} border-[0.2svh] top-[10svh] right-[10vw] portrait:right-[9vw] portrait:top-[7svh]`}
+				className={`${LABEL} border-[0.2svh] top-[20svh] right-[11vw] portrait:right-[9vw] portrait:top-[7svh]`}
 				style={word(0, 4)}
 			>
 				<Strings />
 				Annual Art Competition
 			</h2>
 			<p
-				className={`${LABEL} border-[0.2svh] top-[20svh] right-[12vw] portrait:right-[10vw] portrait:top-[13svh]`}
+				className={`${LABEL} border-[0.2svh] top-[28svh] right-[11vw] portrait:right-[10vw] portrait:top-[13svh]`}
 				style={word(1, 3)}
 			>
 				<Strings />
@@ -352,7 +374,7 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 								: "calc(100% - 56svh)"
 							: portrait
 								? "-16vw"
-								: "-10vw",
+								: "-9vw",
 					// In front of the paintings while picking
 					zIndex: picking ? 6 : undefined,
 					scale: picking
@@ -384,7 +406,7 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 				}}
 				className="bottom-0 left-0 w-[35vw] h-[55svh] portrait:w-[92vw] portrait:h-auto portrait:left-[4vw] portrait:bottom-[2svh] absolute z-6 test-shadow px-[2vw] portrait:px-[4vw] py-[2svh] bg-cover bg-center"
 				style={{
-					backgroundImage: `url(${asset("/imgs/paper-form2.webp")})`,
+					backgroundImage: `url(${asset("/imgs/stage/paper-form2.webp")})`,
 					...hang(signedUp, filling, "bottom", {
 						ms: 900,
 						easing: DOLL_DROP,
@@ -529,8 +551,8 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 							<img
 								src={
 									entry === "magic"
-										? asset("/imgs/drawing-lilies.webp")
-										: (yours ?? asset("/imgs/empty_square_frame.webp"))
+										? asset("/imgs/art/drawing-lilies.webp")
+										: (yours ?? asset("/imgs/art/empty_square_frame.webp"))
 								}
 								className="h-[38svh] portrait:h-[20svh] w-auto max-w-none relative"
 								alt=""

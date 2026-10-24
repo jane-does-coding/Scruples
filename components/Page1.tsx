@@ -50,13 +50,10 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 	}, [curtainsOpen]);
 
 	const handleSayHi = () => {
-		// Show the "Hi" response and buttons
 		setSaidHi(true);
 
-		// Play moving animation
 		setMoving(true);
 
-		// Return to idle (and blinking) after 2 seconds
 		clearTimeout(movingTimer.current);
 		movingTimer.current = setTimeout(() => setMoving(false), 2000);
 	};
@@ -95,7 +92,6 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 				</button>
 			</div>
 
-			{/* Hi response */}
 			<p
 				className="text-[4svh] portrait:text-[2.8svh] max-w-[70%] mx-auto text-center scribbler absolute right-[22vw] portrait:right-[20vw] bg-white border-[0.2svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] z-0 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
@@ -110,7 +106,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 			{/* Doll */}
 			<Zhenya
-				src={moving ? asset("/imgs/moving.webp") : blinkSrc}
+				src={moving ? asset("/imgs/zhenya/moving.webp") : blinkSrc}
 				className="h-svh absolute top-[-30svh] left-[-5vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),

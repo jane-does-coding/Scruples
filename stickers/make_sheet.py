@@ -24,9 +24,22 @@ from scipy import ndimage
 DPI = 300
 W, H = int(8.5 * DPI), int(5.5 * DPI)
 ROOT = Path(__file__).resolve().parent.parent
+# The site's images (in folders), and the full-size originals they were
+# made from
 IMGS = ROOT / "public" / "imgs"
+SOURCES = ROOT / "art-sources"
 FONTS = ROOT / "public" / "scribbler-font"
 OUT = Path(__file__).resolve().parent
+
+
+def find(name):
+    """An image by its file name, wherever it is in the site's folders or
+    the originals"""
+    for folder in (IMGS, SOURCES):
+        found = next(folder.rglob(name), None)
+        if found:
+            return found
+    raise FileNotFoundError(name)
 
 # The white border around each sticker, and how much its outline is smoothed
 # (so gaps between strings, arms etc. are filled in rather than cut round)
@@ -39,7 +52,7 @@ def inches(v):
 
 
 def load(name):
-    img = Image.open(IMGS / name).convert("RGBA")
+    img = Image.open(find(name)).convert("RGBA")
     return img.crop(img.getbbox())
 
 
@@ -92,9 +105,9 @@ def without_strings(img, r=14):
 
 def doll(name, hat=None):
     """Zhenya or Daphne without strings, maybe wearing one of the hats"""
-    img = Image.open(IMGS / name).convert("RGBA")
+    img = Image.open(find(name)).convert("RGBA")
     if hat:
-        img.alpha_composite(Image.open(IMGS / hat).convert("RGBA").resize(img.size, Image.LANCZOS))
+        img.alpha_composite(Image.open(find(hat)).convert("RGBA").resize(img.size, Image.LANCZOS))
     return without_strings(img)
 
 
@@ -185,7 +198,7 @@ def main():
     cut_sheet.save(OUT / "scruples-stickers-cutlines.png", dpi=(DPI, DPI))
 
     # The site's paper, with the name printed in the corner
-    paper = Image.open(IMGS / "paper-bg-2560.jpg").convert("RGB")
+    paper = Image.open(find("paper-bg-2560.jpg")).convert("RGB")
     paper = paper.resize((round(paper.width * H / paper.height), H), Image.LANCZOS)
     paper = paper.crop((0, 0, W, H)).convert("RGBA")
     logo, lx, ly = LOGO

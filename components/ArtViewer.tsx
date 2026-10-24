@@ -41,7 +41,7 @@ export default function ArtViewer({
 			aria-modal
 			aria-label={name}
 			onClick={close}
-			className="fixed inset-0 z-[25] flex items-center justify-center bg-black/40 backdrop-blur-[1px] transition-opacity duration-500"
+			className="fixed inset-0 z-25 flex items-center justify-center bg-black/40 backdrop-blur-[1px] transition-opacity duration-500"
 			style={{ opacity: shown ? 1 : 0 }}
 		>
 			<div
@@ -60,8 +60,6 @@ export default function ArtViewer({
 					className="relative z-1 max-h-[70svh] max-w-[80vw] w-auto h-auto test-shadow-darker"
 					alt={name}
 				/>
-				{/* The name and Close hang on their own strings too, which run up
-				    behind the painting (z-0 under its z-1) */}
 				<div className="relative z-0 flex items-center gap-[1vw]">
 					<p className="relative text-[3svh] portrait:text-[2.3svh] scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40">
 						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>

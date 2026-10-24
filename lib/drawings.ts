@@ -29,7 +29,7 @@ const NO_NAME = "A visitor";
 export const SAMPLE_DRAWINGS: Drawing[] = [
 	{
 		id: "sample-daphne",
-		image: asset("/imgs/drawing-smile.webp"),
+		image: asset("/imgs/art/drawing-smile.webp"),
 		madeAt: 0,
 		by: "Daphne",
 	},

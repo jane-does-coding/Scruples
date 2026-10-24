@@ -43,9 +43,9 @@ const TOOLS_MS = 900; // the tools come out
 const CAN_DRAW_MS = 1300; // the instructions and Clear / Done drop in
 
 // Daphne's palette (from Page 5): paint-out, then holding it, then paint-away
-const PAINT_OUT = asset("/imgs/paint-out.webp");
-const PAINT_AWAY = asset("/imgs/paint-away.webp");
-const HOLDING_PALETTE = asset("/imgs/daphne-palette.webp");
+const PAINT_OUT = asset("/imgs/daphne/paint-out.webp");
+const PAINT_AWAY = asset("/imgs/daphne/paint-away.webp");
+const HOLDING_PALETTE = asset("/imgs/daphne/daphne-palette.webp");
 const PAINT_MS = 910;
 
 // After "Yes, I did!", the three lines of talk lift away top to bottom, this
@@ -90,7 +90,7 @@ const framed = (drawing: string) =>
 		frame.onload = art.onload = draw;
 		// Without the frame, keep the drawing as it is
 		frame.onerror = () => resolve(drawing);
-		frame.src = asset("/imgs/empty_square_frame.webp");
+		frame.src = asset("/imgs/art/empty_square_frame.webp");
 		art.src = drawing;
 	});
 
@@ -156,7 +156,7 @@ const YourArt = ({
 			/>
 		)}
 		<img
-			src={asset("/imgs/empty_square_frame.webp")}
+			src={asset("/imgs/art/empty_square_frame.webp")}
 			className="relative h-full w-auto max-w-none"
 			alt=""
 		/>
@@ -188,7 +188,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 	const wow = useWowDoll();
 	const [penDown, setPenDown] = useState(false);
 	const zhenyaSrc = penDown
-		? asset("/imgs/moving.webp")
+		? asset("/imgs/zhenya/moving.webp")
 		: (wow.src ?? zhenyaBlink);
 
 	// Daphne: idle blinking, or holding out her palette
@@ -478,7 +478,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 				}}
 			>
 				<img
-					src={asset("/imgs/popsicle-stick.webp")}
+					src={asset("/imgs/stage/popsicle-stick.webp")}
 					className="absolute w-[2vw] portrait:w-[2.5svh] h-[35svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
 					alt="Wooden popsicle stick holding up the frame"
 				/>
@@ -492,7 +492,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 					className={`${CANVAS_BOX} z-1 bg-white touch-none ${stage === 1 && canDraw ? "cursor-crosshair" : ""}`}
 				/>
 				<img
-					src={asset("/imgs/empty_square_frame.webp")}
+					src={asset("/imgs/art/empty_square_frame.webp")}
 					className="h-full w-auto max-w-none relative z-2 pointer-events-none"
 					alt="An empty picture frame"
 				/>

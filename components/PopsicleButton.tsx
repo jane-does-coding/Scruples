@@ -69,7 +69,7 @@ export default function PopsicleButton({
 				className={`absolute bottom-[-8svh] z-[-5] drop-shadow-md drop-shadow-black/40 ${right ? "left-[-2vw] portrait:left-[-2.7svh]" : "right-0"}`}
 			>
 				<img
-					src={asset("/imgs/popsicle.webp")}
+					src={asset("/imgs/stage/popsicle.webp")}
 					alt="Wooden popsicle stick holding up the sign"
 					className="w-[18vw] portrait:w-[24svh] max-w-none"
 					style={tilt("50% 100%")}

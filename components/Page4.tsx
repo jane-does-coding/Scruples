@@ -28,23 +28,23 @@ const drop = (shown: boolean, ms = 800, easing = DOLL_DROP) => ({
 // Each post opens `href` in a new tab - replace the "#" placeholders
 const POSTS = [
 	{
-		src: asset("/imgs/insta1.webp"),
+		src: asset("/imgs/social/insta1.webp"),
 		href: "https://www.instagram.com/p/Ddq5HoOCRNT/",
 	},
 	{
-		src: asset("/imgs/insta2.webp"),
+		src: asset("/imgs/social/insta2.webp"),
 		href: "https://www.instagram.com/p/Dcb_GJZt2tD",
 	},
 	{
-		src: asset("/imgs/insta3.webp"),
+		src: asset("/imgs/social/insta3.webp"),
 		href: "https://www.instagram.com/p/DRXYq8PiGAC/",
 	},
 	{
-		src: asset("/imgs/insta4.webp"),
+		src: asset("/imgs/social/insta4.webp"),
 		href: "https://www.instagram.com/p/Dd6tuMIEWhr/",
 	},
 	{
-		src: asset("/imgs/insta5.webp"),
+		src: asset("/imgs/social/insta5.webp"),
 		href: "https://www.instagram.com/p/DZLF-KpEytA/",
 	},
 ];

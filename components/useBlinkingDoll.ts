@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { asset } from "@/lib/asset";
 
-// Zhenya by default. blink.webp is one 700ms blink (it loops, so it's
+// Zhenya by default. blink2.webp is one 700ms blink (it loops, so it's
 // swapped out after one)
 const ZHENYA = {
-	idle: asset("/imgs/doll3.webp"),
-	blink: asset("/imgs/blink.webp"),
+	idle: asset("/imgs/zhenya/doll3.webp"),
+	blink: asset("/imgs/zhenya/blink2.webp"),
 	blinkMs: 700,
 };
 
 // Daphne: daphne-blinking2.webp is one 450ms blink (the source GIF had two
 // blinks back to back, so only its first 5 frames were kept)
 export const DAPHNE = {
-	idle: asset("/imgs/daphne3.webp"),
-	blink: asset("/imgs/daphne-blinking2.webp"),
+	idle: asset("/imgs/daphne/daphne3.webp"),
+	blink: asset("/imgs/daphne/daphne-blinking2.webp"),
 	blinkMs: 450,
 };
 // Each blink comes a random 1-3s after the last one
@@ -22,7 +22,7 @@ const MAX_GAP_MS = 3000;
 
 // A doll's idle image, blinking once at random every 1-3 seconds - Zhenya
 // unless another doll is passed in (e.g. DAPHNE). Returns the image to show. A browser won't restart an animated image whose URL it has already
-// shown, so blink.webp is loaded once as a blob and gets a fresh object URL
+// shown, so the blink is loaded once as a blob and gets a fresh object URL
 // for every blink - that way each blink starts from its first frame
 export default function useBlinkingDoll(doll = ZHENYA) {
 	const { idle: IDLE, blink: BLINK, blinkMs: BLINK_MS } = doll;

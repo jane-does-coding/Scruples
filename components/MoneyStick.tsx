@@ -26,7 +26,7 @@ export default function MoneyStick() {
 			{/* Stick first, so the money sits in front of it. Centred under the
 			    bills and poking out below them */}
 			<img
-				src={asset("/imgs/popsicle-stick.webp")}
+				src={asset("/imgs/stage/popsicle-stick.webp")}
 				className="h-[25svh] w-[2.5vw] portrait:w-[3svh] max-w-none absolute bottom-[-18svh] left-[50%] -translate-x-[50%]"
 				alt="Wooden popsicle stick holding up the money"
 			/>

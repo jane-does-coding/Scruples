@@ -21,7 +21,7 @@ export type Frame = {
 export const FRAMES: Frame[] = [
 	{
 		slug: "scream",
-		src: asset("/imgs/frame1.webp"),
+		src: asset("/imgs/art/frame1.webp"),
 		size: "tall",
 		label: "Scream • 1893",
 		artist: "Edvard Munch",
@@ -39,7 +39,7 @@ export const FRAMES: Frame[] = [
 	},
 	{
 		slug: "sunflowers",
-		src: asset("/imgs/frame3.webp"),
+		src: asset("/imgs/art/frame3.webp"),
 		size: "wide",
 		label: "Sunflowers • 1887",
 		artist: "Vincent van Gogh",
@@ -57,7 +57,7 @@ export const FRAMES: Frame[] = [
 	},
 	{
 		slug: "girl-with-a-pearl-earring",
-		src: asset("/imgs/frame2.webp"),
+		src: asset("/imgs/art/frame2.webp"),
 		size: "tall",
 		label: "Girl with a Pearl Earring • 1665",
 		artist: "Johannes Vermeer",
@@ -75,7 +75,7 @@ export const FRAMES: Frame[] = [
 	},
 	{
 		slug: "the-starry-night",
-		src: asset("/imgs/frame4.webp"),
+		src: asset("/imgs/art/frame4.webp"),
 		size: "extra-wide",
 		label: "The Starry Night • 1889",
 		artist: "Vincent van Gogh",
@@ -93,7 +93,7 @@ export const FRAMES: Frame[] = [
 	},
 	{
 		slug: "the-persistence-of-memory",
-		src: asset("/imgs/frame5.webp"),
+		src: asset("/imgs/art/frame5.webp"),
 		size: "tall",
 		label: "The Persistence of Memory • 1931",
 		artist: "Salvador Dalí",
@@ -111,7 +111,7 @@ export const FRAMES: Frame[] = [
 	},
 	{
 		slug: "the-water-lily-pond",
-		src: asset("/imgs/frame6.webp"),
+		src: asset("/imgs/art/frame6.webp"),
 		size: "wide",
 		label: "The Water Lily Pond • 1899",
 		artist: "Claude Monet",

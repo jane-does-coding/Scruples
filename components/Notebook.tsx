@@ -291,14 +291,14 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 					{["left-[25%]", "left-[75%]"].map((left) => (
 						<img
 							key={left}
-							src={asset("/imgs/popsicle-stick.webp")}
+							src={asset("/imgs/stage/popsicle-stick.webp")}
 							className={`absolute ${left} translate-x-[-50%] top-[80%] w-[2.5vw] h-[40svh] max-w-none`}
 							alt=""
 							aria-hidden
 						/>
 					))}
 					<img
-						src={asset("/imgs/open-notebook.webp")}
+						src={asset("/imgs/shop/open-notebook.webp")}
 						className="absolute inset-0 w-full h-full test-shadow-darker"
 						alt="An open notebook"
 					/>
@@ -345,7 +345,7 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 						);
 					})}
 					<img
-						src={asset("/imgs/bookmark.webp")}
+						src={asset("/imgs/shop/bookmark.webp")}
 						className="absolute top-0 h-full w-auto max-w-none left-[calc(50%+2vw)] translate-x-[-50%] pointer-events-none"
 						alt=""
 						aria-hidden
