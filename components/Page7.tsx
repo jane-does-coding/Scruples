@@ -352,7 +352,7 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 			{/* Zhenya - drops in on the left; at step 2 she turns round (the
 			    scale flips through 0, like a cut-out) and goes over to the
 			    right, a little higher; at step 3 she goes to the middle and
-			    turns to face the pointer. Facing right is her own way round */}
+			    turns to face the pointer.  */}
 			<Zhenya
 				src={blinkSrc}
 				className="h-svh absolute portrait:h-[66svh] max-w-none test-shadow"
@@ -362,10 +362,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 					transition: `transform 900ms ${DOLL_DROP}, top 900ms ease-in-out 300ms, ${chosen ? "left 500ms ease-out" : "left 1200ms ease-in-out 300ms"}, scale ${picking ? 350 : 600}ms ease-in-out`,
 					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",
 					top: portrait ? "-10svh" : filling ? "-35svh" : "-28svh",
-					// The doll is 56svh wide (896 x 1600 at the full height),
-					// or 37svh on portrait screens
-					// Once a painting's picked, she moves over towards the other
-					// one's side, into the room it leaves as it shrinks
 					left: picking
 						? `calc(50% - ${portrait ? "18.5svh" : "28svh"} ${chosen === "yours" ? "-" : "+"} ${chosen ? room : "0px"})`
 						: signedUp

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
+import useFrownDoll, { FROWN_MS } from "@/components/useFrownDoll";
+import useHeheDoll, { HEHE_MS } from "@/components/useHeheDoll";
 import useWowDoll from "@/components/useWowDoll";
 import { asset } from "@/lib/asset";
 import MoneyStick from "@/components/MoneyStick";
@@ -191,7 +193,34 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	const blinkSrc = useBlinkingDoll();
 	// Daphne idles and blinks the same way, with her own images
 	const daphneBlinkSrc = useBlinkingDoll(DAPHNE);
-	const daphneSrc = daphnePaint ?? daphneBlinkSrc;
+	// …or giggling, from when Zhenya says she loves the drawing until she
+	// asks about the magic button
+	const hehe = useHeheDoll();
+	// …or frowning, if Zhenya doesn't like the drawing or gives nothing
+	const frown = useFrownDoll();
+	// Daphne's face: switching from one to another plays the one she has
+	// out first, then the new one in (each starts from her usual face). The
+	// new one starts just before the old one ends, so there's no gap
+	const [face, setFace] = useState<"hehe" | "frown" | null>(null);
+	const faceNow = useRef<"hehe" | "frown" | null>(null);
+	const FACES = {
+		hehe: { in: hehe.playHehe, out: hehe.playHeheReverse, ms: HEHE_MS },
+		frown: { in: frown.playFrown, out: frown.playFrownReverse, ms: FROWN_MS },
+	};
+	const feel = (next: "hehe" | "frown" | null) => {
+		const now = faceNow.current;
+		if (now === next) return;
+		faceNow.current = next;
+		setFace(next);
+		if (now) {
+			FACES[now].out();
+			if (next) later(FACES[now].ms - 40, FACES[next].in);
+		} else if (next) FACES[next].in();
+	};
+	// The face she's going to shows as soon as it starts
+	const faceSrc =
+		face === "frown" ? (frown.src ?? hehe.src) : (hehe.src ?? frown.src);
+	const daphneSrc = daphnePaint ?? faceSrc ?? daphneBlinkSrc;
 	const wow = useWowDoll();
 	const dollSrc = wow.src ?? blinkSrc;
 
@@ -303,6 +332,8 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	// A donation (or none): the ask lifts away, then the chat starts
 	const giveDonation = (amount: number) => {
 		setDonated(true);
+		// Nothing at all: she frowns
+		if (amount === 0) feel("frown");
 		donate(amount);
 		later(900, () => setZhenyaStage(1));
 	};
@@ -313,6 +344,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	// leaves, Daphne replies, then Zhenya asks about the magic button
 	const choose = (c: "love" | "dislike") => {
 		setChoice(c);
+		feel(c === "love" ? "hehe" : "frown");
 		setZhenyaStage(2);
 		later(900, () => setReplied(true));
 		later(2000, () => setZhenyaStage(3));
@@ -320,6 +352,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 	const askMagic = () => {
 		setZhenyaStage(4);
+		feel(null);
 		later(1500, () => setZhenyaStage(5));
 	};
 

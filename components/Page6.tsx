@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
+import useHeheDoll from "@/components/useHeheDoll";
 import useWowDoll from "@/components/useWowDoll";
 import { asset } from "@/lib/asset";
 import usePortrait from "@/components/usePortrait";
@@ -219,7 +220,9 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			paintUrl.current ?? (which === "out" ? PAINT_OUT : PAINT_AWAY),
 		);
 	};
-	const daphneSrc = daphnePaint ?? daphneBlink;
+	// …or giggling, once Zhenya says she did have a good time
+	const hehe = useHeheDoll();
+	const daphneSrc = daphnePaint ?? hehe.src ?? daphneBlink;
 
 	// --- Drawing ---
 	// The canvas inside the empty frame. Pointer events draw on it (mouse,
@@ -368,10 +371,12 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 		later(1500, () => setGoodTime(true));
 	};
 
-	// "Yes, I did!" → wow, and the gallery hangs in with your drawing in it
+	// "Yes, I did!" → wow (and Daphne giggles), and the gallery hangs in
+	// with your drawing in it
 	const sayYes = () => {
 		setStage(4);
 		wow.playWow();
+		hehe.playHehe();
 		later(600, () => setGalleryUp(true));
 		later(2600, () => wow.playWowReverse());
 		later(3400, () => setShowContinue(true));
