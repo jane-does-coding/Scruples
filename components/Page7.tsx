@@ -552,6 +552,8 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 								}
 								className="h-[38svh] portrait:h-[20svh] w-auto max-w-none relative"
 								alt=""
+								// Only the drawn frame counts (see opaqueAt)
+								data-hit
 							/>
 						</button>
 						<button

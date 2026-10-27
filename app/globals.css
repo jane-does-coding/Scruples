@@ -4,6 +4,90 @@
 	font-family: "scribbler", serif;
 }
 
+/* The hand-drawn cursor: white normally, yellow over anything clickable,
+   red over anything that can't be clicked yet (like locked pages). The
+   point is its tip (3, 3). A click shrinks it to 90% while pressed, then it
+   bounces back a little (102%, then 100%) - Stage.tsx puts .cursor-press /
+   .cursor-bounce on the page for that, which swap in the cursor drawn at
+   that size. Every size is drawn in the middle of the same canvas, so it
+   grows and shrinks around its centre. (?v= makes browsers fetch new
+   drawings when they change.) Plain URL
+   first, for browsers without image-set */
+:root {
+	--cursor: image-set(
+		url("/imgs/stage/cursor2.png?v=3") 1x,
+		url("/imgs/stage/cursor2@2x.png?v=3") 2x
+	);
+	--cursor-pointer: image-set(
+		url("/imgs/stage/cursor2-pointer.png?v=3") 1x,
+		url("/imgs/stage/cursor2-pointer@2x.png?v=3") 2x
+	);
+	--cursor-locked: image-set(
+		url("/imgs/stage/cursor2-locked.png?v=3") 1x,
+		url("/imgs/stage/cursor2-locked@2x.png?v=3") 2x
+	);
+}
+
+:root.cursor-press {
+	--cursor: image-set(
+		url("/imgs/stage/cursor2-90.png?v=3") 1x,
+		url("/imgs/stage/cursor2-90@2x.png?v=3") 2x
+	);
+	--cursor-pointer: image-set(
+		url("/imgs/stage/cursor2-pointer-90.png?v=3") 1x,
+		url("/imgs/stage/cursor2-pointer-90@2x.png?v=3") 2x
+	);
+	--cursor-locked: image-set(
+		url("/imgs/stage/cursor2-locked-90.png?v=3") 1x,
+		url("/imgs/stage/cursor2-locked-90@2x.png?v=3") 2x
+	);
+}
+
+:root.cursor-bounce {
+	--cursor: image-set(
+		url("/imgs/stage/cursor2-102.png?v=3") 1x,
+		url("/imgs/stage/cursor2-102@2x.png?v=3") 2x
+	);
+	--cursor-pointer: image-set(
+		url("/imgs/stage/cursor2-pointer-102.png?v=3") 1x,
+		url("/imgs/stage/cursor2-pointer-102@2x.png?v=3") 2x
+	);
+	--cursor-locked: image-set(
+		url("/imgs/stage/cursor2-locked-102.png?v=3") 1x,
+		url("/imgs/stage/cursor2-locked-102@2x.png?v=3") 2x
+	);
+}
+
+html,
+button:disabled,
+.cursor-default {
+	cursor:
+		url("/imgs/stage/cursor2.png?v=3") 3 3,
+		auto;
+	cursor:
+		var(--cursor) 3 3,
+		auto;
+}
+
+a[href],
+.cursor-pointer:not(:disabled) {
+	cursor:
+		url("/imgs/stage/cursor2-pointer.png?v=3") 3 3,
+		pointer;
+	cursor:
+		var(--cursor-pointer) 3 3,
+		pointer;
+}
+
+.cursor-not-allowed {
+	cursor:
+		url("/imgs/stage/cursor2-locked.png?v=3") 3 3,
+		not-allowed;
+	cursor:
+		var(--cursor-locked) 3 3,
+		not-allowed;
+}
+
 /* The inventory's square slots (and the gap between them). Portrait screens
    (phones held upright) size them by width instead, so four fit across */
 :root {
@@ -118,12 +202,67 @@ button {
 	transition: transform 1100ms cubic-bezier(0.34, 1.25, 0.64, 1);
 	transition: transform 1100ms
 		linear(
-			0, 0.013, 0.048, 0.101, 0.167, 0.241, 0.321, 0.403, 0.485, 0.564, 0.64,
-			0.712, 0.777, 0.836, 0.888, 0.933, 0.972, 1.004, 1.03, 1.051, 1.066, 1.077,
-			1.084, 1.088, 1.089, 1.087, 1.084, 1.079, 1.073, 1.066, 1.059, 1.052, 1.044,
-			1.037, 1.031, 1.024, 1.019, 1.014, 1.009, 1.005, 1.002, 0.999, 0.997, 0.995,
-			0.994, 0.993, 0.992, 0.992, 0.992, 0.992, 0.993, 0.993, 0.994, 0.994, 0.995,
-			0.996, 0.996, 0.997, 0.997, 0.998, 1
+			0,
+			0.013,
+			0.048,
+			0.101,
+			0.167,
+			0.241,
+			0.321,
+			0.403,
+			0.485,
+			0.564,
+			0.64,
+			0.712,
+			0.777,
+			0.836,
+			0.888,
+			0.933,
+			0.972,
+			1.004,
+			1.03,
+			1.051,
+			1.066,
+			1.077,
+			1.084,
+			1.088,
+			1.089,
+			1.087,
+			1.084,
+			1.079,
+			1.073,
+			1.066,
+			1.059,
+			1.052,
+			1.044,
+			1.037,
+			1.031,
+			1.024,
+			1.019,
+			1.014,
+			1.009,
+			1.005,
+			1.002,
+			0.999,
+			0.997,
+			0.995,
+			0.994,
+			0.993,
+			0.992,
+			0.992,
+			0.992,
+			0.992,
+			0.993,
+			0.993,
+			0.994,
+			0.994,
+			0.995,
+			0.996,
+			0.996,
+			0.997,
+			0.997,
+			0.998,
+			1
 		);
 }
 
@@ -352,7 +491,49 @@ button {
 	}
 }
 
+/* The menu's locked pages: hovering one dims the others further, and it
+   grows a little while its letters drift apart, each its own way, and float
+   there */
+.locked-pages:has(.locked:hover) .locked:not(:hover) {
+	opacity: 0.25;
+}
+
+.locked {
+	transform-origin: left center;
+	transition:
+		opacity 250ms ease,
+		scale 250ms ease;
+}
+
+.locked:hover {
+	scale: 1.05;
+}
+
+.locked .scatter {
+	display: inline-block;
+	white-space: pre;
+	transition:
+		translate 400ms ease-out,
+		rotate 400ms ease-out;
+}
+
+.locked:hover .scatter {
+	translate: var(--dx) var(--dy);
+	rotate: var(--r);
+	animation: letter-float 1.4s ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes letter-float {
+	to {
+		transform: translate(calc(var(--dx) * 0.5), -0.06em) rotate(3deg);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
+	.locked:hover .scatter {
+		animation: none;
+	}
+
 	.marquee,
 	.marquee-up,
 	.ticket-shake,

@@ -146,10 +146,10 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	// Daphne's painting animation while she draws; null = idle blinking
 	const [daphnePaint, setDaphnePaint] = useState<string | null>(null);
 
-	// Paying Daphne goes through the inventory (the "?" menu): the drawing
-	// costs $10 and is added to it. Too little money → a short message
+	// Paying Daphne goes through the inventory (the menu): the drawing costs
+	// $10 and is added to it. Too little money → she asks for a donation;
+	// already have one → she draws it again, for nothing
 	const { buy: buyItem, give, donate, money } = useStage();
-	const [buyNote, setBuyNote] = useState<string | null>(null);
 	// Can't pay ("poor") or clicked Cancel ("please"): Daphne asks to draw
 	// anyway, for free, and asks for a donation once it's done.
 	// pleaDone = her line lifts away (as she starts drawing, or once the
@@ -290,11 +290,8 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			later(3000, () => draw(true, true));
 			return;
 		}
-		if (result !== "bought") {
-			setBuyNote("You already have one!");
-			later(1500, () => setBuyNote(null));
-			return;
-		}
+		// Already have one (back on this page again): she still draws it, but
+		// there's nothing to pay and no second one goes into the inventory
 		draw(false);
 	};
 
@@ -699,7 +696,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			>
 				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-				{buyNote ?? "Buy"}
+				Buy
 			</button>
 
 			{/* Daphne's plea - where the price was, once Buy fails (not enough

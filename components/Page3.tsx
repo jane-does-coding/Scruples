@@ -122,7 +122,9 @@ export default function Page3({
 			timers.push(
 				setTimeout(() => {
 					wowPlayed.current = true;
-					setDollSrc(freshUrl(wowBlobs.current.wow, asset("/imgs/zhenya/wow.webp")));
+					setDollSrc(
+						freshUrl(wowBlobs.current.wow, asset("/imgs/zhenya/wow.webp")),
+					);
 				}, MONA_DELAY_MS),
 				setTimeout(
 					() => setDollSrc(asset("/imgs/zhenya/wow-idle.webp")),
@@ -134,7 +136,10 @@ export default function Page3({
 			timers.push(
 				setTimeout(() =>
 					setDollSrc(
-						freshUrl(wowBlobs.current.reverse, asset("/imgs/zhenya/wow-reverse.webp")),
+						freshUrl(
+							wowBlobs.current.reverse,
+							asset("/imgs/zhenya/wow-reverse.webp"),
+						),
 					),
 				),
 				setTimeout(() => setDollSrc(null), WOW_REVERSE_MS),
@@ -227,16 +232,20 @@ export default function Page3({
 					src={asset("/imgs/shop/souvenir.webp")}
 					className="h-[70svh] portrait:h-[42svh] max-w-none z-5 relative"
 					alt="Souvenir shop"
+					// Only the drawn shop and sticks count (see opaqueAt)
+					data-hit
 				/>
 				<img
 					src={asset("/imgs/stage/popsicle.webp")}
 					className="absolute top-[50%] left-[-8vw] portrait:left-[-6svh] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the souvenir"
+					data-hit
 				/>
 				<img
 					src={asset("/imgs/stage/popsicle.webp")}
 					className="absolute top-[50%] right-[-10vw] portrait:right-[-8svh] h-[60svh] min-w-[22vw] portrait:min-w-[24svh] portrait:h-[40svh] z-1"
 					alt="Wooden popsicle stick holding up the souvenir"
+					data-hit
 				/>
 			</button>
 

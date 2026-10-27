@@ -45,7 +45,10 @@ export default function PopsicleButton({
 	const right = side === "right";
 	const portrait = usePortrait();
 
-	// Popsicle + button tilt together on hover
+	// Popsicle + button tilt together on hover - over the sign, or over the
+	// stick itself (its drawn part only, see data-hit). Clicking the stick
+	// does what clicking the sign does, so hovering and clicking always go
+	// together
 	const [hover, setHover] = useState(false);
 	const hoverProps = {
 		onMouseEnter: () => setHover(true),
@@ -71,8 +74,10 @@ export default function PopsicleButton({
 				<img
 					src={asset("/imgs/stage/popsicle.webp")}
 					alt="Wooden popsicle stick holding up the sign"
-					className="w-[18vw] portrait:w-[24svh] max-w-none"
+					data-hit
+					className="w-[18vw] portrait:w-[24svh] max-w-none cursor-pointer"
 					style={tilt("50% 100%")}
+					onClick={onClick}
 					{...hoverProps}
 				/>
 			</div>

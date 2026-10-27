@@ -291,6 +291,8 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 										src={src}
 										className="h-[60svh] portrait:h-[30svh] w-auto max-w-none"
 										alt={`Instagram-style art post ${i + 1}`}
+										// Only its drawn part counts (see opaqueAt)
+										data-hit
 									/>
 								</a>
 							))}

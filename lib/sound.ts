@@ -301,7 +301,8 @@ export const startMusic = () => {
 	warm.frequency.value = 2200;
 	warm.connect(bus);
 	// A soft echo on the melody, for a sleepy, roomy feel
-	const echo = audio.createDelay();
+	// Up to 2s (the default maximum is 1s, shorter than the echo)
+	const echo = audio.createDelay(2);
 	echo.delayTime.value = BEAT * 1.5;
 	const feedback = audio.createGain();
 	feedback.gain.value = 0.3;

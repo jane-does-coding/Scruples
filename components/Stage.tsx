@@ -14,6 +14,7 @@ import ArtViewer from "@/components/ArtViewer";
 import Notebook from "@/components/Notebook";
 import usePortrait from "@/components/usePortrait";
 import { asset, srcSet } from "@/lib/asset";
+import { opaqueAt } from "@/lib/opaque";
 import * as sound from "@/lib/sound";
 import {
 	BILL_IMAGES,
@@ -124,6 +125,13 @@ const NAV_GLIDE_MS = 650;
 // One row of the inventory: a slot plus the gap (set in globals.css, and
 // sized by width on portrait screens)
 const ROW = "(var(--slot) + var(--slot-gap))";
+// A made-up number from -1 to 1 for a locked page's letter (page n, letter
+// j, and which of its values) - scattered, but the same every time
+const scatter = (n: number, j: number, which: number) => {
+	const x = Math.sin(n * 12.9898 + j * 78.233 + which * 37.719) * 43758.5453;
+	return (x - Math.floor(x)) * 2 - 1;
+};
+
 // The pages, as listed in the menu
 const PAGES = [
 	{ title: "Meet Zhenya", href: "/page1" },
@@ -724,6 +732,123 @@ export default function Stage({ children }: { children: ReactNode }) {
 	const back = pathname === "/wardrobe" ? wardrobeFrom : backHref(pathname);
 	// 1-8 on the story's pages, 0 elsewhere (paintings, the gallery)
 	const pageNumber = PAGES.findIndex((p) => p.href === pathname) + 1;
+
+	// Clickable pictures only count where they're drawn: anything with an
+	// img[data-hit] in it (or the img itself, if it's what's clicked) stops
+	// taking the pointer while the pointer is over a see-through part of its
+	// picture(s) - so hover effects, the cursor and clicks all go to what's
+	// underneath. A tap on a see-through part is ignored too
+	useEffect(() => {
+		const targetOf = (img: HTMLImageElement) =>
+			img.closest<HTMLElement>("button, a") ?? img;
+		// Whether (x, y) is over each target's pictures, and over a drawn part
+		const check = (x: number, y: number) => {
+			const found = new Map<HTMLElement, { inside: boolean; hit: boolean }>();
+			for (const img of document.querySelectorAll<HTMLImageElement>(
+				"img[data-hit]",
+			)) {
+				const target = targetOf(img);
+				const state = found.get(target) ?? { inside: false, hit: false };
+				const box = img.getBoundingClientRect();
+				if (
+					x >= box.left &&
+					x <= box.right &&
+					y >= box.top &&
+					y <= box.bottom
+				) {
+					state.inside = true;
+					if (opaqueAt(img, x, y)) state.hit = true;
+				}
+				found.set(target, state);
+			}
+			return found;
+		};
+		let frame = 0;
+		let last = { x: 0, y: 0 };
+		const onMove = (e: PointerEvent) => {
+			last = { x: e.clientX, y: e.clientY };
+			if (frame) return;
+			frame = requestAnimationFrame(() => {
+				frame = 0;
+				for (const [target, { inside, hit }] of check(last.x, last.y))
+					target.style.pointerEvents = inside && !hit ? "none" : "";
+			});
+		};
+		// A tap (or a click that slipped through) on a see-through part
+		const onClick = (e: MouseEvent) => {
+			// Key presses have no place on the screen
+			if (e.detail === 0 || !(e.target instanceof Element)) return;
+			for (const [target, { inside, hit }] of check(e.clientX, e.clientY)) {
+				if (inside && !hit && target.contains(e.target)) {
+					e.preventDefault();
+					e.stopPropagation();
+					return;
+				}
+			}
+		};
+		window.addEventListener("pointermove", onMove, { passive: true });
+		window.addEventListener("click", onClick, true);
+		return () => {
+			window.removeEventListener("pointermove", onMove);
+			window.removeEventListener("click", onClick, true);
+			cancelAnimationFrame(frame);
+		};
+	}, []);
+
+	// The cursor shrinks to 90% while the mouse button is down, and bounces
+	// back a little when it's let go (102%, then normal) - see .cursor-press /
+	// .cursor-bounce in globals.css. Those sizes are loaded up front so the
+	// first click doesn't wait for them
+	useEffect(() => {
+		if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+		const sharp = window.devicePixelRatio > 1 ? "@2x" : "";
+		for (const colour of ["", "-pointer", "-locked"])
+			for (const size of ["-90", "-102"])
+				new Image().src = `/imgs/stage/cursor2${colour}${size}${sharp}.png?v=3`;
+		const root = document.documentElement;
+		let bounce: ReturnType<typeof setTimeout>;
+		const press = (e: PointerEvent) => {
+			if (e.pointerType !== "mouse") return;
+			clearTimeout(bounce);
+			root.classList.remove("cursor-bounce");
+			root.classList.add("cursor-press");
+		};
+		const release = () => {
+			if (!root.classList.contains("cursor-press")) return;
+			root.classList.remove("cursor-press");
+			root.classList.add("cursor-bounce");
+			bounce = setTimeout(() => root.classList.remove("cursor-bounce"), 110);
+		};
+		window.addEventListener("pointerdown", press);
+		window.addEventListener("pointerup", release);
+		window.addEventListener("pointercancel", release);
+		return () => {
+			window.removeEventListener("pointerdown", press);
+			window.removeEventListener("pointerup", release);
+			window.removeEventListener("pointercancel", release);
+			clearTimeout(bounce);
+			root.classList.remove("cursor-press", "cursor-bounce");
+		};
+	}, []);
+
+	// The furthest story page reached so far (kept in this browser). The
+	// menu only links to pages up to it - the ones after are locked until
+	// the story gets there
+	const [reached, setReached] = useState(0);
+	useEffect(() => {
+		let furthest = 0;
+		try {
+			furthest = Number(localStorage.getItem("scruples-reached")) || 0;
+		} catch {}
+		if (pageNumber > furthest) {
+			furthest = pageNumber;
+			try {
+				localStorage.setItem("scruples-reached", String(furthest));
+			} catch {}
+		}
+		const timer = setTimeout(() => setReached(furthest), 0);
+		return () => clearTimeout(timer);
+	}, [pageNumber]);
 	const goBack = () => {
 		// Only once the curtains are fully open (not mid-animation or behind
 		// the ticket), so it always goes through the curtains
@@ -964,10 +1089,47 @@ export default function Stage({ children }: { children: ReactNode }) {
 							    the screen leaves room for. The page you're on is marked */}
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
 								<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
-								<ol className="min-h-(--slot) w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-cols-2 grid-rows-[repeat(5,auto)] grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.4svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.2svh] portrait:text-[1.9svh] leading-[1.15]">
+								<ol className="locked-pages min-h-(--slot) w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-cols-2 grid-rows-[repeat(5,auto)] grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.4svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.2svh] portrait:text-[1.9svh] leading-[1.15]">
 									{PAGES.map(({ title, href }, i) => {
 										const n = i + 1;
 										const here = pathname === href;
+										// Not reached yet: greyed out, not a link
+										if (n > reached && !here)
+											return (
+												<li key={href}>
+													<span
+														aria-disabled
+														title="Not yet - keep going through the story"
+														className="locked block py-[0.15svh] text-black/35 cursor-not-allowed"
+													>
+														{/* Each letter on its own, to drift its own way on
+														    hover (see .locked in globals.css). Where to
+														    is made up from its place, so it's the same
+														    every time */}
+														<span aria-hidden>
+															{[...`${n}. ${title}`].map((letter, j) => (
+																<span
+																	key={j}
+																	className="scatter"
+																	style={
+																		{
+																			"--dx": `${(scatter(n, j, 1) * 0.12).toFixed(2)}em`,
+																			"--dy": `${(scatter(n, j, 2) * 0.15).toFixed(2)}em`,
+																			"--r": `${Math.round(scatter(n, j, 3) * 10)}deg`,
+																			"--delay": `${(scatter(n, j, 4) * 0.7).toFixed(2)}s`,
+																		} as React.CSSProperties
+																	}
+																>
+																	{letter}
+																</span>
+															))}
+														</span>
+														<span className="sr-only">
+															{`${n}. ${title}`} (locked)
+														</span>
+													</span>
+												</li>
+											);
 										return (
 											<li key={href}>
 												<a
@@ -1330,6 +1492,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 					>
 						<img
 							src={asset("/imgs/stage/ticket2.webp")}
+							// Only the drawn ticket counts, not its picture's
+							// see-through corners (see opaqueAt)
+							data-hit
 							// Shown at 50vw (80vw on portrait screens) - smaller screens get the
 							// 700px version
 							srcSet={srcSet([

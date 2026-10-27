@@ -212,11 +212,14 @@ export default function Page2({
 									src={asset("/imgs/stage/popsicle.webp")}
 									className="absolute top-[30%] left-[50%] translate-x-[-50%] h-[80svh] min-w-[22vw] portrait:min-w-[22svh] z-1"
 									alt="Wooden popsicle stick holding up the frame"
+									// Only its drawn parts count (see opaqueAt)
+									data-hit
 								/>
 								<img
 									src={src}
 									className={`${FRAME_SIZES[size]} relative z-2`}
 									alt={`${label}, painting in a picture frame`}
+									data-hit
 								/>
 								{/* Label - sits right under the frame image */}
 								<span className="border-[0.2svh] border-black bg-white px-[1vw] portrait:px-[3vw] py-[0.5svh] text-[3svh] portrait:text-[2.3svh] left-[50%] translate-x-[-50%] absolute top-full mt-[1svh] z-5 w-max whitespace-nowrap portrait:whitespace-normal portrait:max-w-[24svh] text-center">
