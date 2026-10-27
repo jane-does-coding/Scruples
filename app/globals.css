@@ -24,13 +24,10 @@ a {
 }
 
 /* The hand-drawn cursor: white normally, yellow over anything clickable,
-   red over anything that can't be clicked yet (like locked pages). On
-   computers it's drawn by the page itself (CustomCursor.tsx), which hides
-   the system cursor everywhere (.custom-cursor) - that way the browser can
-   never swap it for its own, not even by the window's edges, and clicking
-   can bounce it. The image cursors below are only for if that isn't
-   running. The point is its tip, at (3, 3). (?v= makes browsers fetch new
-   drawings when they change.) */
+   red over anything that can't be clicked yet (like locked pages). It's the
+   real system cursor (just a different picture), so it moves with the mouse
+   without any delay. The point is its tip, at (3, 3). (?v= makes browsers
+   fetch new drawings when they change.) */
 :root {
 	--cursor: image-set(
 		url("/imgs/stage/cursor2.png?v=5") 1x,
@@ -46,11 +43,6 @@ a {
 	);
 }
 
-html.custom-cursor,
-html.custom-cursor * {
-	cursor: none !important;
-}
-
 html,
 button:disabled,
 .cursor-default {
@@ -62,7 +54,8 @@ button:disabled,
 		auto;
 }
 
-a[href],
+/* (:where so these never outweigh .cursor-not-allowed below) */
+:where(a[href], button:not(:disabled), [role="button"], summary),
 .cursor-pointer:not(:disabled) {
 	cursor:
 		url("/imgs/stage/cursor2-pointer.png?v=5") 3 3,
@@ -518,7 +511,7 @@ button {
 
 @keyframes letter-float {
 	to {
-		transform: translate(calc(var(--dx) * 0.5), -0.06em) rotate(3deg);
+		transform: translate(calc(var(--dx) * 0.25), -0.06em) rotate(3deg);
 	}
 }
 

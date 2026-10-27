@@ -11,7 +11,6 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import ArtViewer from "@/components/ArtViewer";
-import CustomCursor from "@/components/CustomCursor";
 import Notebook from "@/components/Notebook";
 import usePortrait from "@/components/usePortrait";
 import { asset, srcSet } from "@/lib/asset";
@@ -851,7 +850,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 			}}
 		>
 			<div className="relative h-svh overflow-clip">
-				<CustomCursor />
 				<button
 					onClick={() => setNavOpen((open) => !open)}
 					aria-expanded={navOpen}
@@ -1081,7 +1079,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 																	className="scatter"
 																	style={
 																		{
-																			"--dx": `${(scatter(n, j, 1) * 0.12).toFixed(2)}em`,
+																			"--dx": `${(scatter(n, j, 1) * 0.05).toFixed(2)}em`,
 																			"--dy": `${(scatter(n, j, 2) * 0.15).toFixed(2)}em`,
 																			"--r": `${Math.round(scatter(n, j, 3) * 10)}deg`,
 																			"--delay": `${(scatter(n, j, 4) * 0.7).toFixed(2)}s`,
