@@ -1,8 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
-// Served as /manifest.webmanifest - lets phones add the site to the home
-// screen with its own name, icon (Zhenya) and colours
 export default function manifest(): MetadataRoute.Manifest {
 	return {
 		name: SITE_NAME,

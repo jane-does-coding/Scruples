@@ -61,8 +61,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 	return (
 		<html lang="en" className="h-full antialiased">
 			<head>
-				{/* The Scribbler font is used everywhere, so start downloading it
-				    with the page instead of waiting for the CSS to ask for it */}
 				<link
 					rel="preload"
 					href="/scribbler-font/Scribbler.woff2"
