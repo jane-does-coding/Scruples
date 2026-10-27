@@ -125,8 +125,8 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			    portrait screens, where the cards need the room and the round
 			    "<-" in the corner does the same) */}
 			<PopsicleButton
-				onClick={() => goTo("/page2")}
-				href="/page2"
+				onClick={() => goTo("/zhenya-likes-art")}
+				href="/zhenya-likes-art"
 				side="left"
 				className="portrait:hidden"
 				style={{ ...slideIn(shown, "bottom", 400), left: "-2vw" }}

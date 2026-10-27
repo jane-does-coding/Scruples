@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/site";
 export const metadata: Metadata = pageMetadata(
 	"The art competition",
 	"Zhenya signs up for an art competition - and has to choose which painting to submit.",
-	"/page7",
+	"/art-competition",
 );
 
 export default function Page7Route() {

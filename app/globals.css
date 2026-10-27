@@ -4,65 +4,58 @@
 	font-family: "scribbler", serif;
 }
 
+/* It's a stage, not a document: text and pictures can't be selected or
+   dragged around - except in the fields where you type */
+body {
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+input,
+textarea,
+[contenteditable] {
+	-webkit-user-select: text;
+	user-select: text;
+}
+
+img,
+a {
+	-webkit-user-drag: none;
+}
+
 /* The hand-drawn cursor: white normally, yellow over anything clickable,
-   red over anything that can't be clicked yet (like locked pages). The
-   point is its tip (3, 3). A click shrinks it to 90% while pressed, then it
-   bounces back a little (102%, then 100%) - Stage.tsx puts .cursor-press /
-   .cursor-bounce on the page for that, which swap in the cursor drawn at
-   that size. Every size is drawn in the middle of the same canvas, so it
-   grows and shrinks around its centre. (?v= makes browsers fetch new
-   drawings when they change.) Plain URL
-   first, for browsers without image-set */
+   red over anything that can't be clicked yet (like locked pages). On
+   computers it's drawn by the page itself (CustomCursor.tsx), which hides
+   the system cursor everywhere (.custom-cursor) - that way the browser can
+   never swap it for its own, not even by the window's edges, and clicking
+   can bounce it. The image cursors below are only for if that isn't
+   running. The point is its tip, at (3, 3). (?v= makes browsers fetch new
+   drawings when they change.) */
 :root {
 	--cursor: image-set(
-		url("/imgs/stage/cursor2.png?v=3") 1x,
-		url("/imgs/stage/cursor2@2x.png?v=3") 2x
+		url("/imgs/stage/cursor2.png?v=5") 1x,
+		url("/imgs/stage/cursor2@2x.png?v=5") 2x
 	);
 	--cursor-pointer: image-set(
-		url("/imgs/stage/cursor2-pointer.png?v=3") 1x,
-		url("/imgs/stage/cursor2-pointer@2x.png?v=3") 2x
+		url("/imgs/stage/cursor2-pointer.png?v=5") 1x,
+		url("/imgs/stage/cursor2-pointer@2x.png?v=5") 2x
 	);
 	--cursor-locked: image-set(
-		url("/imgs/stage/cursor2-locked.png?v=3") 1x,
-		url("/imgs/stage/cursor2-locked@2x.png?v=3") 2x
+		url("/imgs/stage/cursor2-locked.png?v=5") 1x,
+		url("/imgs/stage/cursor2-locked@2x.png?v=5") 2x
 	);
 }
 
-:root.cursor-press {
-	--cursor: image-set(
-		url("/imgs/stage/cursor2-90.png?v=3") 1x,
-		url("/imgs/stage/cursor2-90@2x.png?v=3") 2x
-	);
-	--cursor-pointer: image-set(
-		url("/imgs/stage/cursor2-pointer-90.png?v=3") 1x,
-		url("/imgs/stage/cursor2-pointer-90@2x.png?v=3") 2x
-	);
-	--cursor-locked: image-set(
-		url("/imgs/stage/cursor2-locked-90.png?v=3") 1x,
-		url("/imgs/stage/cursor2-locked-90@2x.png?v=3") 2x
-	);
-}
-
-:root.cursor-bounce {
-	--cursor: image-set(
-		url("/imgs/stage/cursor2-102.png?v=3") 1x,
-		url("/imgs/stage/cursor2-102@2x.png?v=3") 2x
-	);
-	--cursor-pointer: image-set(
-		url("/imgs/stage/cursor2-pointer-102.png?v=3") 1x,
-		url("/imgs/stage/cursor2-pointer-102@2x.png?v=3") 2x
-	);
-	--cursor-locked: image-set(
-		url("/imgs/stage/cursor2-locked-102.png?v=3") 1x,
-		url("/imgs/stage/cursor2-locked-102@2x.png?v=3") 2x
-	);
+html.custom-cursor,
+html.custom-cursor * {
+	cursor: none !important;
 }
 
 html,
 button:disabled,
 .cursor-default {
 	cursor:
-		url("/imgs/stage/cursor2.png?v=3") 3 3,
+		url("/imgs/stage/cursor2.png?v=5") 3 3,
 		auto;
 	cursor:
 		var(--cursor) 3 3,
@@ -72,7 +65,7 @@ button:disabled,
 a[href],
 .cursor-pointer:not(:disabled) {
 	cursor:
-		url("/imgs/stage/cursor2-pointer.png?v=3") 3 3,
+		url("/imgs/stage/cursor2-pointer.png?v=5") 3 3,
 		pointer;
 	cursor:
 		var(--cursor-pointer) 3 3,
@@ -81,7 +74,7 @@ a[href],
 
 .cursor-not-allowed {
 	cursor:
-		url("/imgs/stage/cursor2-locked.png?v=3") 3 3,
+		url("/imgs/stage/cursor2-locked.png?v=5") 3 3,
 		not-allowed;
 	cursor:
 		var(--cursor-locked) 3 3,

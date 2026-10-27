@@ -252,7 +252,7 @@ export default function Page2({
 
 			<PopsicleButton
 				onClick={nextPage}
-				href="/page3"
+				href="/souvenir-shop"
 				style={{
 					...drop(step >= 4, 900, BUTTON_DROP),
 					// Inline so it beats the component's right-0

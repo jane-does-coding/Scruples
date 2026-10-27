@@ -10,18 +10,19 @@ import Page7 from "@/components/Page7";
 import Page8 from "@/components/Page8";
 import Page9 from "@/components/Page9";
 import { useStage } from "@/components/Stage";
+import { storyHref } from "@/lib/pages";
 
 const PAGES = [Page1, Page2, Page3, Page4, Page5, Page6, Page7, Page8, Page9];
 
-// Renders Page1-9 for the /page1 … /page9 routes. Next/previous go
-// through the curtains to the neighbouring route
+// Renders Page1-9 for the story's routes (see lib/pages.ts). Next/previous
+// go through the curtains to the neighbouring one
 export default function StagePage({ page }: { page: number }) {
 	const { curtainsOpen, goTo } = useStage();
 	const Page = PAGES[page - 1];
 
 	const goToPage = (target: number) => {
 		if (target < 1 || target > PAGES.length) return;
-		goTo(`/page${target}`);
+		goTo(storyHref(target));
 	};
 
 	return (

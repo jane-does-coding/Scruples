@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { STORY_PAGES } from "./lib/pages";
 
 // Images and fonts in public/ aren't renamed when they change, so by default
 // they're only cached for an hour (then refreshed in the background for up to
@@ -30,6 +31,15 @@ const nextConfig: NextConfig = {
 		// The deploy's git commit on Vercel; empty locally (no versioning)
 		NEXT_PUBLIC_ASSET_VERSION:
 			process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 8) ?? "",
+	},
+	// The story's pages used to be /page1 … /page9: those addresses (old
+	// links, bookmarks, search results) go to the new ones for good
+	redirects() {
+		return STORY_PAGES.map(({ href }, i) => ({
+			source: `/page${i + 1}`,
+			destination: href,
+			permanent: true,
+		}));
 	},
 	headers() {
 		return [

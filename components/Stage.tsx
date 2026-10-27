@@ -11,10 +11,12 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import ArtViewer from "@/components/ArtViewer";
+import CustomCursor from "@/components/CustomCursor";
 import Notebook from "@/components/Notebook";
 import usePortrait from "@/components/usePortrait";
 import { asset, srcSet } from "@/lib/asset";
 import { opaqueAt } from "@/lib/opaque";
+import { STORY_PAGES, storyHref } from "@/lib/pages";
 import * as sound from "@/lib/sound";
 import {
 	BILL_IMAGES,
@@ -59,13 +61,14 @@ const CURTAIN_DELAY_MS = 300;
 
 // Where the top-left "<-" button goes from each route, or null to hide it
 const backHref = (pathname: string) => {
-	const page = pathname.match(/^\/page(\d+)$/);
-	if (page) return Number(page[1]) > 1 ? `/page${Number(page[1]) - 1}` : null;
+	// A story page goes back to the one before it (the first has no Back)
+	const n = STORY_PAGES.findIndex((p) => p.href === pathname) + 1;
+	if (n) return n > 1 ? storyHref(n - 1) : null;
 	// Paintings are opened from the marquee on Page 2
-	if (pathname.startsWith("/art-piece/")) return "/page2";
+	if (pathname.startsWith("/art-piece/")) return "/zhenya-likes-art";
 	// The last page comes after Page 9 (for now), and the drawings wall is
 	// opened from the last page
-	if (pathname === "/lastpage") return "/page9";
+	if (pathname === "/lastpage") return "/in-the-spotlight";
 	if (pathname === "/gallery") return "/lastpage";
 	return null;
 };
@@ -133,18 +136,7 @@ const scatter = (n: number, j: number, which: number) => {
 };
 
 // The pages, as listed in the menu
-const PAGES = [
-	{ title: "Meet Zhenya", href: "/page1" },
-	{ title: "Zhenya likes art", href: "/page2" },
-	{ title: "Souvenir shop", href: "/page3" },
-	{ title: "Art on social media", href: "/page4" },
-	{ title: "Meet Daphne", href: "/page5" },
-	{ title: "Every artist starts somewhere", href: "/page6" },
-	{ title: "The art competition", href: "/page7" },
-	{ title: "The results", href: "/page8" },
-	{ title: "In the spotlight", href: "/page9" },
-	{ title: "Curtain call", href: "/lastpage" },
-];
+const PAGES = [...STORY_PAGES, { title: "Curtain call", href: "/lastpage" }];
 
 // The inventory pop-up next to the "?"
 const NOTE =
@@ -237,7 +229,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 	// they're tried on - opened by clicking the hats in the inventory. Its
 	// Back goes to the page it was opened from
 	const [wearing, setWearing] = useState<HatId | null>(null);
-	const [wardrobeFrom, setWardrobeFrom] = useState("/page3");
+	const [wardrobeFrom, setWardrobeFrom] = useState("/souvenir-shop");
 	const openWardrobe = () => {
 		setNavOpen(false);
 		if (pathname === "/wardrobe") return;
@@ -795,40 +787,15 @@ export default function Stage({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
-	// The cursor shrinks to 90% while the mouse button is down, and bounces
-	// back a little when it's let go (102%, then normal) - see .cursor-press /
-	// .cursor-bounce in globals.css. Those sizes are loaded up front so the
-	// first click doesn't wait for them
+	// Pictures and links can't be dragged out (Chrome and Safari already
+	// don't, from the CSS; this is for Firefox)
 	useEffect(() => {
-		if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-		const sharp = window.devicePixelRatio > 1 ? "@2x" : "";
-		for (const colour of ["", "-pointer", "-locked"])
-			for (const size of ["-90", "-102"])
-				new Image().src = `/imgs/stage/cursor2${colour}${size}${sharp}.png?v=3`;
-		const root = document.documentElement;
-		let bounce: ReturnType<typeof setTimeout>;
-		const press = (e: PointerEvent) => {
-			if (e.pointerType !== "mouse") return;
-			clearTimeout(bounce);
-			root.classList.remove("cursor-bounce");
-			root.classList.add("cursor-press");
+		const noDrag = (e: DragEvent) => {
+			if (e.target instanceof Element && e.target.closest("img, a"))
+				e.preventDefault();
 		};
-		const release = () => {
-			if (!root.classList.contains("cursor-press")) return;
-			root.classList.remove("cursor-press");
-			root.classList.add("cursor-bounce");
-			bounce = setTimeout(() => root.classList.remove("cursor-bounce"), 110);
-		};
-		window.addEventListener("pointerdown", press);
-		window.addEventListener("pointerup", release);
-		window.addEventListener("pointercancel", release);
-		return () => {
-			window.removeEventListener("pointerdown", press);
-			window.removeEventListener("pointerup", release);
-			window.removeEventListener("pointercancel", release);
-			clearTimeout(bounce);
-			root.classList.remove("cursor-press", "cursor-bounce");
-		};
+		document.addEventListener("dragstart", noDrag);
+		return () => document.removeEventListener("dragstart", noDrag);
 	}, []);
 
 	// The furthest story page reached so far (kept in this browser). The
@@ -884,6 +851,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 			}}
 		>
 			<div className="relative h-svh overflow-clip">
+				<CustomCursor />
 				<button
 					onClick={() => setNavOpen((open) => !open)}
 					aria-expanded={navOpen}
@@ -1485,9 +1453,14 @@ export default function Stage({ children }: { children: ReactNode }) {
 				{/* Ticket - click it to open the curtains and enter */}
 				{ticket !== "gone" && (
 					<button
+						// Clicking it again does nothing (see enter). It isn't
+						// actually disabled after the click, so the cursor stays
+						// the same until the ticket's gone - swapping it while the
+						// page is busy starting the curtains made it flicker to the
+						// browser's own cursor
 						onClick={enter}
-						disabled={ticket !== "waiting"}
-						className={`fixed top-[40svh] left-[20vw] portrait:left-[10vw] z-40 cursor-pointer disabled:cursor-default drop-shadow-lg drop-shadow-black/60 test-shadow-darkest ${ticket === "waiting" ? "ticket-shake" : ""}`}
+						aria-disabled={ticket !== "waiting"}
+						className={`fixed top-[40svh] left-[20vw] portrait:left-[10vw] z-40 cursor-pointer drop-shadow-lg drop-shadow-black/60 test-shadow-darkest ${ticket === "waiting" ? "ticket-shake" : ""}`}
 						aria-label="Enter"
 					>
 						<img

@@ -576,12 +576,12 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 						{/* Nothing drawn yet: a way to go and draw something */}
 						{entry === "yours" && !yours && (
 							<a
-								href="/page6"
+								href="/every-artist-starts-somewhere"
 								onClick={(e) => {
 									if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)
 										return;
 									e.preventDefault();
-									goTo("/page6");
+									goTo("/every-artist-starts-somewhere");
 								}}
 								tabIndex={picking ? undefined : -1}
 								className="relative z-0 w-max max-w-[22vw] portrait:max-w-[44vw] text-[2.2svh] portrait:text-[1.6svh] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[2vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow cursor-pointer"
@@ -596,7 +596,7 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 
 			<PopsicleButton
 				onClick={goOn}
-				href="/page8"
+				href="/competition-results"
 				style={{
 					visibility: chosen ? "visible" : "hidden",
 					transition: `transform 900ms ${DOLL_DROP}`,

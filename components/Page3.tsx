@@ -519,7 +519,7 @@ export default function Page3({
 			<div className="z-10">
 				<PopsicleButton
 					onClick={nextPage}
-					href="/page4"
+					href="/art-on-social-media"
 					style={{
 						...drop(step >= 3, 900, BUTTON_DROP),
 						// Inline so it beats the component's right-0

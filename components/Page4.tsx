@@ -305,7 +305,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			    marquee in the code so it sits in front of the posts */}
 			<PopsicleButton
 				onClick={nextPage}
-				href="/page5"
+				href="/meet-daphne"
 				style={{
 					...drop(showContinue, 900, BUTTON_DROP),
 					transform: showContinue ? "translateY(0)" : "translateY(100svh)",

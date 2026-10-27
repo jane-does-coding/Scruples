@@ -37,6 +37,15 @@ export const opaqueAt = (img: HTMLImageElement, x: number, y: number) => {
 	const px = Math.floor(((x - box.left) / box.width) * map.width);
 	const py = Math.floor(((y - box.top) / box.height) * map.height);
 	if (px < 0 || py < 0 || px >= map.width || py >= map.height) return false;
-	// The alpha of that pixel; a faint edge doesn't count
-	return map.data[(py * map.width + px) * 4 + 3] > 60;
+	// That pixel or one right next to it is drawn (even faintly, like a soft
+	// pencil edge) - so the edge of a drawing counts as part of it, and the
+	// cursor doesn't flicker along it
+	for (let dy = -1; dy <= 1; dy++)
+		for (let dx = -1; dx <= 1; dx++) {
+			const nx = px + dx;
+			const ny = py + dy;
+			if (nx < 0 || ny < 0 || nx >= map.width || ny >= map.height) continue;
+			if (map.data[(ny * map.width + nx) * 4 + 3] > 12) return true;
+		}
+	return false;
 };

@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/site";
 export const metadata: Metadata = pageMetadata(
 	"Souvenir shop",
 	"Step into Zhenya's little souvenir shop and browse art button pins, Micron pens, a ruled notebook and the Mona Lisa herself.",
-	"/page3",
+	"/souvenir-shop",
 );
 
 export default function Page3Route() {

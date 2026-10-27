@@ -668,7 +668,7 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 			    Pages 4 and 5, in front of everything on the page */}
 			<PopsicleButton
 				onClick={nextPage}
-				href="/page7"
+				href="/art-competition"
 				style={{
 					...hang(showContinue, showContinue, "bottom", {
 						ms: 900,

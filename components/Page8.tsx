@@ -472,7 +472,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 
 			<PopsicleButton
 				onClick={nextPage}
-				href="/page9"
+				href="/in-the-spotlight"
 				style={{
 					visibility: showContinue ? "visible" : "hidden",
 					transition: `transform 900ms ${DOLL_DROP}`,

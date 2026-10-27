@@ -1,13 +1,14 @@
 import type { MetadataRoute } from "next";
 import { FRAMES } from "@/lib/frames";
+import { STORY_PAGES } from "@/lib/pages";
 import { SITE_URL } from "@/lib/site";
 
 // Served as /sitemap.xml - the story pages and every painting's page
 export default function sitemap(): MetadataRoute.Sitemap {
-	const pages = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({
-		url: `${SITE_URL}/page${n}`,
+	const pages = STORY_PAGES.map(({ href }, i) => ({
+		url: `${SITE_URL}${href}`,
 		changeFrequency: "monthly" as const,
-		priority: n === 1 ? 1 : 0.8,
+		priority: i === 0 ? 1 : 0.8,
 	}));
 	const ending = ["/lastpage", "/gallery"].map((path) => ({
 		url: `${SITE_URL}${path}`,

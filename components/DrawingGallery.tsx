@@ -77,12 +77,12 @@ export default function DrawingGallery() {
 				{onlySamples && (
 					<p className="mt-[4svh] text-center text-[3svh] portrait:text-[2.3svh]">
 						<a
-							href="/page6"
+							href="/every-artist-starts-somewhere"
 							onClick={(e) => {
 								if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)
 									return;
 								e.preventDefault();
-								goTo("/page6");
+								goTo("/every-artist-starts-somewhere");
 							}}
 							className="inline-block bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[2.5vw] py-[0.5svh] cursor-pointer"
 						>

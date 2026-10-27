@@ -161,12 +161,12 @@ export default function WardrobePage() {
 				) : (
 					// Came here without them (e.g. straight from a link)
 					<a
-						href="/page3"
+						href="/souvenir-shop"
 						onClick={(e) => {
 							if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)
 								return;
 							e.preventDefault();
-							goTo("/page3");
+							goTo("/souvenir-shop");
 						}}
 						className={`${BUTTON} block max-w-[30vw] portrait:max-w-[80vw] text-[3svh] portrait:text-[2.3svh]`}
 						style={{ ...hang(shown, { delay: 500 }), zIndex: 8 }}

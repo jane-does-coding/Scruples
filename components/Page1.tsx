@@ -117,7 +117,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 			<PopsicleButton
 				onClick={nextPage}
-				href="/page2"
+				href="/zhenya-likes-art"
 				style={{
 					...drop(saidHi, 900, BUTTON_DROP),
 					transitionDelay: saidHi ? "400ms" : "0ms",
