@@ -2,6 +2,12 @@
 
 export const SITE_NAME = "Scruples";
 
+// While testing: the whole opening (the lights going down and the phones
+// card, with its sound question) plays on every load, not just the first
+// time in a visit.
+// Set back to false before launch
+export const ALWAYS_PLAY_OPENING = true;
+
 export const SITE_DESCRIPTION =
 	"Step through the curtains and meet Zhenya, a marionette doll who loves art - wander past famous paintings, browse a tiny souvenir shop, and see how artists share their work online.";
 

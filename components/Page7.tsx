@@ -311,13 +311,13 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 				/>
 			</div>
 
-			<h2
+			<h1
 				className={`${LABEL} border-[0.2svh] top-[20svh] right-[11vw] portrait:right-[9vw] portrait:top-[7svh]`}
 				style={word(0, 4)}
 			>
 				<Strings />
 				Annual Art Competition
-			</h2>
+			</h1>
 			<p
 				className={`${LABEL} border-[0.2svh] top-[28svh] right-[11vw] portrait:right-[10vw] portrait:top-[13svh]`}
 				style={word(1, 3)}

@@ -13,6 +13,9 @@
 //   fanfare()   - a little "ta-da" for winning
 //   sadTrombone()- a soft "wah-wah-wah-waaah" for losing
 //   click()     - a soft click, for picking something
+//   startMurmur()- the audience chatting before the show, on a loop
+//   hushMurmur() - the audience going quiet as the lights dim
+//   chime()     - the theatre's "bing-bong" before the show starts
 
 const STORAGE_KEY = "scruples-sound";
 const VOLUME = 1;
@@ -608,4 +611,129 @@ export const click = () => {
 	osc.connect(gain).connect(master);
 	osc.start(now);
 	osc.stop(now + 0.1);
+};
+
+// ---------- The audience ----------
+// Chatter before the show: a handful of "voices", each a band of noise
+// whose loudness comes and goes in syllables and whose pitch moves around
+// like vowels do - too blurry to make out words, which is what a full room
+// sounds like from the stage. Quiet room hum under it
+const MURMUR_VOLUME = 0.5;
+let murmur: { bus: GainNode; stop: () => void } | null = null;
+
+export const startMurmur = () => {
+	if (!ctx || !master || murmur) return;
+	const audio = ctx;
+	const now = audio.currentTime;
+	const bus = audio.createGain();
+	bus.gain.setValueAtTime(0.0001, now);
+	bus.gain.exponentialRampToValueAtTime(MURMUR_VOLUME, now + 2);
+	const room = audio.createBiquadFilter();
+	room.type = "lowpass";
+	room.frequency.value = 1800;
+	room.connect(bus).connect(master);
+
+	const sources: AudioBufferSourceNode[] = [];
+	const hum = noiseSource(audio);
+	const humFilter = audio.createBiquadFilter();
+	humFilter.type = "lowpass";
+	humFilter.frequency.value = 300;
+	const humGain = audio.createGain();
+	humGain.gain.value = 0.05;
+	hum.connect(humFilter).connect(humGain).connect(room);
+	hum.start(now);
+	sources.push(hum);
+
+	const voices = Array.from({ length: 9 }, () => {
+		const source = noiseSource(audio);
+		const mouth = audio.createBiquadFilter();
+		mouth.type = "bandpass";
+		mouth.Q.value = 4;
+		mouth.frequency.value = 500;
+		const gain = audio.createGain();
+		gain.gain.value = 0.0001;
+		source.connect(mouth).connect(gain).connect(room);
+		source.start(now, Math.random());
+		sources.push(source);
+		// Each voice is a bit higher or lower, and some talk more than others
+		return {
+			mouth,
+			gain,
+			pitch: 0.7 + Math.random() * 0.6,
+			chatty: 0.4 + Math.random() * 0.5,
+			next: now + Math.random(),
+		};
+	});
+	// Syllables are planned a moment ahead, like the music
+	const schedule = () => {
+		for (const v of voices) {
+			while (v.next < audio.currentTime + 0.6) {
+				const at = v.next;
+				if (Math.random() > v.chatty) {
+					// A pause between sentences
+					v.next += 0.4 + Math.random() * 1.2;
+					continue;
+				}
+				const length = 0.08 + Math.random() * 0.18;
+				const level = (0.25 + Math.random() * 0.75) * 0.6;
+				v.mouth.frequency.setTargetAtTime(
+					(350 + Math.random() * 800) * v.pitch,
+					at,
+					0.03,
+				);
+				v.gain.gain.setTargetAtTime(level, at, 0.025);
+				v.gain.gain.setTargetAtTime(0.0001, at + length, 0.04);
+				v.next = at + length + 0.03 + Math.random() * 0.12;
+			}
+		}
+	};
+	schedule();
+	const timer = setInterval(schedule, 200);
+
+	murmur = {
+		bus,
+		stop: () => {
+			clearInterval(timer);
+			const end = audio.currentTime;
+			sources.forEach((source) => source.stop(end + 0.1));
+		},
+	};
+};
+
+// The house lights going down: the chatter dies away over a couple of
+// seconds, the way a room goes quiet
+export const hushMurmur = (ms = 2200) => {
+	if (!ctx || !murmur) return;
+	const { bus, stop } = murmur;
+	murmur = null;
+	const now = ctx.currentTime;
+	bus.gain.cancelScheduledValues(now);
+	bus.gain.setValueAtTime(Math.max(bus.gain.value, 0.0001), now);
+	bus.gain.exponentialRampToValueAtTime(0.0001, now + ms / 1000);
+	setTimeout(stop, ms + 100);
+};
+
+// The "bing-bong" a theatre plays to say the show's starting: two soft
+// bell notes, high then low
+export const chime = () => {
+	const audio = ready();
+	if (!audio || !master) return;
+	[
+		[659, 0],
+		[523, 0.55],
+	].forEach(([note, offset]) => {
+		const at = audio.currentTime + offset;
+		[1, 2, 3.01].forEach((ratio, i) => {
+			const osc = audio.createOscillator();
+			osc.type = "sine";
+			osc.frequency.value = note * ratio;
+			const gain = audio.createGain();
+			gain.gain.setValueAtTime(0.0001, at);
+			gain.gain.exponentialRampToValueAtTime([0.22, 0.05, 0.02][i], at + 0.01);
+			gain.gain.exponentialRampToValueAtTime(0.0001, at + [2.2, 1, 0.5][i]);
+			osc.connect(gain).connect(master!);
+			osc.start(at);
+			osc.stop(at + 2.3);
+		});
+	});
 };

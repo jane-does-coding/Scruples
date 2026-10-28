@@ -365,7 +365,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
 			{/* The page's title, for screen readers and search engines */}
-			<h1 className="sr-only">Zhenya</h1>
+			<h1 className="sr-only">Meet Daphne</h1>
 
 			{/* "Click this magic button…" - drops in at 0.4s; lifts away once
 			    "Aww cute!" is clicked */}

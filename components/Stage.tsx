@@ -12,10 +12,13 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import ArtViewer from "@/components/ArtViewer";
 import Notebook from "@/components/Notebook";
+import { PhoneCard } from "@/components/Opening";
 import usePortrait from "@/components/usePortrait";
 import { asset, srcSet } from "@/lib/asset";
 import { opaqueAt } from "@/lib/opaque";
 import { STORY_PAGES, storyHref } from "@/lib/pages";
+import { usePlaytimeCounter } from "@/lib/playtime";
+import { ALWAYS_PLAY_OPENING } from "@/lib/site";
 import * as sound from "@/lib/sound";
 import {
 	BILL_IMAGES,
@@ -57,6 +60,16 @@ const RIP_WAIT_MAX_MS = 4000;
 const RIPPING_FRAME_MS = 30;
 // Curtains start opening this long after the ticket is clicked
 const CURTAIN_DELAY_MS = 300;
+// The opening, the first time in a visit (this tab): after the ticket, the
+// house lights go down and the audience hushes, the "bing-bong" plays and
+// "please silence your phones" hangs in - asking about the show's sound
+// too. Choosing lifts it away and the curtains open. When the lights and
+// the card come, after the ticket is clicked, and how long the card takes
+// to lift away
+const LIGHTS_DOWN_AT_MS = 500;
+const PHONE_CARD_AT_MS = 1600;
+const PHONE_CARD_LIFT_MS = 600;
+const OPENING_SEEN_KEY = "scruples-opening-seen";
 
 // Where the top-left "<-" button goes from each route, or null to hide it
 const backHref = (pathname: string) => {
@@ -102,6 +115,9 @@ type StageContextValue = {
 	equip: (hat: HatId | null) => void;
 	// Through the curtains to where the top-left "<-" goes
 	goBack: () => void;
+	// The furthest story page reached so far (the menu locks the ones
+	// after it)
+	reached: number;
 };
 
 // A drawing in the inventory that isn't from the shop
@@ -171,6 +187,24 @@ export default function Stage({ children }: { children: ReactNode }) {
 	>("waiting");
 	const enteredRef = useRef(false);
 	const curtainDelayDone = useRef(false);
+
+	// The house lights (a dark layer over the closed curtains, lit in the
+	// middle where the card hangs) and the phones card
+	const [lightsDown, setLightsDown] = useState(false);
+	const [phoneCard, setPhoneCard] = useState(false);
+	const openingTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+	const openingDone = useRef<(() => void) | null>(null);
+	// Sound on or off, from the phones card: it lifts away, then the
+	// curtains open
+	const chooseSound = (on: boolean) => {
+		if (!openingDone.current) return;
+		sound.setMuted(!on);
+		setPhoneCard(false);
+		openingTimers.current.push(
+			setTimeout(openingDone.current, PHONE_CARD_LIFT_MS),
+		);
+		openingDone.current = null;
+	};
 	const ripCanvasRef = useRef<HTMLCanvasElement>(null);
 	const ripFrames = useRef<ImageBitmap[]>([]);
 
@@ -542,6 +576,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 	};
 
 	const openCurtains = (duration = ANIMATION_MS) => {
+		// The house lights come back up as the curtains open, and the music
+		// starts (both only matter the first time)
+		setLightsDown(false);
+		sound.startMusic();
 		setAnimationStage("opening");
 		sound.whoosh(duration);
 		playFrames(
@@ -620,23 +658,56 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return openingLoading.current;
 	};
 
+	// Opens the curtains as soon as the opening frames are ready (otherwise
+	// the frame loader opens them once it's done)
+	const curtainsUp = () => {
+		curtainDelayDone.current = true;
+		if (bitmaps.current.opening.length) openCurtains();
+	};
+
+	// The lights going down, the hush and the phones card - then, once sound
+	// is chosen on it, curtainsUp
+	const playOpening = () => {
+		try {
+			sessionStorage.setItem(OPENING_SEEN_KEY, "1");
+		} catch {}
+		// Someone's still talking if the audience wasn't there already
+		sound.startMurmur();
+		const at = (ms: number, then: () => void) =>
+			openingTimers.current.push(setTimeout(then, ms));
+		at(LIGHTS_DOWN_AT_MS, () => {
+			setLightsDown(true);
+			sound.hushMurmur();
+		});
+		at(PHONE_CARD_AT_MS, () => {
+			sound.chime();
+			setPhoneCard(true);
+		});
+		openingDone.current = () => {
+			sound.hushMurmur(600);
+			curtainsUp();
+		};
+	};
+
 	const enter = () => {
 		if (enteredRef.current) return;
 		enteredRef.current = true;
 		// The first click is what lets the browser play sound: wake it up
-		// and start the music
+		// (the music starts as the curtains open)
 		sound.unlock();
-		sound.startMusic();
 		// Make sure both are on their way, even if the click beat the timer
 		loadOpening();
+		let seen = true;
+		try {
+			seen =
+				!ALWAYS_PLAY_OPENING &&
+				sessionStorage.getItem(OPENING_SEEN_KEY) === "1";
+		} catch {}
 
 		const ripThenOpen = () => {
 			playRipping();
-			setTimeout(() => {
-				curtainDelayDone.current = true;
-				// Otherwise the frame loader opens them once it's done
-				if (bitmaps.current.opening.length) openCurtains();
-			}, CURTAIN_DELAY_MS);
+			if (!seen) playOpening();
+			else setTimeout(curtainsUp, CURTAIN_DELAY_MS);
 		};
 
 		if (ripFrames.current.length) {
@@ -676,10 +747,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 		if (document.readyState === "complete") afterLoad();
 		else window.addEventListener("load", afterLoad, { once: true });
 
+		const timers = openingTimers.current;
 		return () => {
 			clearTimeout(delay);
 			window.removeEventListener("load", afterLoad);
 			if (frameTimer.current) clearInterval(frameTimer.current);
+			timers.forEach(clearTimeout);
 		};
 	}, []);
 
@@ -797,22 +870,19 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return () => document.removeEventListener("dragstart", noDrag);
 	}, []);
 
-	// The furthest story page reached so far (kept in this browser). The
-	// menu only links to pages up to it - the ones after are locked until
-	// the story gets there
+	// Time spent here, for the stats at the curtain call
+	usePlaytimeCounter();
+
+	// The furthest story page reached so far. The menu only links to pages
+	// up to it - the ones after are locked until the story gets there. For
+	// now it's only kept while the site is open, like the inventory (a
+	// reload locks them all again), which makes testing easier
 	const [reached, setReached] = useState(0);
 	useEffect(() => {
-		let furthest = 0;
-		try {
-			furthest = Number(localStorage.getItem("scruples-reached")) || 0;
-		} catch {}
-		if (pageNumber > furthest) {
-			furthest = pageNumber;
-			try {
-				localStorage.setItem("scruples-reached", String(furthest));
-			} catch {}
-		}
-		const timer = setTimeout(() => setReached(furthest), 0);
+		const timer = setTimeout(
+			() => setReached((furthest) => Math.max(furthest, pageNumber)),
+			0,
+		);
 		return () => clearTimeout(timer);
 	}, [pageNumber]);
 	const goBack = () => {
@@ -847,6 +917,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				wearing,
 				equip,
 				goBack,
+				reached,
 			}}
 		>
 			<div className="relative h-svh overflow-clip">
@@ -1449,6 +1520,22 @@ export default function Stage({ children }: { children: ReactNode }) {
 				)}
 
 				{/* Ticket - click it to open the curtains and enter */}
+				{/* House lights going down before the show - lit in the middle,
+				    where the phones card hangs. Over the closed curtains,
+				    under the ticket and the card */}
+				<div
+					aria-hidden
+					className="fixed inset-0 z-35"
+					style={{
+						background:
+							"radial-gradient(ellipse 38vw 34svh at 50% 40%, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0.88))",
+						opacity: lightsDown ? 1 : 0,
+						pointerEvents: lightsDown ? "auto" : "none",
+						transition: `opacity ${lightsDown ? 1400 : 1200}ms ease`,
+					}}
+				/>
+				<PhoneCard shown={phoneCard} onChoose={chooseSound} />
+
 				{ticket !== "gone" && (
 					<button
 						// Clicking it again does nothing (see enter). It isn't

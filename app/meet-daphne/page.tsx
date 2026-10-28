@@ -3,8 +3,8 @@ import StagePage from "@/components/StagePage";
 import { pageMetadata } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata(
-	"Zhenya",
-	"Zhenya the marionette doll, waiting on stage for what comes next.",
+	"Meet Daphne",
+	"Zhenya meets Daphne, an artist who draws by hand - and a magic button that makes perfect pictures in a second.",
 	"/meet-daphne",
 );
 

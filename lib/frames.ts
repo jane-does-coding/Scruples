@@ -31,9 +31,9 @@ export const FRAMES: Frame[] = [
 			where: "National Museum, Oslo",
 		},
 		facts: [
+			"It was stolen in 1994. The thieves left a note: \"Thanks for the poor security\". It was found three months later.",
 			"There's more than one Scream - Munch made two paintings, two pastels and a print of it.",
 			"A tiny pencil note in the sky says \"Could only have been painted by a madman!\" In 2021, experts proved Munch wrote it himself.",
-			"It was stolen in 1994. The thieves left a note: \"Thanks for the poor security\". It was found three months later.",
 			"One of the pastel versions sold for almost $120 million in 2012.",
 		],
 	},

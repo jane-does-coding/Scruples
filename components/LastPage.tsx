@@ -3,15 +3,19 @@
 import { useEffect, useState } from "react";
 import { useStage } from "@/components/Stage";
 import { asset } from "@/lib/asset";
+import { loadCompetitor } from "@/lib/competitor";
 import { useDrawings } from "@/lib/drawings";
+import { STORY_PAGES } from "@/lib/pages";
+import { formatPlaytime, loadPlaytime } from "@/lib/playtime";
+import { HATS, ITEMS } from "@/lib/shop";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import Zhenya from "@/components/Zhenya";
 
-// The last page - a curtain call. On the left, the story's ending scrolls
-// up a sentence at a time, the sentences threaded on two strings that stay
-// still; on the right, everyone's drawings from Page 6 scroll up forever,
-// with a label over them and a link to the full gallery under them. Both
-// pause while the pointer is over them
+// The last page - a curtain call. In the middle, your stats - like at the
+// end of a game - drop in a part at a time, four cards to a part; on the
+// right, everyone's drawings from Page 6 scroll up forever, with a label
+// over them and a link to the full gallery under them (pausing while the
+// pointer is over them)
 
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
@@ -20,39 +24,17 @@ const LABEL =
 	"text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
 const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer`;
 
-// The ending, in three parts: two of "The conclusion" (the story) and then
-// "The final lesson". Each part's heading and sentences drop in one by one;
-// "next" lifts them away one by one and drops in the next part
-const ENDING = [
-	{
-		title: "The conclusion",
-		lines: [
-			"Zhenya came here just to look at art.",
-			"Every painting was made by a person, stroke by stroke.",
-			"Social media shares art with the whole world.",
-			"But it can turn art into a contest of likes.",
-		],
-	},
-	{
-		title: "The conclusion",
-		lines: [
-			"The magic button makes perfect pictures, instantly.",
-			"Daphne showed the picture was never the point.",
-			"Zhenya's first drawing wasn't very good.",
-			"But it was fun to make - and it was hers.",
-		],
-	},
-	{
-		title: "The final lesson",
-		lines: [
-			"Art is how someone sees the world.",
-			"A hand-made drawing carries the hand that made it.",
-			"Use any tools you like - just don't let them see for you.",
-			"Every artist starts somewhere. Thanks for starting here.",
-		],
-	},
-];
-// Each part is its heading, its sentences and "next": they drop in this far
+// What can be collected: everything in the shop, Daphne's drawing and the
+// magic button's (the mystery box and the hats it turns into count once)
+const COLLECTIBLE = Object.keys(ITEMS).filter((item) => item !== "hats");
+// Who there is to meet: Zhenya from the start, and Daphne on Page 5
+const CHARACTERS = 2;
+const PAGE_COUNT = STORY_PAGES.length + 1;
+
+// One stat: its number (big) and what it counts (small, under it)
+type Stat = [value: string, label: string];
+
+// Each part is its heading, its stats and "next": they drop in this far
 // apart, and lift away (top to bottom) this far apart
 const DROP_STAGGER_MS = 300;
 const LIFT_STAGGER_MS = 100;
@@ -83,7 +65,7 @@ const hang = (
 });
 
 export default function LastPage() {
-	const { curtainsOpen, goTo } = useStage();
+	const { curtainsOpen, goTo, owned, money, reached } = useStage();
 	const dollSrc = useBlinkingDoll();
 	const [shown, setShown] = useState(false);
 	useEffect(() => {
@@ -92,13 +74,55 @@ export default function LastPage() {
 		return () => clearTimeout(timer);
 	}, [curtainsOpen]);
 
-	// Which part of the ending is up, and whether "next" has been clicked
+	// The stats, in two parts. The time spent is read when the curtains open
+	const [seconds, setSeconds] = useState(0);
+	useEffect(() => {
+		if (!shown) return;
+		const timer = setTimeout(() => setSeconds(loadPlaytime()), 0);
+		return () => clearTimeout(timer);
+	}, [shown]);
+	const entry = shown ? loadCompetitor().entry : undefined;
+	const collected = new Set(
+		owned.map((item) => (item === "hats" ? "mystery-box" : item)),
+	).size;
+	const made = useDrawings().filter((d) => !d.id.startsWith("sample")).length;
+	const met = reached >= 5 ? 2 : 1;
+	const hats = owned.includes("hats") ? Object.keys(HATS).length : 0;
+	const STATS: { title: string; lines: Stat[] }[] = [
+		{
+			title: "Your stats",
+			lines: [
+				[`${collected}/${COLLECTIBLE.length}`, "items collected"],
+				[`$${money}`, "total money"],
+				[`${hats}/${Object.keys(HATS).length}`, "hats unlocked"],
+				[`${made}`, made === 1 ? "drawing made" : "drawings made"],
+			],
+		},
+		{
+			title: "Your stats",
+			lines: [
+				[`${met}/${CHARACTERS}`, "characters met"],
+				[
+					`${Math.min(reached, PAGE_COUNT)}/${PAGE_COUNT}`,
+					"pages visited",
+				],
+				entry === "magic"
+					? ["1st", "in the competition"]
+					: entry === "yours"
+						? ["0", "competition wins"]
+						: ["0", "paintings entered"],
+				[formatPlaytime(seconds), "spent at the theatre"],
+			],
+		},
+	];
+
+	// Which part of the stats is up, and whether "next" has been clicked
 	// yet (after that, each part waits for the last one to lift away)
 	const [part, setPart] = useState(0);
 	const [turned, setTurned] = useState(false);
 	const next = () => {
 		setTurned(true);
-		setPart((p) => (p + 1) % ENDING.length);
+		setPart((p) => (p + 1) % STATS.length);
 	};
 	// Where the i-th thing in part p is: dropping in one by one when its part
 	// is up, lifting away one by one when it's not. Earlier ones sit in
@@ -140,11 +164,11 @@ export default function LastPage() {
 				alt="Zhenya, a marionette doll on strings"
 			/>
 
-			{/* The ending - in the middle, between Zhenya and the drawings, a
-			    part at a time: its heading, then its sentences (in a column),
-			    then "next", each dropping in on its own strings. All three parts sit in the same spot; only the one
-			    that's up is on the stage */}
-			{ENDING.map(({ title, lines }, p) => (
+			{/* Your stats - in the middle, between Zhenya and the drawings, a
+			    part at a time: its heading, then its four stats (cards, two by
+			    two), then "next", each dropping in on its own strings. Both parts sit in
+			    the same spot; only the one that's up is on the stage */}
+			{STATS.map(({ title, lines }, p) => (
 				<section
 					key={p}
 					aria-hidden={p !== part}
@@ -157,15 +181,20 @@ export default function LastPage() {
 						<Strings />
 						{title}
 					</h2>
-					<div className="flex flex-col gap-[1.8svh] portrait:gap-[1.5svh] w-full">
-						{lines.map((line, i) => (
+					<div className="grid grid-cols-2 gap-[1.8svh] portrait:gap-[1.5svh] w-full">
+						{lines.map(([value, label], i) => (
 							<p
-								key={line}
-								className={`relative text-[3svh] portrait:text-[2.3svh] ${LABEL}`}
+								key={i}
+								className={`relative flex flex-col items-center justify-center gap-[0.6svh] min-h-[15svh] portrait:min-h-[12svh] ${LABEL} border-[0.3svh]`}
 								style={place(p, i + 1)}
 							>
 								<Strings />
-								{line}
+								<span className="text-[6svh] portrait:text-[4svh] leading-none whitespace-nowrap">
+									{value}
+								</span>
+								<span className="text-[2.4svh] portrait:text-[1.8svh] leading-tight text-black/70">
+									{label}
+								</span>
 							</p>
 						))}
 					</div>
@@ -177,7 +206,7 @@ export default function LastPage() {
 						style={place(p, lines.length + 1)}
 					>
 						<Strings />
-						{p < ENDING.length - 1 ? "next ->" : "read it again"}
+						{p < STATS.length - 1 ? "next ->" : "<- back"}
 					</button>
 				</section>
 			))}
