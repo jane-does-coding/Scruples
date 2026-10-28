@@ -58,7 +58,7 @@ export default function PopsicleButton({
 	const tilt = (transformOrigin: string) => ({
 		transition: "transform 250ms cubic-bezier(0.25, 0.8, 0.25, 1)",
 		// Back buttons (left side) tilt the opposite way
-		transform: hover ? `rotate(${right ? 3 : -3}deg)` : "rotate(0deg)",
+		transform: hover ? `rotate(${right ? 1.5 : -1.5}deg)` : "rotate(0deg)",
 		transformOrigin,
 	});
 
