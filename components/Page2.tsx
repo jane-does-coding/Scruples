@@ -197,9 +197,9 @@ export default function Page2({
 		// still be on its way back there (moved and grown) from last time
 		const own = el.getBoundingClientRect();
 		const style = getComputedStyle(el);
-		const [tx = 0] = (style.translate === "none" ? "" : style.translate)
-			.split(" ")
-			.map(parseFloat);
+		// (before it's ever been moved it has no translate at all - "none")
+		const tx =
+			style.translate === "none" ? 0 : parseFloat(style.translate) || 0;
 		const grown = style.scale === "none" ? 1 : parseFloat(style.scale) || 1;
 		const ownX = own.left + own.width / 2;
 		const picture = {
@@ -237,9 +237,17 @@ export default function Page2({
 			index,
 			dx: x - picture.centerX,
 			scale,
-			dy: innerHeight * (portrait ? -0.17 : 0.02),
-			open: true,
+			// A little higher than where it was in the strip
+			dy: innerHeight * (portrait ? -0.2 : -0.01),
+			// Set up closed first - everything in its resting place, with its
+			// transitions - and opened a frame later, so it all moves even
+			// the first time (otherwise the cards appear already down and the
+			// painting jumps instead of gliding)
+			open: false,
 		});
+		requestAnimationFrame(() =>
+			requestAnimationFrame(() => setFocus((f) => f && { ...f, open: true })),
+		);
 		sound.click();
 		playWow();
 	};

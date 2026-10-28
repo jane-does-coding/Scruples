@@ -383,13 +383,17 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 	};
 
 	// "Yes, I did!" → wow (and Daphne giggles), and the gallery hangs in
-	// with your drawing in it
+	// with your drawing in it. Zhenya's wow and Daphne's giggle end together
 	const sayYes = () => {
 		setStage(4);
 		wow.playWow();
 		hehe.playHehe();
 		later(600, () => setGalleryUp(true));
-		later(2600, () => wow.playWowReverse());
+		// Both faces go back at the same time
+		later(2600, () => {
+			wow.playWowReverse();
+			hehe.playHeheReverse();
+		});
 		later(3400, () => setShowContinue(true));
 	};
 

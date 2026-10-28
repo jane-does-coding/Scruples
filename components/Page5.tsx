@@ -8,6 +8,7 @@ import { asset } from "@/lib/asset";
 import MoneyStick from "@/components/MoneyStick";
 import usePortrait from "@/components/usePortrait";
 import { useStage } from "@/components/Stage";
+import { HATS } from "@/lib/shop";
 import useLeaving from "@/components/useLeaving";
 import Zhenya from "@/components/Zhenya";
 
@@ -36,14 +37,19 @@ const AWW_MS = FRAME3_MS + 1100;
 
 // After "Aww cute!" (ms after the click): Zhenya flips (0.6s), then Daphne
 // walks in from the right (WALK_MS). Half a second after she
-// stops, the labels drop in between the two dolls, a second apart so each
-// lands before the next one starts
+// stops, the labels drop in between the two dolls: "This is Daphne", then
+// "Daphne likes to draw" 0.2s later, then the ask button 0.3s after that
 const DAPHNE_WALK_START_MS = 600;
 const WALK_MS = 4000;
 const DAPHNE_ARRIVED_MS = DAPHNE_WALK_START_MS + WALK_MS;
 const THIS_IS_DAPHNE_MS = DAPHNE_ARRIVED_MS + 500;
-const LIKES_TO_DRAW_MS = THIS_IS_DAPHNE_MS + 1000;
-const ASK_MS = LIKES_TO_DRAW_MS + 1000;
+const LIKES_TO_DRAW_MS = THIS_IS_DAPHNE_MS + 200;
+const ASK_MS = LIKES_TO_DRAW_MS + 300;
+
+// If Zhenya's wearing a hat, she says hi first (ms after "Hi Daphne!"):
+// Daphne says she likes the hat, then Zhenya thanks her and asks
+const NICE_HAT_MS = 400;
+const THANKS_MS = 1300;
 
 // After the ask button (ms after the click): each piece comes in once the
 // one before has landed
@@ -149,7 +155,15 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	// Paying Daphne goes through the inventory (the menu): the drawing costs
 	// $10 and is added to it. Too little money → she asks for a donation;
 	// already have one → she draws it again, for nothing
-	const { buy: buyItem, give, donate, money } = useStage();
+	const { buy: buyItem, give, donate, money, hat, wearing } = useStage();
+	// Wearing a hat? Then Zhenya says hi first and Daphne notices it.
+	// greeted = "Hi Daphne!" clicked: the labels go, it moves up, then
+	// under it Daphne says "Nice … !", and under that Zhenya's "Thanks,
+	// could you please…"
+	const hatName = hat && wearing ? HATS[wearing].name : null;
+	const [greeted, setGreeted] = useState(false);
+	const [niceHat, setNiceHat] = useState(false);
+	const [thanks, setThanks] = useState(false);
 	// Can't pay ("poor") or clicked Cancel ("please"): Daphne asks to draw
 	// anyway, for free, and asks for a donation once it's done.
 	// pleaDone = her line lifts away (as she starts drawing, or once the
@@ -271,6 +285,12 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 		later(THIS_IS_DAPHNE_MS, () => setDaphneStep(1));
 		later(LIKES_TO_DRAW_MS, () => setDaphneStep(2));
 		later(ASK_MS, () => setDaphneStep(3));
+	};
+
+	const greet = () => {
+		setGreeted(true);
+		later(NICE_HAT_MS, () => setNiceHat(true));
+		later(THANKS_MS, () => setThanks(true));
 	};
 
 	const ask = () => {
@@ -553,36 +573,83 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 			    once the ask button is clicked */}
 			<p
 				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-max mx-auto text-center scribbler absolute bottom-[60svh] left-[57%] portrait:bottom-[30svh] portrait:left-[50%] translate-x-[-50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
-				style={hang(daphneStep >= 1, daphneStep >= 1 && !asked, "top")}
+				style={hang(
+					daphneStep >= 1,
+					daphneStep >= 1 && !asked && !greeted,
+					"top",
+				)}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				This is Daphne
 			</p>
 
-			{/* "Daphne likes to draw" - a second later */}
+			{/* "Daphne likes to draw" - just after */}
 			<p
 				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-max mx-auto text-center scribbler absolute bottom-[51svh] left-[57%] portrait:bottom-[22svh] portrait:left-[50%] translate-x-[-50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
-				style={hang(daphneStep >= 2, daphneStep >= 2 && !asked, "top")}
+				style={hang(
+					daphneStep >= 2,
+					daphneStep >= 2 && !asked && !greeted,
+					"top",
+					{ exitDelay: 80 },
+				)}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 				Daphne likes to draw
 			</p>
 
-			{/* Ask button (dashed) - a second later; clicking it clears the labels
-			    and brings in the frame, money, price and Cancel / Buy */}
+			{/* Ask button (dashed) - just after; clicking it clears the labels
+			    and brings in the frame, money, price and Cancel / Buy. If
+			    Zhenya's wearing a hat it's "Hi Daphne!" instead, which moves up
+			    a little once clicked (see the hat chat below) */}
 			<button
-				onClick={ask}
-				disabled={daphneStep < 3 || asked}
-				tabIndex={daphneStep >= 3 && !asked ? undefined : -1}
-				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-[24vw] portrait:w-[70vw] mx-auto text-center scribbler absolute bottom-[34svh] portrait:bottom-[8svh] left-[46%] portrait:left-[50%] translate-x-[-50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
-				style={hang(daphneStep >= 3, daphneStep >= 3 && !asked, "top")}
+				onClick={hatName ? greet : ask}
+				disabled={daphneStep < 3 || asked || greeted}
+				tabIndex={daphneStep >= 3 && !asked && !greeted ? undefined : -1}
+				// "Hi Daphne!" is short: as wide as its words, with the roomier
+				// padding of a normal button
+				className={`text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] ${hatName ? "w-max !px-[2vw] portrait:!px-[4vw] !py-[1svh] ml-[-4vw] portrait:ml-0 !z-7" : "w-[24vw] portrait:w-[70vw]"} mx-auto text-center scribbler absolute bottom-[34svh] portrait:bottom-[8svh] left-[46%] portrait:left-[50%] translate-x-[-50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default`}
+				style={(() => {
+					const style = hang(daphneStep >= 3, daphneStep >= 3 && !asked, "top");
+					return greeted && !asked
+						? { ...style, transform: `translateY(${portrait ? -23 : -24}svh)` }
+						: style;
+				})()}
 			>
 				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-				Daphne could you please draw something for me?
+				{hatName
+					? "Hi Daphne!"
+					: "Daphne could you please draw something for me?"}
 			</button>
+
+			{/* The hat chat (only if Zhenya's wearing one): Daphne notices it,
+			    then Zhenya thanks her and asks for a drawing. Both lift away
+			    once she's asked */}
+			{hatName && (
+				<>
+					<p
+						className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-max max-w-[26vw] portrait:max-w-[60vw] text-center scribbler absolute bottom-[42svh] left-[62%] ml-[-5vw] portrait:ml-0 portrait:bottom-[17svh] portrait:left-[56%] translate-x-[-50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
+						style={hang(niceHat, niceHat && !asked, "top")}
+					>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+						Nice {hatName}!
+					</p>
+					<button
+						onClick={ask}
+						disabled={!thanks || asked}
+						tabIndex={thanks && !asked ? undefined : -1}
+						className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-[24vw] portrait:w-[70vw] mx-auto text-center scribbler absolute bottom-[25svh] portrait:bottom-[5svh] left-[46%] portrait:left-[50%] translate-x-[-50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+						style={hang(thanks, thanks && !asked, "top", { exitDelay: 80 })}
+					>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+						Thanks! Could you please draw something for me?
+					</button>
+				</>
+			)}
 
 			{/* Empty frame (2) - rises in the middle just after asking; sinks
 			    once the spiral has had its 2s */}

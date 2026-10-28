@@ -67,7 +67,7 @@ export default function WardrobePage() {
 				style={hang(shown, { ms: 900, easing: DOLL_DROP })}
 				alt={
 					trying
-						? `Zhenya, a marionette doll on strings, wearing the ${HATS[trying].name.toLowerCase()}`
+						? `Zhenya, a marionette doll on strings, wearing the ${HATS[trying].name}`
 						: "Zhenya, a marionette doll on strings"
 				}
 			/>

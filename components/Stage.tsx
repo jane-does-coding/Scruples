@@ -129,9 +129,11 @@ type Drawing = {
 };
 
 // The inventory shows 3 items next to the money, or 7 (two rows) with
-// "View all items"
+// "View all items". With more than WIDE_AFTER items it's a box wider - 4
+// next to the money, 9 in all - and the pages list goes to one column to
+// make room
 const SLOTS = 3;
-const ALL_SLOTS = 7;
+const WIDE_AFTER = 8;
 // An opened item: how long it takes to grow (with a little spring) and to
 // shrink back (smoothly), and its final fade as the slots come back
 const ITEM_GROW_MS = 400;
@@ -153,9 +155,9 @@ const scatter = (n: number, j: number, which: number) => {
 // The pages, as listed in the menu
 const PAGES = [...STORY_PAGES, { title: "Curtain call", href: "/lastpage" }];
 
-// The inventory pop-up next to the "?"
+// The inventory pop-up next to "menu", its top lined up with the button's
 const NOTE =
-	"note-pop fixed top-[1svh] right-[calc(1.3vw+max(6.5vw,72px))] portrait:top-[2vw] portrait:right-[22vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
+	"note-pop fixed top-[0.5svh] right-[calc(1.3vw+max(6.5vw,72px))] portrait:top-[1.5vw] portrait:right-[22vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
 
 const StageContext = createContext<StageContextValue | null>(null);
 
@@ -274,8 +276,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 		setWearing(hat);
 		notify(
 			hat
-				? `Zhenya is wearing the ${HATS[hat].name.toLowerCase()}`
-				: `Zhenya took off the ${HATS[wearing!].name.toLowerCase()}`,
+				? `Zhenya is wearing the ${HATS[hat].name}`
+				: `Zhenya took off the ${HATS[wearing!].name}`,
 			false,
 		);
 	};
@@ -321,10 +323,17 @@ export default function Stage({ children }: { children: ReactNode }) {
 		clearTimeout(glideTimer.current);
 		glideTimer.current = setTimeout(() => setNavGliding(false), NAV_GLIDE_MS);
 	};
+	// Lots of items: a box more per row (see WIDE_AFTER)
+	const wide = entries.length > WIDE_AFTER;
+	const columns = wide ? 5 : 4;
+	const rowSlots = columns - 1;
+	const allSlots = columns * 2 - 1;
 	// The switch only shows once there are more items than one row fits, and
 	// until then (or after selling things) it's as if it were off
-	const canViewAll = entries.length > SLOTS;
-	const allItems = allItemsOn && canViewAll;
+	const canViewAll = entries.length > rowSlots;
+	// With that many items both rows always show (the one-column pages list
+	// beside them is as tall as two rows), and there's no "view less"
+	const allItems = (allItemsOn || wide) && canViewAll;
 	const setAllItems = (on: boolean) => {
 		setAllItemsState(on);
 		try {
@@ -1034,7 +1043,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 				<nav
 					id="nav"
 					inert={!navOpen}
-					className={`${navGliding ? "nav-smooth" : "nav-bounce"} fixed inset-x-0 bottom-[10svh] z-22 drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
+					// .inv-wide: smaller slots, so a wide inventory still fits
+					className={`${navGliding ? "nav-smooth" : "nav-bounce"} ${wide ? "inv-wide" : ""} fixed inset-x-0 bottom-[10svh] z-22 drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
 					style={{
 						// "View all items" drops it one more row, so the second row
 						// shows
@@ -1097,7 +1107,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 					<div
 						className={`${navGliding ? "nav-smooth" : "nav-bounce"} absolute inset-x-0 bottom-[45%] flex flex-col items-center gap-[2svh] text-[3svh] pt-[3svh]`}
 						style={{
-							transform: allItems ? `translateY(calc(-1 * ${ROW}))` : "none",
+							// (A wide inventory already counts its second row, so it
+							// isn't moved)
+							transform:
+								allItems && !wide ? `translateY(calc(-1 * ${ROW}))` : "none",
 						}}
 					>
 						{/* 	{pageLoaded && (
@@ -1119,14 +1132,20 @@ export default function Stage({ children }: { children: ReactNode }) {
 						    empty */}
 						{/* Pages (left) and the inventory (right), side by side - on
 						    portrait screens, one above the other */}
-						<div className="flex portrait:flex-col items-end portrait:items-center gap-[3vw] portrait:gap-[2.5svh]">
+						<div
+							// (With a wide inventory both its rows count towards its
+							// height, so the taller pages list lines up with the second)
+							className={`flex portrait:flex-col items-end portrait:items-center gap-[3vw] portrait:gap-[2.5svh]`}
+						>
 							{/* Pages - a link to every page, with its title, in two
-							    columns. Same height as a row of the inventory (taller only
+							    columns (one, beside a wide inventory). Same height as a row of the inventory (taller only
 							    if a narrow screen makes the titles wrap), and as wide as
 							    the screen leaves room for. The page you're on is marked */}
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
 								<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
-								<ol className="locked-pages min-h-(--slot) w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-cols-2 grid-rows-[repeat(5,auto)] grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.4svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.2svh] portrait:text-[1.9svh] leading-[1.15]">
+								<ol
+									className={`locked-pages min-h-(--slot) ${wide ? "w-[min(36svh,calc(96vw-5*var(--slot)-4*var(--slot-gap)-3vw))] grid-cols-1 grid-rows-[repeat(10,auto)] portrait:grid-cols-2 portrait:grid-rows-[repeat(5,auto)]" : "w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] grid-cols-2 grid-rows-[repeat(5,auto)]"} portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.4svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.2svh] portrait:text-[1.9svh] leading-[1.15]`}
+								>
 									{PAGES.map(({ title, href }, i) => {
 										const n = i + 1;
 										const here = pathname === href;
@@ -1199,7 +1218,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 									<h2 className="text-[4svh] portrait:text-[3svh]">
 										Inventory
 									</h2>
-									{canViewAll && (
+									{canViewAll && !wide && (
 										<button
 											onClick={() => {
 												glideNav();
@@ -1215,7 +1234,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 								</div>
 								{/* One row tall: the second row hangs below it, fading in and
 						    out with "View all" */}
-								<ul className="relative grid grid-cols-4 auto-rows-(--slot) h-(--slot) gap-(--slot-gap)">
+								<ul
+									className={`relative grid ${wide ? "grid-cols-5 h-[calc(2*var(--slot)+var(--slot-gap))]" : "grid-cols-4 h-(--slot)"} auto-rows-(--slot) gap-(--slot-gap)`}
+								>
 									{/* Money - click it to see what it's for */}
 									<li
 										className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed cursor-pointer"
@@ -1251,14 +1272,16 @@ export default function Stage({ children }: { children: ReactNode }) {
 											${money}
 										</span>
 									</li>
-									{Array.from({ length: ALL_SLOTS }, (_, i) => entries[i]).map(
+									{Array.from({ length: allSlots }, (_, i) => entries[i]).map(
 										(entry, i) => {
-											const hidden = i >= SLOTS && !allItems;
+											const hidden = i >= rowSlots && !allItems;
 											return (
 												<li
 													key={entry?.key ?? `empty-${i}`}
 													inert={hidden}
-													className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center"
+													// A slot with something in it is clickable, so its dashes
+													// march on hover like a button's (see globals.css)
+													className={`relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center ${entry ? "cursor-pointer" : ""}`}
 													style={{
 														opacity:
 															slotsHidden || hidden || openItem?.slot === i + 1
@@ -1273,7 +1296,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 																? "opacity 300ms ease"
 																: openItem
 																	? `opacity ${ITEM_FADE_MS}ms ease`
-																	: `opacity ${hidden ? 200 : 450}ms ease ${i >= SLOTS && !hidden ? 150 : 0}ms`,
+																	: `opacity ${hidden ? 200 : 450}ms ease ${i >= rowSlots && !hidden ? 150 : 0}ms`,
 													}}
 													aria-label={entry ? undefined : "Empty slot"}
 												>
@@ -1336,10 +1359,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 												top:
 													itemOpen && allItems
 														? "0"
-														: `calc(${Math.floor(openItem.slot / 4)} * ${ROW})`,
+														: `calc(${Math.floor(openItem.slot / columns)} * ${ROW})`,
 												left: itemOpen
 													? "0"
-													: `calc(${openItem.slot % 4} * ${ROW})`,
+													: `calc(${openItem.slot % columns} * ${ROW})`,
 												width: itemOpen ? "100%" : "var(--slot)",
 												height:
 													itemOpen && allItems && !portrait

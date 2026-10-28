@@ -57,7 +57,7 @@ export const ITEMS = {
 		price: 0,
 		image: asset("/imgs/hats/hats-preview.webp"),
 		description:
-			"A sailor hat, devil horns, a princess crown and a backwards cap, from the mystery box.",
+			"The Spongebob Hat, the Star vs the Forces of Evil Horns, the Adventure time crown and the Gravity Falls hat, from the mystery box.",
 	},
 	// Not for sale - it's what the magic button makes on Page 5. Price 0 means
 	// it can't be sold
@@ -79,22 +79,22 @@ export type ItemId = keyof typeof ITEMS;
 // laid right over her
 export const HATS = {
 	sailor: {
-		name: "Sailor hat",
+		name: "Spongebob Hat",
 		image: asset("/imgs/hats/hat-sailor-thumb.webp"),
 		wear: asset("/imgs/hats/hat-sailor.webp"),
 	},
 	devil: {
-		name: "Devil horns",
+		name: "Star vs the Forces of Evil Horns",
 		image: asset("/imgs/hats/hat-devil-thumb.webp"),
 		wear: asset("/imgs/hats/hat-devil.webp"),
 	},
 	crown: {
-		name: "Princess crown",
+		name: "Adventure time crown",
 		image: asset("/imgs/hats/hat-crown-thumb.webp"),
 		wear: asset("/imgs/hats/hat-crown.webp"),
 	},
 	cap: {
-		name: "Backwards cap",
+		name: "Gravity Falls hat",
 		image: asset("/imgs/hats/hat-cap-thumb.webp"),
 		wear: asset("/imgs/hats/hat-cap.webp"),
 	},

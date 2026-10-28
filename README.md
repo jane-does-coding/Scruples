@@ -44,15 +44,15 @@ Everything is drawn by hand, and it's meant to be like a box theater. Art and an
 
 The images the site uses are in `public/imgs`, by what they are:
 
-| Folder | What's in it |
-| --- | --- |
-| `stage/` | Curtains, the ticket, the menu, the paper backgrounds, popsicle sticks, and the frame-by-frame curtain and ticket animations |
-| `zhenya/` | Zhenya's poses and animations |
-| `daphne/` | Daphne's poses and her palette |
-| `art/` | The famous paintings' frames and the drawings |
-| `shop/` | Everything in the souvenir shop, and the notebook |
-| `hats/` | The mystery box hats |
-| `social/` | The social media posts |
+| Folder    | What's in it                                                                                                                 |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `stage/`  | Curtains, the ticket, the menu, the paper backgrounds, popsicle sticks, and the frame-by-frame curtain and ticket animations |
+| `zhenya/` | Zhenya's poses and animations                                                                                                |
+| `daphne/` | Daphne's poses and her palette                                                                                               |
+| `art/`    | The famous paintings' frames and the drawings                                                                                |
+| `shop/`   | Everything in the souvenir shop, and the notebook                                                                            |
+| `hats/`   | The mystery box hats                                                                                                         |
+| `social/` | The social media posts                                                                                                       |
 
 The full-size originals they were made from (GIFs and big PNGs) are in `art-sources/`, outside `public/`, so they aren't sent to visitors.
 
@@ -107,3 +107,50 @@ npm start
 <img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 24 19 AM" src="https://github.com/user-attachments/assets/ea2373a6-989f-4d29-9fef-c70d2522f86a" />
 
 <img width="1710" height="950" alt="Screenshot 2026-10-13 at 1 25 21 AM" src="https://github.com/user-attachments/assets/76d7eaa2-6dfa-4a87-ab8a-52f15521272a" />
+
+Improvement notes:
+
+Biggest impact
+
+Real string physics. Make Zhenya and Daphne sway and lag a little when they move, and lean slightly toward the cursor. It’s the one interaction nobody else has, and it turns “drawings of puppets” into puppets. On phones, tilting the device could swing them.
+
+Secrets, counted in the stats. Hide a few things to find: clicking a curtain tassel, the hidden scribble that’s already there, something in the souvenir shop, a key combo. Add “2/6 secrets found” to the curtain call stats. It rewards exploring and gives people a reason to come back, which judges notice.
+
+A “making of” page. Show your pencil sketches from art-sources/, early versions and how the animations were drawn. Juries score craft, and showing the hand-made process fits a site whose message is “a hand-made drawing carries the hand that made it”.
+
+Atmosphere
+
+Zhenya reacts to what you’ve done: notices her hat, or mentions what you bought, on later pages.
+
+Idle moments: if nobody moves for a while, she yawns, glances at the audience or fidgets.
+
+Quiet ambient theatre sound under every page, mixed under the lullaby.
+
+Dust floating in the light on the spotlight page.
+
+Developer award and usability
+
+A pause button for the scrolling strips, plus the loading fixes from my last list (the 1.2MB of animations the souvenir shop loads up front, and images loaded on every page that only the menu uses).
+
+Search details for the paintings, and a share image for each page.
+
+Keyboard and screen-reader checks through the whole story. The Skip on the drawing was a good step.
+
+For the submission itself
+
+A short screen recording or GIF of the best moments (the opening, a painting opening up, the drawing). Juries often decide from the first few seconds.
+
+Good phone screenshots, since mobile is judged too.
+
+Credits that say who drew and built it.
+
+Todo list:
+
+Secrets, counted in the stats (curtain tassel, hidden scribble, something in the shop, a key combo → “X/6 secrets found”)
+A “making of” page (sketches from art-sources/, early versions, how the animations were drawn)
+Zhenya reacts to what you’ve done on later pages (hat, things bought)
+Idle moments: yawns, glances at the audience, fidgets
+Art for when Daphne explains why she likes creating art
+End screen zoom-out assets and animation
+Creator page / “who am I”
+Draw an award for the art competition (or an honorable mention)

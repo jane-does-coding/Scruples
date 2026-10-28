@@ -88,6 +88,19 @@ button:disabled,
 	}
 }
 
+/* …a little smaller once there are five to a row (see WIDE_AFTER in
+   Stage.tsx) */
+.inv-wide {
+	--slot: 19svh;
+}
+
+@media (orientation: portrait) {
+	.inv-wide {
+		--slot: 16vw;
+		--slot-gap: 2vw;
+	}
+}
+
 /* Phones: no grey flash on tap, no double-tap-to-zoom delay on buttons and
    links, and no pull-to-refresh / rubber-banding of the whole stage */
 html,
