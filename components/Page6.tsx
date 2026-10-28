@@ -8,6 +8,7 @@ import { asset } from "@/lib/asset";
 import usePortrait from "@/components/usePortrait";
 import { FRAMES } from "@/lib/frames";
 import { saveDrawing } from "@/lib/drawings";
+import { drawRandomDoodle } from "@/lib/doodles";
 import { ITEMS } from "@/lib/shop";
 import {
 	penDown as startStroke,
@@ -365,6 +366,16 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 		later(900, () => setVerdict(true));
 	};
 
+	// Skip: for anyone who'd rather not (or can't easily) draw - a simple
+	// doodle is drawn in the frame instead, and it carries on as if Done
+	const skip = () => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+		const [blue, yellow, orange, brown] = COLORS.map((c) => c.value);
+		drawRandomDoodle(canvas, { blue, yellow, orange, brown });
+		done();
+	};
+
 	// "Hmm... it's not very good" → Daphne: "But did you have a good time?"
 	const sayVerdict = () => {
 		setStage(3);
@@ -545,10 +556,10 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 					: "Daphne lends Zhenya her palette - draw something in the frame!"}
 			</p>
 
-			{/* Bigger / Clear / Done - next to the frame while you draw, hanging
-			    as one: the strings are tied to the bottom one (Done) and run up
-			    behind the other two. Done only works once there's something
-			    drawn. (On portrait screens it's a row above the colors, the
+			{/* Bigger / Clear / Done / Skip - next to the frame while you draw,
+			    hanging as one: the strings are tied to the bottom one (Skip) and
+			    run up behind the others. Done only works once there's something
+			    drawn; Skip draws a doodle for you and carries on. (On portrait screens it's a row above the colors, the
 			    strings at its two ends) */}
 			<div
 				className="absolute translate-x-[-50%] flex flex-col portrait:flex-row items-stretch portrait:items-center gap-[2svh] portrait:gap-[3vw] z-7"
@@ -595,6 +606,15 @@ export default function Page6({ nextPage, curtainsOpen }: PageProps) {
 					className={`relative w-full portrait:w-max ${BUTTON} disabled:opacity-60`}
 				>
 					Done
+				</button>
+				<button
+					onClick={skip}
+					disabled={stage !== 1}
+					tabIndex={canDraw && stage === 1 ? undefined : -1}
+					title="Skip drawing - a doodle goes in the frame instead"
+					className={`relative w-full portrait:w-max ${BUTTON}`}
+				>
+					Skip
 				</button>
 			</div>
 

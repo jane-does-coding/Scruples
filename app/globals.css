@@ -498,11 +498,14 @@ button {
 	--bw: max(1px, round(down, 0.2svh, 1px));
 }
 
-:is(a, button, [role="button"], .cursor-pointer).border-dashed:not(
-		:disabled,
-		[aria-disabled="true"]
-	):hover {
-	animation-play-state: running;
+/* Only with a mouse - a tap on a phone leaves things "hovered" */
+@media (hover: hover) {
+	:is(a, button, [role="button"], .cursor-pointer).border-dashed:not(
+			:disabled,
+			[aria-disabled="true"]
+		):hover {
+		animation-play-state: running;
+	}
 }
 
 /* One dash and its gap along per loop: right along the top, down the

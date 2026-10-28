@@ -485,7 +485,7 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 				<button
 					type="submit"
 					tabIndex={filling ? undefined : -1}
-					className="block text-[3svh] portrait:text-[2.2svh] border-dashed max-w-[70%] mx-auto text-center scribbler mt-[1svh] portrait:mt-[2.5svh] bg-white border-[0.3svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] drop-shadow-md drop-shadow-black/40 test-shadow cursor-pointer"
+					className="block text-[3svh] portrait:text-[2.2svh] border-dashed max-w-[70%] mx-auto text-center scribbler mt-[1svh] portrait:mt-[2.5svh] bg-white border-[0.3svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] drop-shadow-md drop-shadow-black/40 cursor-pointer"
 				>
 					Join NOW
 				</button>
