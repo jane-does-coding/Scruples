@@ -3,7 +3,6 @@ import { FRAMES } from "@/lib/frames";
 import { STORY_PAGES } from "@/lib/pages";
 import { SITE_URL } from "@/lib/site";
 
-// Served as /sitemap.xml - the story pages and every painting's page
 export default function sitemap(): MetadataRoute.Sitemap {
 	const pages = STORY_PAGES.map(({ href }, i) => ({
 		url: `${SITE_URL}${href}`,

@@ -21,17 +21,11 @@ type PageProps = {
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 
-// When things happen once the curtains are open
 const TITLE_MS = 400;
-// The winning painting (and on a loss, yours) drops in, then "Yayy!" /
-// "Oh.." - clicking it starts the talk
 const REVEAL_MS = 1800;
 const REACTION_DELAY_MS = 1300;
-// The competitors' complaints, this far apart
 const COMPLAINT_GAP_MS = 200;
 
-// Hangs something in from the top (or up from the bottom) once shown, and
-// takes it away again once it's gone
 const hang = (
 	shown: boolean,
 	here: boolean,
@@ -57,8 +51,6 @@ const TEXT =
 const LABEL = `${TEXT} border-[0.2svh]`;
 const BUTTON = `${TEXT} border-[0.3svh] border-dashed cursor-pointer disabled:cursor-default`;
 
-// --- If you submitted the magic button's painting: you win, and the other
-// competitors aren't happy about it
 const COMPLAINTS = [
 	{ by: "Mia", line: "I spent 60 hours on my painting." },
 	{ by: "Theo", line: "I went to art school for four years for this." },
@@ -67,8 +59,6 @@ const COMPLAINTS = [
 ];
 const AFTER_WINNING = "…somehow it doesn't feel like I won anything.";
 
-// --- If you submitted your own: someone else's magic button painting wins,
-// and a little talk about how that feels. Each answer gets its own reply
 const TALK = [
 	{
 		question: "How does it make you feel, losing to a magic button?",
@@ -107,15 +97,7 @@ const TALK = [
 	},
 ];
 
-// Page 8 - the results of the art competition, from the painting submitted
-// on Page 7. The title drops in, then the winning painting, then "Yayy!"
-// or "Oh..", which starts the rest. Win (the magic button's painting): the
-// other competitors complain, one after another. Lose (your own): your
-// drawing hangs next to the winner, then a little talk about how it feels -
-// once the last question's answered, the ones before lift away
 export default function Page8({ nextPage, curtainsOpen }: PageProps) {
-	// Which painting was submitted - from this browser, once the page is
-	// running. Your own, if nothing was picked
 	const [entry, setEntry] = useState<Competitor["entry"]>("yours");
 	useEffect(() => {
 		const saved = loadCompetitor();
@@ -124,22 +106,15 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 	}, []);
 	const won = entry === "magic";
 
-	// Your drawing from Page 6 (as on Page 7)
 	const { myDrawing } = useStage();
 	const saved = useDrawings().find((d) => !d.id.startsWith("sample"));
 	const yours = myDrawing ?? saved?.image ?? null;
 
-	// Zhenya: blinking, or her "wow" when she wins
 	const blinkSrc = useBlinkingDoll();
 	const wow = useWowDoll();
 
-	// 1 = Zhenya and the title, 2 = the reveal, 3 = the talk
 	const [step, setStep] = useState(0);
-	// Win: how many complaints are up (one more than all of them = Zhenya's
-	// line is up too)
 	const [complaints, setComplaints] = useState(0);
-	// Lose: the answer picked for each question so far, whether its reply
-	// is up, and how many questions have lifted away (to make room)
 	const [picks, setPicks] = useState<number[]>([]);
 	const [replied, setReplied] = useState(0);
 	const [cleared, setCleared] = useState(0);
@@ -150,7 +125,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 		timers.current.push(setTimeout(fn, ms));
 	useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
-	// A drumroll while the title hangs there, up to the reveal
 	useEffect(() => {
 		if (!curtainsOpen) return;
 		const t = [
@@ -164,8 +138,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 		return () => t.forEach(clearTimeout);
 	}, [curtainsOpen]);
 
-	// The reveal: a ta-da for a win, a sad trombone for a loss, as the
-	// painting lands
 	useEffect(() => {
 		if (step !== 2) return;
 		const t = setTimeout(
@@ -175,8 +147,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 		return () => clearTimeout(t);
 	}, [step, won]);
 
-	// The win: Zhenya's "wow" as the painting lands, then the complaints one
-	// by one, then her line, then Continue
 	useEffect(() => {
 		if (!won) return;
 		if (step === 2) {
@@ -184,8 +154,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 			return () => clearTimeout(t);
 		}
 		if (step !== 3) return;
-		// The complaints come in quick succession; Zhenya's line once they've
-		// all landed
 		const lastComplaint = 400 + (COMPLAINTS.length - 1) * COMPLAINT_GAP_MS;
 		const t = [
 			setTimeout(() => wow.playWowReverse(), 0),
@@ -202,15 +170,11 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [won, step]);
 
-	// The loss: answering a question puts up its reply, then the next
-	// question (or, after the last, Continue)
 	const answer = (q: number, a: number) => {
 		if (picks.length !== q) return;
 		setPicks((p) => [...p, a]);
 		later(700, () => setReplied(q + 1));
 		if (q !== TALK.length - 1) return;
-		// The last one: the questions before it lift away, and it moves up
-		// into their place at the same time
 		setCleared(q);
 		later(2200, () => setShowContinue(true));
 	};
@@ -218,11 +182,9 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 	const revealed = step >= 2;
 	const talking = step >= 3;
 
-	// Who won, under the winning painting
 	const winnerCaption = won
 		? "1st place - Zhenya!"
 		: "1st place - Rob (magic button)";
-	// The newest thing to appear, for screen readers
 	const latestLine = (() => {
 		if (!revealed) return "";
 		if (!talking) return winnerCaption;
@@ -231,20 +193,16 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 			const c = COMPLAINTS[complaints - 1];
 			return c ? `"${c.line}" - ${c.by}, another competitor` : "";
 		}
-		// The last reply, then the question after it (if there is one)
 		const reply =
 			replied > 0 ? TALK[replied - 1].answers[picks[replied - 1]]?.reply : "";
 		const next = TALK[replied]?.question ?? "";
 		return [reply, next].filter(Boolean).join(" ");
 	})();
-	// Phones held upright have no room for both: the winning painting lifts
-	// away once the talk starts, and the talk takes its place
 	const portrait = usePortrait();
 
 	return (
 		<div className="h-full relative">
 			<h1 className="sr-only">The results of the art competition</h1>
-			{/* The newest line, read out by screen readers as it comes up */}
 			<p role="status" aria-live="polite" className="sr-only">
 				{latestLine}
 			</p>
@@ -257,7 +215,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 						ms: 900,
 						easing: DOLL_DROP,
 					}),
-					// Losing, she sinks a little on her strings, and stays down
 					transition: `transform 900ms ${DOLL_DROP}, translate 1600ms ease-in-out 700ms`,
 					translate: revealed && !won ? "0 4svh" : "0 0",
 				}}
@@ -268,7 +225,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				}
 			/>
 
-			{/* The title - lifts away once the talk starts */}
 			<h2
 				className={`${LABEL} absolute top-[0svh] right-[4vw] portrait:right-[3vw] portrait:top-[1svh] w-max max-w-[40vw] portrait:max-w-[62vw] text-[3.5svh] portrait:text-[2.4svh] z-9`}
 				style={hang(step >= 1, step >= 1 && !talking, "top", {
@@ -279,7 +235,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				And the BEST artist Award goes to…
 			</h2>
 
-			{/* The winning painting, with who won under it. It stays up */}
 			<figure
 				className="absolute top-[10svh] left-[19vw] portrait:left-auto portrait:right-[4vw] portrait:top-[9svh] z-5 flex flex-col items-center gap-[1.5svh] portrait:gap-[1svh]"
 				style={hang(revealed, revealed && !(portrait && talking), "top", {
@@ -303,8 +258,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				</figcaption>
 			</figure>
 
-			{/* Lose: your drawing hangs next to it for a moment, then lifts
-			    away for the talk */}
 			{!won && (
 				<figure
 					className="absolute top-[14svh] right-[1vw] portrait:right-auto portrait:left-[4vw] portrait:top-[42svh] z-4 flex flex-col items-center gap-[1.5svh] portrait:gap-[1svh]"
@@ -335,8 +288,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				</figure>
 			)}
 
-			{/* Win: Zhenya's own thought, hanging on its own by her head once
-			    everyone's had their say */}
 			{won && (
 				<p
 					className={`${LABEL} absolute top-[47svh] left-[38vw] portrait:left-[4vw] portrait:top-[auto] portrait:bottom-[20svh] w-max max-w-[19vw] portrait:max-w-[60vw] text-[2.8svh] portrait:text-[2svh] z-5`}
@@ -351,8 +302,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				</p>
 			)}
 
-			{/* "Yayy!" or "Oh.." - on the right once the paintings are up
-			    (under yours, on a loss); clicking it starts the talk */}
 			<button
 				onClick={() => setStep(3)}
 				disabled={!revealed || talking}
@@ -366,9 +315,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				{won ? "Yayy!" : "Oh.."}
 			</button>
 
-			{/* The talk - a column on the right. Each line hangs in on its own
-			    strings; higher ones sit in front, so the strings of the ones
-			    below run behind them */}
 			<div className="absolute top-[1svh] right-[2vw] w-[25vw] portrait:top-[2svh] portrait:left-[4vw] portrait:right-[4vw] portrait:w-auto flex flex-col items-stretch gap-[0.9svh] portrait:gap-[1svh]">
 				{won ? (
 					<>
@@ -378,7 +324,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 								className={`${LABEL} relative text-[2.5svh] portrait:text-[1.9svh]`}
 								style={{
 									...hang(complaints > i, complaints > i, "top"),
-									// Under the curtains (z-10), higher ones in front
 									zIndex: 9 - i,
 								}}
 							>
@@ -392,18 +337,13 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 					</>
 				) : (
 					TALK.map(({ question, answers }, q) => {
-						// Each question comes up once the one before has its reply
 						const up = talking && replied >= q;
 						const picked = picks[q];
 						return (
-							// Lifts away once cleared, and its space closes up straight
-							// away (the grid row shrinking to nothing), so the next one
-							// moves up as this one goes
 							<div
 								key={question}
 								className="grid"
 								style={{
-									// Under the curtains (z-10), earlier ones in front
 									zIndex: 9 - q,
 									gridTemplateRows: q < cleared ? "0fr" : "1fr",
 									transition: "grid-template-rows 600ms ease-out",
@@ -424,8 +364,6 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 										<Strings />
 										{question}
 									</p>
-									{/* The answers, until one's picked - then just that
-								    one stays, and the reply comes under it */}
 									<div className="flex flex-wrap justify-center gap-[0.8vw] portrait:gap-[2vw]">
 										{answers.map(({ answer: text }, a) => {
 											const showing =

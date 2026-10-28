@@ -25,24 +25,14 @@ type PageProps = {
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 
-// The frame's words drop in this long after the frame, this far apart
 const WORDS_DELAY_MS = 700;
 const WORD_STAGGER_MS = 100;
-// After "Sign up here": Zhenya turns round and walks over to the right,
-// then "Competitor Information" drops in and the form slides up
 const TITLE_DELAY_MS = 1200;
 const FORM_DELAY_MS = 1500;
-// After "Join NOW": Zhenya walks to the middle, then the question and the
-// two paintings drop in
 const PICK_DELAY_MS = 900;
-// How far the one not picked moves out (as it shrinks), and how far Zhenya
-// and the picked one then move over into the room it leaves (the shrinking
-// and the move out free up about this much)
 const OUT = "3vw";
 const MAKE_ROOM = { wide: "5vw", portrait: "6vw" };
 
-// Hangs something in from the top (or up from the bottom) once shown, and
-// takes it away again once it's gone
 const hang = (
 	shown: boolean,
 	here: boolean,
@@ -73,12 +63,8 @@ const FrameStrings = () => (
 const LABEL =
 	"text-[3svh] portrait:text-[2svh] max-w-[70%] mx-auto text-center scribbler absolute portrait:max-w-[50vw] bg-white border-black px-[2vw] portrait:px-[3vw] py-[1svh] portrait:py-[0.7svh] drop-shadow-md drop-shadow-black/40 test-shadow";
 
-// "Sign up here" (and the invisible copy of it its strings hang from)
 const SIGN_UP = `${LABEL} border-[0.3svh] border-dashed top-[39svh] right-[13vw] portrait:right-[14vw] portrait:top-[21.5svh]`;
 
-// The form's questions: which answer, the question, and what's written in
-// grey until something's typed. All of them have to be answered, within
-// LIMITS - the age as a whole number, the others as words
 const QUESTIONS = [
 	{
 		key: "age",
@@ -99,14 +85,10 @@ const QUESTIONS = [
 		autoComplete: "off",
 	},
 ] as const;
-// As typed (the age is saved as a number)
 type Answers = Record<"age" | "gender" | "aiArt", string>;
 type Field = keyof Answers;
-// What gender is filled in as with "Prefer not to say"
 const NOT_SAYING = "Prefer not to say";
 
-// What's wrong with each answer, if anything - shown under the field in
-// place of the browser's own messages
 const problems = (answers: Answers) => {
 	const found: Partial<Record<Field, string>> = {};
 	const age = Number(answers.age);
@@ -125,7 +107,6 @@ const problems = (answers: Answers) => {
 	return found;
 };
 
-// The two paintings to choose between at step 3
 const CHOICES = [
 	{
 		entry: "magic",
@@ -141,29 +122,18 @@ const CHOICES = [
 const CHOICE_LABEL =
 	"w-max text-[3.5svh] portrait:text-[2.2svh] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1.5vw] portrait:px-[3vw] py-[0.7svh] drop-shadow-md drop-shadow-black/40 test-shadow";
 
-// Page 7 - the art competition. Step 1: Zhenya drops in on the left, the
-// empty frame drops in on the right, then its words one by one. "Sign up
-// here" is step 2: the frame lifts away, Zhenya turns round and goes to the
-// right, "Competitor Information" drops in and the form slides up. "Join
-// NOW" is step 3: the form goes, Zhenya walks to the middle, and the magic
-// button's painting hangs on her left and yours on her right - she looks
-// whichever way the pointer is
 export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 	const portrait = usePortrait();
 	const [step, setStep] = useState(0);
 
-	// Zhenya, idle and blinking every 1-3s
 	const blinkSrc = useBlinkingDoll();
 
-	// Once the curtains have opened: the doll and the frame drop in, then
-	// the frame's words
 	useEffect(() => {
 		if (!curtainsOpen) return;
 		const timer = setTimeout(() => setStep((s) => Math.max(s, 1)), 0);
 		return () => clearTimeout(timer);
 	}, [curtainsOpen]);
 
-	// The form's answers - filled in from last time, if there was one
 	const [answers, setAnswers] = useState<Answers>({
 		age: "",
 		gender: "",
@@ -183,15 +153,10 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 		return () => clearTimeout(timer);
 	}, []);
 
-	// "Sign up here" → step 2; "Join NOW" (once everything's answered) saves
-	// the answers → step 3; picking a painting saves which and goes on.
-	// Once the form is up, the cursor goes to its first field (not on
-	// touch screens, where that would pop the keyboard up)
 	const fields = useRef<Partial<Record<Field, HTMLInputElement | null>>>({});
 	const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
 	const setAnswer = (key: Field, value: string) => {
 		setAnswers((a) => ({ ...a, [key]: value }));
-		// Fixing a field clears its note
 		setErrors((e) => ({ ...e, [key]: undefined }));
 	};
 	const focusTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -205,8 +170,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 			);
 	};
 	const join = () => {
-		// Anything missing or wrong: a note under each, and the cursor goes
-		// to the first one
 		const found = problems(answers);
 		setErrors(found);
 		const firstWrong = QUESTIONS.find(({ key }) => found[key]);
@@ -221,8 +184,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 		});
 		setStep(3);
 	};
-	// Picking a painting selects it (it can be changed) and saves it;
-	// Continue then goes on
 	const [chosen, setChosen] = useState<Competitor["entry"] | null>(null);
 	const pick = (entry: Competitor["entry"]) => {
 		if (entry !== chosen) sound.click();
@@ -230,8 +191,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 		setLookLeft(entry === "magic");
 		saveCompetitor({ entry });
 	};
-	// How far things move over for a picked painting, and which way a
-	// painting moves (the magic button's is on the left)
 	const room = portrait ? MAKE_ROOM.portrait : MAKE_ROOM.wide;
 	const toward = (entry: Competitor["entry"], way: "in" | "out") =>
 		(entry === "magic") === (way === "out") ? "-" : "";
@@ -247,14 +206,10 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 	const filling = step === 2;
 	const picking = step >= 3;
 
-	// Your drawing from Page 6 - this visit's, or else the last one kept in
-	// this browser, or else an empty frame
 	const { myDrawing, goTo } = useStage();
 	const saved = useDrawings().find((d) => !d.id.startsWith("sample"));
 	const yours = myDrawing ?? saved?.image ?? null;
 
-	// While picking, Zhenya looks towards whichever side the pointer is on
-	// (she's in the middle of the screen) - and once one's picked, at it
 	const [lookLeft, setLookLeft] = useState(true);
 	useEffect(() => {
 		if (!picking || chosen) return;
@@ -263,9 +218,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 		window.addEventListener("pointermove", onMove);
 		return () => window.removeEventListener("pointermove", onMove);
 	}, [picking, chosen]);
-	// The frame's words, top to bottom, each a little after the last
-	// They hang behind the frame (z-5), higher ones in front of lower ones;
-	// "Sign up here" is in front of the frame so it can be clicked
 	const word = (i: number, zIndex: number) => ({
 		...hang(step >= 1, framed, "top", {
 			delay: WORDS_DELAY_MS + i * WORD_STAGGER_MS,
@@ -275,8 +227,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 
 	return (
 		<div className="h-full flex flex-col items-center justify-center relative">
-			{/* Step 1: the TV on its popsicle sticks, rising up from the bottom
-			    (and sinking back down after), and the competition's words in it */}
 			<div
 				className="absolute top-[10svh] right-[0vw] portrait:top-[1svh] portrait:right-[3vw] z-5 test-shadow-darker"
 				style={hang(step >= 1, framed, "bottom", {
@@ -325,9 +275,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 				<Strings />
 				Get the BEST artist Award
 			</p>
-			{/* "Sign up here" is in front of the frame, but its strings run
-			    behind it like the others': they hang from an invisible copy of
-			    it behind the frame, which moves exactly with it */}
 			<span
 				id="sign-up-strings"
 				aria-hidden
@@ -341,7 +288,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 				onClick={signUp}
 				disabled={!framed}
 				tabIndex={framed ? undefined : -1}
-				// Its strings get the click's little tug too
 				data-tug-with="sign-up-strings"
 				className={`${SIGN_UP} cursor-pointer disabled:cursor-default`}
 				style={word(2, 9)}
@@ -349,16 +295,11 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 				Sign up here
 			</button>
 
-			{/* Zhenya - drops in on the left; at step 2 she turns round (the
-			    scale flips through 0, like a cut-out) and goes over to the
-			    right, a little higher; at step 3 she goes to the middle and
-			    turns to face the pointer.  */}
 			<Zhenya
 				src={blinkSrc}
 				className="h-svh absolute portrait:h-[66svh] max-w-none test-shadow"
 				style={{
 					visibility: step >= 1 ? "visible" : "hidden",
-					// Moving over for a picked painting is quicker than walking
 					transition: `transform 900ms ${DOLL_DROP}, top 900ms ease-in-out 300ms, ${chosen ? "left 500ms ease-out" : "left 1200ms ease-in-out 300ms"}, scale ${picking ? 350 : 600}ms ease-in-out`,
 					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",
 					top: portrait ? "-10svh" : filling ? "-35svh" : "-28svh",
@@ -371,7 +312,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 							: portrait
 								? "-16vw"
 								: "-9vw",
-					// In front of the paintings while picking
 					zIndex: picking ? 6 : undefined,
 					scale: picking
 						? lookLeft
@@ -384,7 +324,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 				alt="Zhenya, a marionette doll on strings"
 			/>
 
-			{/* Step 2: "Competitor Information", and the form sliding up */}
 			<h2
 				className={`${LABEL} text-[4svh] border-[0.2svh] top-[5svh] left-[5vw] portrait:top-[24svh] portrait:left-[4vw] z-3`}
 				style={hang(signedUp, filling, "top", { delay: TITLE_DELAY_MS })}
@@ -394,7 +333,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 			</h2>
 
 			<form
-				// Its own notes instead of the browser's
 				noValidate
 				onSubmit={(e) => {
 					e.preventDefault();
@@ -416,7 +354,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 							className={`flex items-baseline justify-between gap-[1vw] text-[3svh] portrait:text-[2.2svh] ${i ? "mt-[2.2svh] portrait:mt-[1.6svh]" : ""}`}
 						>
 							{question}
-							{/* Gender can be left unsaid */}
 							{key === "gender" && (
 								<button
 									type="button"
@@ -434,7 +371,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 							required
 							{...(key === "age"
 								? {
-										// A whole number, with no up/down arrows
 										type: "number",
 										inputMode: "numeric" as const,
 										min: LIMITS.age.min,
@@ -445,7 +381,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 										type: "text",
 										minLength: LIMITS[key].min,
 										maxLength: LIMITS[key].max,
-										// Just spaces don't count as an answer
 										pattern: ".*\\S.*",
 									})}
 							value={answers[key]}
@@ -460,8 +395,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 							tabIndex={filling ? undefined : -1}
 							className="no-focus-ring [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none border-b-[0.3svh] w-full text-[3svh] portrait:text-[2.2svh] bg-transparent outline-none px-[0.5vw] pb-[1svh] border-black border-dashed"
 						/>
-						{/* What's wrong, if anything - and the long answer shows
-						    how much room is left */}
 						{(errors[key] || key === "aiArt") && (
 							<span className="flex justify-between gap-[1vw] text-[1.8svh] portrait:text-[1.5svh] mt-[0.4svh]">
 								<span id={`${key}-problem`}>
@@ -491,8 +424,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 				</button>
 			</form>
 
-			{/* Step 3: the question, and the two paintings to choose from -
-			    the magic button's on the left, yours on the right */}
 			<h2
 				className={`${LABEL} text-[3.5svh] border-[0.2svh] top-[-1svh] left-[50%] translate-x-[-50%] w-max max-w-[60vw] portrait:max-w-[90vw] portrait:top-[2svh] z-9`}
 				style={hang(picking, picking, "top", { delay: PICK_DELAY_MS })}
@@ -500,18 +431,12 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 				<Strings />
 				Which painting do you want to submit to the competition?
 			</h2>
-			{/* The two paintings, each hanging with its label under it -
-			    picking either one (the frame or the label) submits it and goes
-			    on to the next page. The magic button's on the left, yours on
-			    the right; each a moment after the last */}
 			{CHOICES.map(({ entry, label, side }, i) => {
 				const dropIn = hang(picking, picking, "top", {
 					ms: 900,
 					easing: DOLL_DROP,
 					delay: PICK_DELAY_MS + 200 + i * 150,
 				});
-				// The picked one grows (and moves up a little); the other shrinks
-				// and moves a little out to its side
 				const selected = chosen === entry;
 				const other = chosen !== null && !selected;
 				return (
@@ -520,11 +445,8 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 						className={`absolute top-[10svh] portrait:top-[40svh] ${side} z-4 flex flex-col items-center gap-[1.5svh] portrait:gap-[1svh] origin-top`}
 						style={{
 							...dropIn,
-							// Growing and shrinking both just ease, with no bounce
 							transition: `${dropIn.transition}, scale 500ms ease-out, translate 500ms ease-out`,
 							scale: selected ? "1.12" : other ? "0.82" : "1",
-							// The one not picked moves out to its side; the picked one
-							// moves in, into the room Zhenya leaves
 							translate: other
 								? `${toward(entry, "out")}${OUT} 0`
 								: selected
@@ -532,8 +454,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 									: "0 0",
 						}}
 					>
-						{/* The frame - the label under it is the same button for
-					    screen readers and keyboards */}
 						<button
 							onClick={() => pick(entry)}
 							disabled={!picking}
@@ -552,7 +472,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 								}
 								className="h-[38svh] portrait:h-[20svh] w-auto max-w-none relative"
 								alt=""
-								// Only the drawn frame counts (see opaqueAt)
 								data-hit
 							/>
 						</button>
@@ -573,7 +492,6 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 							<Strings />
 							{label}
 						</button>
-						{/* Nothing drawn yet: a way to go and draw something */}
 						{entry === "yours" && !yours && (
 							<a
 								href="/every-artist-starts-somewhere"

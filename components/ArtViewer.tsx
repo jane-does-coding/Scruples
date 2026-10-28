@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
 
-// A piece of art from the inventory, shown big: it's lowered onto the stage
-// on two strings, like everything that hangs in this box theatre, and lifted
-// back up when closed
-
 const DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 const MS = 800;
 
@@ -22,7 +18,6 @@ export default function ArtViewer({
 		return () => clearTimeout(timer);
 	}, []);
 
-	// Lift it away, then close
 	const close = () => {
 		setShown(false);
 		setTimeout(onClose, MS);
@@ -52,7 +47,6 @@ export default function ArtViewer({
 					transform: shown ? "translateY(0)" : "translateY(-110svh)",
 				}}
 			>
-				{/* The strings it hangs on */}
 				<span className="w-[0.1vw] bg-black/60 h-[100svh] bottom-[calc(100%-12svh)] left-[30%] absolute"></span>
 				<span className="w-[0.1vw] bg-black/60 h-[100svh] bottom-[calc(100%-12svh)] right-[30%] absolute"></span>
 				<img
@@ -68,7 +62,6 @@ export default function ArtViewer({
 					</p>
 					<button
 						onClick={close}
-						// Keyboard focus starts here when it opens
 						autoFocus
 						className="relative text-[3svh] portrait:text-[2.3svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] cursor-pointer drop-shadow-md drop-shadow-black/40"
 					>

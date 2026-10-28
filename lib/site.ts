@@ -1,17 +1,10 @@
-// Shared site info for metadata, the sitemap, robots.txt and structured data
-
 export const SITE_NAME = "Scruples";
 
-// While testing: the whole opening (the lights going down and the phones
-// card, with its sound question) plays on every load, not just the first
-// time in a visit.
-// Set back to false before launch
 export const ALWAYS_PLAY_OPENING = true;
 
 export const SITE_DESCRIPTION =
 	"Step through the curtains and meet Zhenya, a marionette doll who loves art - wander past famous paintings, browse a tiny souvenir shop, and see how artists share their work online.";
 
-// On Vercel this is the production domain; locally it's the dev server
 export const SITE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
 	? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
 	: "http://localhost:3000";
@@ -23,8 +16,6 @@ export const OG_IMAGE = {
 	alt: "A theatre ticket on closed stage curtains",
 };
 
-// Full metadata for one page. Next replaces (doesn't merge) openGraph and
-// twitter when a page sets them, so every page gets the complete set
 export const pageMetadata = (
 	title: string,
 	description: string,

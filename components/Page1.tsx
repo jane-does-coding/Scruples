@@ -24,15 +24,10 @@ const drop = (shown: boolean, ms = 800, easing = LABEL_DROP) => ({
 
 export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 	const [step, setStep] = useState(0);
-	// Phones held upright get their own layout: the doll smaller on the left,
-	// the labels stacked beside her on the right
 	const portrait = usePortrait();
 
-	// Controls whether the "Hi" response/buttons have appeared
 	const [saidHi, setSaidHi] = useState(false);
 
-	// The doll: idle and blinking every 1-3s, except while it's doing the
-	// "moving" animation after "Say Hi"
 	const blinkSrc = useBlinkingDoll();
 	const [moving, setMoving] = useState(false);
 	const movingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -60,7 +55,6 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 
 	return (
 		<div className="h-full flex flex-col items-center justify-center relative">
-			{/* Title */}
 			<h1
 				className="text-[4svh] portrait:text-[2.8svh] max-w-[70%] mx-auto text-center scribbler absolute top-0 right-[10vw] portrait:right-[12vw] portrait:top-[26svh] portrait:max-w-[50vw] bg-white border-[0.2svh] border-black px-[2vw] portrait:px-[3vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
@@ -73,7 +67,6 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 				This is Zhenya
 			</h1>
 
-			{/* Say Hi button */}
 			<div
 				className="absolute right-[18vw] portrait:right-[10vw] portrait:max-w-[52vw] drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
@@ -104,7 +97,6 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 				&quot;Hi&quot;
 			</p>
 
-			{/* Doll */}
 			<Zhenya
 				src={moving ? asset("/imgs/zhenya/moving.webp") : blinkSrc}
 				className="h-svh absolute top-[-30svh] left-[-5vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"

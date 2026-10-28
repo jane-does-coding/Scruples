@@ -1,11 +1,6 @@
 import { useEffect } from "react";
 
-// How long has been spent on the site, in seconds, over every visit (kept
-// in this browser). Counted while the page is open and on screen, for the
-// stats at the curtain call
-
 const STORAGE_KEY = "scruples-time";
-// Added up this often
 const TICK_S = 5;
 
 export const loadPlaytime = () => {
@@ -16,7 +11,6 @@ export const loadPlaytime = () => {
 	}
 };
 
-// Keeps the count going while the site is open (used once, in Stage)
 export const usePlaytimeCounter = () => {
 	useEffect(() => {
 		const timer = setInterval(() => {
@@ -29,7 +23,6 @@ export const usePlaytimeCounter = () => {
 	}, []);
 };
 
-// e.g. "40 sec", "12 min", "1 h 5 min"
 export const formatPlaytime = (seconds: number) => {
 	if (seconds < 60) return `${seconds} sec`;
 	const minutes = Math.floor(seconds / 60);

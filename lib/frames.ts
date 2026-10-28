@@ -3,21 +3,15 @@ import { asset } from "@/lib/asset";
 export type FrameSize = "tall" | "wide" | "extra-wide";
 
 export type Frame = {
-	// The frame's page is at /art-piece/<slug>
 	slug: string;
 	src: string;
 	size: FrameSize;
-	// Shown under the frame in the marquee and on its page
 	label: string;
-	// Who painted it, shown on its page as "by <artist>"
 	artist: string;
-	// On its page, either side of the painting: the facts about the real
-	// painting, and a few fun facts
 	details: { medium: string; size: string; where: string };
 	facts: string[];
 };
 
-// Tall frames alternate with wide ones
 export const FRAMES: Frame[] = [
 	{
 		slug: "scream",

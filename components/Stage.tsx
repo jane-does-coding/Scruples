@@ -31,8 +31,6 @@ import {
 } from "@/lib/shop";
 
 const ANIMATION_MS = 700;
-// Opening on a new route is a bit slower, and waits a moment first so the
-// new page has drawn before the curtains move
 const ROUTE_OPEN_MS = 1000;
 const ROUTE_OPEN_DELAY_MS = 150;
 
@@ -43,84 +41,47 @@ const frames = (name: string, count: number) =>
 
 const CLOSING_FRAMES = frames("closing", 10);
 const OPENING_FRAMES = frames("opening", 12);
-// The same at 800px wide, for phones (≈1.3MB for both instead of ≈3.1MB)
 const CLOSING_FRAMES_SMALL = frames("closing-800", 10);
 const OPENING_FRAMES_SMALL = frames("opening-800", 12);
-// A phone (either way up): the short side of the screen is at most 500px
 const isPhone = () => Math.min(window.innerWidth, window.innerHeight) <= 500;
-// First half (21 of 42 frames) of ripping.gif. The GIF runs at 50ms a frame;
-// it's played faster here
 const RIPPING_FRAMES = frames("ripping", 21);
-// The same frames at 700px wide, for screens where the ticket (50vw) doesn't
-// need more - smaller download, so they're ready sooner
 const RIPPING_FRAMES_SMALL = frames("ripping-700", 21);
-// If the rip frames still aren't ready this long after the ticket is
-// clicked, skip the rip rather than leave the ticket sitting there
 const RIP_WAIT_MAX_MS = 4000;
 const RIPPING_FRAME_MS = 30;
-// Curtains start opening this long after the ticket is clicked
 const CURTAIN_DELAY_MS = 300;
-// The opening, the first time in a visit (this tab): after the ticket, the
-// house lights go down and the audience hushes, the "bing-bong" plays and
-// "please silence your phones" hangs in - asking about the show's sound
-// too. Choosing lifts it away and the curtains open. When the lights and
-// the card come, after the ticket is clicked, and how long the card takes
-// to lift away
 const LIGHTS_DOWN_AT_MS = 500;
 const PHONE_CARD_AT_MS = 1600;
 const PHONE_CARD_LIFT_MS = 600;
 const OPENING_SEEN_KEY = "scruples-opening-seen";
 
-// Where the top-left "<-" button goes from each route, or null to hide it
 const backHref = (pathname: string) => {
-	// A story page goes back to the one before it (the first has no Back)
 	const n = STORY_PAGES.findIndex((p) => p.href === pathname) + 1;
 	if (n) return n > 1 ? storyHref(n - 1) : null;
-	// Paintings are opened from the marquee on Page 2
 	if (pathname.startsWith("/art-piece/")) return "/zhenya-likes-art";
-	// The last page comes after Page 9 (for now), and the drawings wall is
-	// opened from the last page
 	if (pathname === "/lastpage") return "/in-the-spotlight";
 	if (pathname === "/gallery") return "/lastpage";
 	return null;
 };
 
-// What happened when trying to buy something
 export type BuyResult = "bought" | "already-owned" | "not-enough-money";
 
 type StageContextValue = {
-	// True once the curtains have finished opening
 	curtainsOpen: boolean;
-	// Close the curtains, go to `href`, and open them once it has rendered
 	goTo: (href: string) => void;
-	// The inventory (shown in the "?" menu): money left and items bought.
-	// Kept here so it carries over between pages
 	money: number;
 	owned: ItemId[];
 	buy: (item: ItemId) => BuyResult;
-	// Adds an item without paying for it (e.g. Daphne drawing for free)
 	give: (item: ItemId) => void;
-	// Gives money to Daphne
 	donate: (amount: number) => void;
-	// Adds a drawing made along the way (like yours on Page 6) to the
-	// inventory. Drawings can't be sold
 	keepDrawing: (drawing: Omit<Drawing, "key">) => void;
-	// The last drawing kept that way (yours from Page 6), or null
 	myDrawing: string | null;
-	// The hat Zhenya is wearing (from a mystery box): its image, the same
-	// size as hers, to lay over her - or null
 	hat: string | null;
-	// Which hat that is, and putting one on (or null to take it off)
 	wearing: HatId | null;
 	equip: (hat: HatId | null) => void;
-	// Through the curtains to where the top-left "<-" goes
 	goBack: () => void;
-	// The furthest story page reached so far (the menu locks the ones
-	// after it)
 	reached: number;
 };
 
-// A drawing in the inventory that isn't from the shop
 type Drawing = {
 	key: string;
 	name: string;
@@ -128,34 +89,20 @@ type Drawing = {
 	description: string;
 };
 
-// The inventory shows 3 items next to the money, or 7 (two rows) with
-// "View all items". With more than WIDE_AFTER items it's a box wider - 4
-// next to the money, 9 in all - and the pages list goes to one column to
-// make room
 const SLOTS = 3;
 const WIDE_AFTER = 8;
-// An opened item: how long it takes to grow (with a little spring) and to
-// shrink back (smoothly), and its final fade as the slots come back
 const ITEM_GROW_MS = 400;
 const ITEM_SHRINK_MS = 350;
 const ITEM_FADE_MS = 200;
-// How long the menu glides for when "view all" extends or shrinks it (the
-// length of .nav-smooth in globals.css)
 const NAV_GLIDE_MS = 650;
-// One row of the inventory: a slot plus the gap (set in globals.css, and
-// sized by width on portrait screens)
 const ROW = "(var(--slot) + var(--slot-gap))";
-// A made-up number from -1 to 1 for a locked page's letter (page n, letter
-// j, and which of its values) - scattered, but the same every time
 const scatter = (n: number, j: number, which: number) => {
 	const x = Math.sin(n * 12.9898 + j * 78.233 + which * 37.719) * 43758.5453;
 	return (x - Math.floor(x)) * 2 - 1;
 };
 
-// The pages, as listed in the menu
 const PAGES = [...STORY_PAGES, { title: "Curtain call", href: "/lastpage" }];
 
-// The inventory pop-up next to "menu", its top lined up with the button's
 const NOTE =
 	"note-pop fixed top-[0.5svh] right-[calc(1.3vw+max(6.5vw,72px))] portrait:top-[1.5vw] portrait:right-[22vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
 
@@ -167,37 +114,24 @@ export const useStage = () => {
 	return stage;
 };
 
-// The theatre around every route: background, curtains, ticket and nav.
-// It lives in the root layout so it stays mounted while routes change
 export default function Stage({ children }: { children: ReactNode }) {
 	const router = useRouter();
 	const pathname = usePathname();
 
-	// Starts "loading": closed curtains cover the page until the ticket is
-	// clicked and the opening frames are decoded, then they open
 	const [animationStage, setAnimationStage] = useState<
 		"loading" | "idle" | "closing" | "opening"
 	>("loading");
 
-	// The ticket sits on the closed curtains until it's clicked, then plays
-	// the ripping frames in the same spot while the curtains open behind it.
-	// The refs are read by the frame loader, which may finish before or after
-	// the click
-	// "loading" = clicked, waiting for the rip frames to arrive
 	const [ticket, setTicket] = useState<
 		"waiting" | "loading" | "ripping" | "gone"
 	>("waiting");
 	const enteredRef = useRef(false);
 	const curtainDelayDone = useRef(false);
 
-	// The house lights (a dark layer over the closed curtains, lit in the
-	// middle where the card hangs) and the phones card
 	const [lightsDown, setLightsDown] = useState(false);
 	const [phoneCard, setPhoneCard] = useState(false);
 	const openingTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 	const openingDone = useRef<(() => void) | null>(null);
-	// Sound on or off, from the phones card: it lifts away, then the
-	// curtains open
 	const chooseSound = (on: boolean) => {
 		if (!openingDone.current) return;
 		sound.setMuted(!on);
@@ -210,15 +144,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 	const ripCanvasRef = useRef<HTMLCanvasElement>(null);
 	const ripFrames = useRef<ImageBitmap[]>([]);
 
-	// Nav: header.png slides down from the top when "?" is clicked
 	const [navOpen, setNavOpen] = useState(false);
 
-	// Inventory - money left and items bought
 	const [money, setMoney] = useState(STARTING_MONEY);
 	const [owned, setOwned] = useState<ItemId[]>([]);
-	// Every change to the inventory pops up a note next to the "?" button
-	// (see notify)
-	// (`link` = it says "click to view" and opens the inventory)
 	const [note, setNote] = useState<{
 		text: string;
 		id: number;
@@ -251,8 +180,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		setMoney((m) => m - amount);
 		notify(`You gave Daphne $${amount}`);
 	};
-	// Opening a mystery box: it turns into the four hats, which share one
-	// inventory slot, and the wardrobe opens to try them on
 	const openBox = () => {
 		setOwned(owned.map((i) => (i === "mystery-box" ? "hats" : i)));
 		sound.unbox();
@@ -260,9 +187,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		closeItem();
 		openWardrobe();
 	};
-	// The hat Zhenya has on (one at a time), and the wardrobe page where
-	// they're tried on - opened by clicking the hats in the inventory. Its
-	// Back goes to the page it was opened from
 	const [wearing, setWearing] = useState<HatId | null>(null);
 	const [wardrobeFrom, setWardrobeFrom] = useState("/souvenir-shop");
 	const openWardrobe = () => {
@@ -288,7 +212,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		closeItem();
 	};
 	const bills = billsFor(money);
-	// One image per bill, $5s first - fanned out in the money slot
 	const moneyBills = [
 		...Array.from({ length: bills.fives }, () => BILL_IMAGES.five),
 		...Array.from({ length: bills.ones }, () => BILL_IMAGES.one),
@@ -300,7 +223,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		notify(`${drawing.name} was added to inventory`);
 		itemAdded();
 	};
-	// Everything in the inventory, shop items first, in one shape
 	const entries = [
 		...owned.map((item) => ({
 			key: item as string,
@@ -310,12 +232,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 		})),
 		...drawings.map((d) => ({ ...d, item: null, price: 0, art: true })),
 	];
-	// "View all items": the menu drops further down to show a second row
-	// It's a toggle that stays as you left it (kept in this browser too), and
-	// turns itself on once there are more items than one row can show
 	const [allItemsOn, setAllItemsState] = useState(false);
-	// While "view all" is extending or shrinking the open menu, it glides
-	// (.nav-smooth) instead of using the springy bounce it opens with
 	const [navGliding, setNavGliding] = useState(false);
 	const glideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const glideNav = () => {
@@ -323,16 +240,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 		clearTimeout(glideTimer.current);
 		glideTimer.current = setTimeout(() => setNavGliding(false), NAV_GLIDE_MS);
 	};
-	// Lots of items: a box more per row (see WIDE_AFTER)
 	const wide = entries.length > WIDE_AFTER;
 	const columns = wide ? 5 : 4;
 	const rowSlots = columns - 1;
 	const allSlots = columns * 2 - 1;
-	// The switch only shows once there are more items than one row fits, and
-	// until then (or after selling things) it's as if it were off
 	const canViewAll = entries.length > rowSlots;
-	// With that many items both rows always show (the one-column pages list
-	// beside them is as tall as two rows), and there's no "view less"
 	const allItems = (allItemsOn || wide) && canViewAll;
 	const setAllItems = (on: boolean) => {
 		setAllItemsState(on);
@@ -348,22 +260,15 @@ export default function Stage({ children }: { children: ReactNode }) {
 		const timer = setTimeout(() => setAllItemsState(on), 0);
 		return () => clearTimeout(timer);
 	}, []);
-	// Called after something is added: one more than there was
 	const itemAdded = () => {
 		if (owned.length + drawings.length + 1 > SLOTS) setAllItems(true);
 	};
-	// The notebook, opened with "Use"
 	const [notebookOpen, setNotebookOpen] = useState(false);
-	// A piece of art being viewed big, opened with "View"
 	const [viewing, setViewing] = useState<{
 		image: string;
 		name: string;
 	} | null>(null);
 
-	// Clicking an item in the inventory opens it: the other slots fade out and
-	// its slot stretches across the whole row with a description and Sell.
-	// `openItem` is which one; `itemOpen` turns on a moment later so the slot
-	// can grow from where it was
 	const [openItem, setOpenItem] = useState<{
 		key: string;
 		slot: number;
@@ -387,10 +292,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		setOpenItem({ key, slot });
 		setTimeout(() => setItemOpen(true), 20);
 	};
-	// Closing: the text fades, the box eases back into its slot (no bounce)
-	// while the other slots fade back in, then it's swapped for its own slot,
-	// which looks exactly the same by then. That slot comes back instantly,
-	// not with a fade (settlingSlot), so the swap can't be seen
 	const [itemFading, setItemFading] = useState(false);
 	const [settlingSlot, setSettlingSlot] = useState<number | null>(null);
 	const closeItem = () => {
@@ -404,16 +305,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 			setTimeout(() => setSettlingSlot(null), 100);
 		}, ITEM_SHRINK_MS + ITEM_FADE_MS);
 	};
-	// Slot k is the one that's opened (or just closed): it hides and comes
-	// back instantly, under the opened box
 	const instantSlot = (k: number) => openItem?.slot === k || settlingSlot === k;
-	// The slots are hidden while an item is open, until it's fading out
 	const slotsHidden = !!openItem && !itemFading;
 
-	// Images that can't be seen until after the ticket is clicked (the menu
-	// header and bag, the open curtains, the paper background behind the closed
-	// curtains) are only added once the page has loaded, so they don't compete
-	// with the ticket and closed curtains for bandwidth
 	const [pageLoaded, setPageLoaded] = useState(false);
 	useEffect(() => {
 		const onLoad = () => setPageLoaded(true);
@@ -425,11 +319,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return () => window.removeEventListener("load", onLoad);
 	}, []);
 
-	// A soft "tock" whenever something hanging on strings lands: a label or
-	// button finishing its drop into place (its transform or top transition
-	// ending back at rest), or a line of dialogue's .hang-in animation
-	// ending. Hanging things have string spans (bg-black/60) as direct
-	// children; lifting away (ending off screen) is silent
 	useEffect(() => {
 		const hangs = (el: Element) =>
 			!!el.querySelector(':scope > span[class*="bg-black/60"]');
@@ -454,8 +343,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
-	// The menu makes a sound when it opens or closes (not on the first
-	// render)
 	const navOpenedBefore = useRef(false);
 	useEffect(() => {
 		if (!navOpenedBefore.current && !navOpen) return;
@@ -463,7 +350,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		sound.menu(navOpen);
 	}, [navOpen]);
 
-	// Sound on/off (the button under the "?"), kept in this browser
 	const [muted, setMutedState] = useState(false);
 	useEffect(() => {
 		const timer = setTimeout(() => setMutedState(sound.isMuted()), 0);
@@ -474,17 +360,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
-	// Clicking a hanging button (dashed border = clickable, on any page) gives
-	// it a tiny tug: it dips down a little and springs back. Hanging
-	// things are the ones with string spans (bg-black/60) as direct children,
-	// so this finds the nearest one around the clicked button. Solid-bordered
-	// labels aren't clickable, so they don't move. A button whose strings
-	// hang from something else (data-tug-with="that thing's id") tugs that
-	// along with it
 	useEffect(() => {
 		const tug = (el: Element) => {
-			// "add" stacks the dip on top of the translate it already has (like
-			// -translate-x-[50%] for centring), so it never shifts sideways
 			el.getAnimations()
 				.filter((a) => a.id === "tug")
 				.forEach((a) => a.cancel());
@@ -505,7 +382,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 				e.target instanceof Element
 					? e.target.closest(".border-dashed:not(:disabled)")
 					: null;
-			// Things marked data-no-tug (like the notebook's colors) stay still
 			if (!dashed || dashed.closest("[data-no-tug]")) return;
 			if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 			const partnerId = dashed.getAttribute("data-tug-with");
@@ -535,10 +411,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return () => window.removeEventListener("keydown", closeOnEscape);
 	}, [navOpen]);
 
-	// The GIFs are too big for browsers to animate reliably, so they're
-	// split into frames (public/imgs/stage/closing, .../opening and
-	// .../ripping). Every frame is decoded up front and drawn to a
-	// canvas, so playback starts the instant the button is clicked.
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const bitmaps = useRef<{ closing: ImageBitmap[]; opening: ImageBitmap[] }>({
 		closing: [],
@@ -558,8 +430,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		ctx.drawImage(bitmap, 0, 0);
 	};
 
-	// Clear the last frame in the same paint that shows open.png again,
-	// so there's no flash between them
 	useLayoutEffect(() => {
 		if (animationStage !== "idle") return;
 		const canvas = canvasRef.current;
@@ -585,8 +455,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 	};
 
 	const openCurtains = (duration = ANIMATION_MS) => {
-		// The house lights come back up as the curtains open, and the music
-		// starts (both only matter the first time)
 		setLightsDown(false);
 		sound.startMusic();
 		setAnimationStage("opening");
@@ -598,8 +466,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		);
 	};
 
-	// Draws the first frame right away, in the click itself, so the rip
-	// starts instantly, then removes the ticket after the last frame
 	const playRipping = () => {
 		const canvas = ripCanvasRef.current;
 		const frames = ripFrames.current;
@@ -631,9 +497,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		}, RIPPING_FRAME_MS);
 	};
 
-	// Frame loading. Each starts once and is shared, so the click and the
-	// page-load timer can both ask for it. Low priority, so they never hold up
-	// what's already on screen
 	const decodeFrames = (srcs: string[], priority: RequestPriority = "low") =>
 		Promise.all(
 			srcs.map((src) =>
@@ -644,8 +507,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		);
 	const ripLoading = useRef<Promise<void> | null>(null);
 	const loadRipping = () => {
-		// The ticket is 50vw wide, so the 700px frames do unless that's more
-		// than 700 real pixels
 		const small = window.innerWidth * 0.5 * window.devicePixelRatio <= 700;
 		ripLoading.current ??= decodeFrames(
 			small ? RIPPING_FRAMES_SMALL : RIPPING_FRAMES,
@@ -661,26 +522,20 @@ export default function Stage({ children }: { children: ReactNode }) {
 			isPhone() ? OPENING_FRAMES_SMALL : OPENING_FRAMES,
 		).then((b) => {
 			bitmaps.current.opening = b;
-			// Ticket was clicked while the frames were still loading
 			if (enteredRef.current && curtainDelayDone.current) openCurtains();
 		});
 		return openingLoading.current;
 	};
 
-	// Opens the curtains as soon as the opening frames are ready (otherwise
-	// the frame loader opens them once it's done)
 	const curtainsUp = () => {
 		curtainDelayDone.current = true;
 		if (bitmaps.current.opening.length) openCurtains();
 	};
 
-	// The lights going down, the hush and the phones card - then, once sound
-	// is chosen on it, curtainsUp
 	const playOpening = () => {
 		try {
 			sessionStorage.setItem(OPENING_SEEN_KEY, "1");
 		} catch {}
-		// Someone's still talking if the audience wasn't there already
 		sound.startMurmur();
 		const at = (ms: number, then: () => void) =>
 			openingTimers.current.push(setTimeout(then, ms));
@@ -701,10 +556,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 	const enter = () => {
 		if (enteredRef.current) return;
 		enteredRef.current = true;
-		// The first click is what lets the browser play sound: wake it up
-		// (the music starts as the curtains open)
 		sound.unlock();
-		// Make sure both are on their way, even if the click beat the timer
 		loadOpening();
 		let seen = true;
 		try {
@@ -723,8 +575,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 			ripThenOpen();
 			return;
 		}
-		// Clicked before the rip frames arrived: hold the ticket still until
-		// they do (or give up after RIP_WAIT_MAX_MS and skip the rip)
 		setTicket("loading");
 		let started = false;
 		const startOnce = () => {
@@ -737,11 +587,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 	};
 
 	useEffect(() => {
-		// The rip frames (~0.5-0.8MB) are needed the moment the ticket is
-		// clicked, so they start as soon as the visible page has loaded. The
-		// opening frames (~1.7MB) wait another second so the ticket is surely on
-		// screen first; the closing frames are only needed when changing pages,
-		// so they come last
 		let delay: ReturnType<typeof setTimeout>;
 		const afterLoad = () => {
 			loadRipping();
@@ -765,8 +610,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
-	// Plays the closing frames, then calls onClosed. Returns false (and does
-	// nothing) if the curtains are mid-animation or the frames aren't loaded
 	const closeCurtains = (onClosed: () => void) => {
 		const { closing, opening } = bitmaps.current;
 		if (animationStage !== "idle" || !closing.length || !opening.length) {
@@ -778,8 +621,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return true;
 	};
 
-	// Set when the curtains have closed for a route change; the pathname
-	// effect below opens them once the new route has rendered
 	const openOnNewRoute = useRef(false);
 
 	const goTo = (href: string) => {
@@ -791,8 +632,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		if (!closing) router.push(href);
 	};
 
-	// For real links (<a href>) that should still go through the curtains on
-	// a plain click; a click with a modifier key (new tab etc.) is left alone
 	const linkClick =
 		(href: string, before?: () => void) =>
 		(e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -803,18 +642,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 		};
 
 	const back = pathname === "/wardrobe" ? wardrobeFrom : backHref(pathname);
-	// 1-8 on the story's pages, 0 elsewhere (paintings, the gallery)
 	const pageNumber = PAGES.findIndex((p) => p.href === pathname) + 1;
 
-	// Clickable pictures only count where they're drawn: anything with an
-	// img[data-hit] in it (or the img itself, if it's what's clicked) stops
-	// taking the pointer while the pointer is over a see-through part of its
-	// picture(s) - so hover effects, the cursor and clicks all go to what's
-	// underneath. A tap on a see-through part is ignored too
 	useEffect(() => {
 		const targetOf = (img: HTMLImageElement) =>
 			img.closest<HTMLElement>("button, a") ?? img;
-		// Whether (x, y) is over each target's pictures, and over a drawn part
 		const check = (x: number, y: number) => {
 			const found = new Map<HTMLElement, { inside: boolean; hit: boolean }>();
 			for (const img of document.querySelectorAll<HTMLImageElement>(
@@ -847,9 +679,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					target.style.pointerEvents = inside && !hit ? "none" : "";
 			});
 		};
-		// A tap (or a click that slipped through) on a see-through part
 		const onClick = (e: MouseEvent) => {
-			// Key presses have no place on the screen
 			if (e.detail === 0 || !(e.target instanceof Element)) return;
 			for (const [target, { inside, hit }] of check(e.clientX, e.clientY)) {
 				if (inside && !hit && target.contains(e.target)) {
@@ -868,8 +698,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
-	// Pictures and links can't be dragged out (Chrome and Safari already
-	// don't, from the CSS; this is for Firefox)
 	useEffect(() => {
 		const noDrag = (e: DragEvent) => {
 			if (e.target instanceof Element && e.target.closest("img, a"))
@@ -879,13 +707,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return () => document.removeEventListener("dragstart", noDrag);
 	}, []);
 
-	// Time spent here, for the stats at the curtain call
 	usePlaytimeCounter();
 
-	// The furthest story page reached so far. The menu only links to pages
-	// up to it - the ones after are locked until the story gets there. For
-	// now it's only kept while the site is open, like the inventory (a
-	// reload locks them all again), which makes testing easier
 	const [reached, setReached] = useState(0);
 	useEffect(() => {
 		const timer = setTimeout(
@@ -895,8 +718,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return () => clearTimeout(timer);
 	}, [pageNumber]);
 	const goBack = () => {
-		// Only once the curtains are fully open (not mid-animation or behind
-		// the ticket), so it always goes through the curtains
 		if (!back || animationStage !== "idle") return;
 		setNavOpen(false);
 		goTo(back);
@@ -905,7 +726,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		if (!openOnNewRoute.current) return;
 		openOnNewRoute.current = false;
-		// Timer also keeps the state change outside the effect itself
 		setTimeout(() => openCurtains(ROUTE_OPEN_MS), ROUTE_OPEN_DELAY_MS);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [pathname]);
@@ -940,8 +760,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 					menu
 				</button>
 
-				{/* Which page this is - same look as "menu", in the bottom-left
-				    corner. Opens the menu (where the pages are listed) */}
 				{pageNumber > 0 && ticket === "gone" && (
 					<button
 						onClick={() => setNavOpen(true)}
@@ -952,7 +770,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 					</button>
 				)}
 
-				{/* Sound on/off - same look as the "?", just under it */}
 				<button
 					onClick={() => {
 						sound.unlock();
@@ -963,7 +780,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 					title={muted ? "Sound off" : "Sound on"}
 					className="fixed top-[calc(1.5svh+max(3vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
-					{/* A music note, crossed out while sound is off */}
 					<svg
 						aria-hidden
 						viewBox="0 0 24 24"
@@ -980,14 +796,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 					</svg>
 				</button>
 
-				{/* The pop-up's text for screen readers - always on the page, so
-				    a new note is announced when it changes */}
 				<p role="status" aria-live="polite" className="sr-only">
 					{note?.text}
 				</p>
 
-				{/* Inventory pop-up - just left of the "?", whenever something is
-				    added, sold or given. Clicking it opens the inventory */}
 				{note &&
 					(note.link ? (
 						<button
@@ -1001,13 +813,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 							{note.text}, click to view {"->"}
 						</button>
 					) : (
-						// Just news - nothing to click
 						<p key={note.id} aria-hidden className={NOTE}>
 							{note.text}
 						</p>
 					))}
 
-				{/* Back - same look as the "?", in the top-left corner */}
 				{back && (
 					<a
 						href={back}
@@ -1024,8 +834,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 					</a>
 				)}
 
-				{/* Backdrop behind the nav - fades in darker and slightly blurred,
-			    and closes the nav when clicked */}
 				<div
 					onClick={() => setNavOpen(false)}
 					aria-hidden
@@ -1036,18 +844,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 					}}
 				/>
 
-				{/* Nav - header.png's bottom rests 10svh above the bottom of the page.
-			    Closed, it's pushed up by 90svh so it sits fully above the screen.
-			    Sits above the curtains, buttons (z-20) and backdrop (z-21),
-			    under the "?" (z-23) */}
 				<nav
 					id="nav"
 					inert={!navOpen}
-					// .inv-wide: smaller slots, so a wide inventory still fits
 					className={`${navGliding ? "nav-smooth" : "nav-bounce"} ${wide ? "inv-wide" : ""} fixed inset-x-0 bottom-[10svh] z-22 drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
 					style={{
-						// "View all items" drops it one more row, so the second row
-						// shows
 						transform: navOpen
 							? allItems
 								? `translateY(calc${ROW})`
@@ -1055,21 +856,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 							: "translateY(-90svh)",
 					}}
 				>
-					{/* Hidden scribble ("nothing to see here"). The nav's bottom edge
-					    rests 90svh down the screen, so bottom-[90svh] puts this right
-					    above the top of the screen when the nav is open - out of
-					    sight. It rides along with the nav, so it only peeks in at
-					    the lowest point of the bounce (the spring in .nav-bounce
-					    dips 8svh - exactly this image's height), then slides back out as
-					    the nav settles. Keep the two in sync: see .nav-bounce */}
 					{pageLoaded && (
 						<img
 							src={asset("/imgs/stage/hidden-scribble.webp")}
 							fetchPriority="low"
 							className="absolute bottom-[90svh] left-0 w-screen h-[8svh] max-w-none pointer-events-none"
-							// Gone at once while it's dropped further for "View all" -
-							// and only back once the menu has moved back up (the
-							// length of .nav-bounce), so it's never seen then
 							style={{
 								opacity: allItems ? 0 : 1,
 								transition: allItems ? "none" : "opacity 0s 1100ms",
@@ -1079,8 +870,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 						/>
 					)}
 
-					{/* White above the header, for when it's dropped further down for
-					    "View all items" (the header's top is white too) */}
 					<div className="absolute bottom-full inset-x-0 h-[60svh] bg-white -mb-px" />
 
 					{pageLoaded && (
@@ -1093,54 +882,21 @@ export default function Stage({ children }: { children: ReactNode }) {
 							])}
 							sizes="100vw"
 							fetchPriority="low"
-							// Portrait screens are too narrow for its height, so it's
-							// made taller there and cropped to its middle instead
 							className="w-screen block portrait:h-[85svh] portrait:object-cover portrait:object-bottom"
 							alt="Theatre curtain valance"
 						/>
 					)}
 
-					{/* Nav content - sits in the solid area above the curtain swags */}
-					{/* With "View all", the menu drops a row but this moves back up
-					    by the same amount, with the same spring, so everything here
-					    stays still while the second row fades in below */}
 					<div
 						className={`${navGliding ? "nav-smooth" : "nav-bounce"} absolute inset-x-0 bottom-[45%] flex flex-col items-center gap-[2svh] text-[3svh] pt-[3svh]`}
 						style={{
-							// (A wide inventory already counts its second row, so it
-							// isn't moved)
 							transform:
 								allItems && !wide ? `translateY(calc(-1 * ${ROW}))` : "none",
 						}}
 					>
-						{/* 	{pageLoaded && (
-							<img
-								src={asset("/imgs/stage/bag.webp")}
-								srcSet={srcSet([
-									["/imgs/stage/bag-450.webp", 450],
-									["/imgs/stage/bag.webp", 900],
-								])}
-								sizes="18vw"
-								fetchPriority="low"
-								className="w-[18vw] absolute right-[8vw] top-[-9svh] test-shadow-darker"
-								alt=""
-							/>
-						)} */}
-						{/* Inventory - a row of six square slots: your money (the
-						    bills fanned out, with the total), then one slot per thing
-						    you can buy - filled in the order you bought them, the rest
-						    empty */}
-						{/* Pages (left) and the inventory (right), side by side - on
-						    portrait screens, one above the other */}
 						<div
-							// (With a wide inventory both its rows count towards its
-							// height, so the taller pages list lines up with the second)
 							className={`flex portrait:flex-col items-end portrait:items-center gap-[3vw] portrait:gap-[2.5svh]`}
 						>
-							{/* Pages - a link to every page, with its title, in two
-							    columns (one, beside a wide inventory). Same height as a row of the inventory (taller only
-							    if a narrow screen makes the titles wrap), and as wide as
-							    the screen leaves room for. The page you're on is marked */}
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
 								<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
 								<ol
@@ -1149,7 +905,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 									{PAGES.map(({ title, href }, i) => {
 										const n = i + 1;
 										const here = pathname === href;
-										// Not reached yet: greyed out, not a link
 										if (n > reached && !here)
 											return (
 												<li key={href}>
@@ -1158,10 +913,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 														title="Not yet - keep going through the story"
 														className="locked block py-[0.15svh] text-black/35 cursor-not-allowed"
 													>
-														{/* Each letter on its own, to drift its own way on
-														    hover (see .locked in globals.css). Where to
-														    is made up from its place, so it's the same
-														    every time */}
 														<span aria-hidden>
 															{[...`${n}. ${title}`].map((letter, j) => (
 																<span
@@ -1211,9 +962,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 							</section>
 
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
-								{/* The title, and a small "view all" label next to it once
-								    there are more items than one row shows: drops the menu
-								    a row further so the second row shows (and back) */}
 								<div className="flex items-baseline gap-[1.2vw] portrait:gap-[3vw]">
 									<h2 className="text-[4svh] portrait:text-[3svh]">
 										Inventory
@@ -1232,12 +980,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 										</button>
 									)}
 								</div>
-								{/* One row tall: the second row hangs below it, fading in and
-						    out with "View all" */}
 								<ul
 									className={`relative grid ${wide ? "grid-cols-5 h-[calc(2*var(--slot)+var(--slot-gap))]" : "grid-cols-4 h-(--slot)"} auto-rows-(--slot) gap-(--slot-gap)`}
 								>
-									{/* Money - click it to see what it's for */}
 									<li
 										className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed cursor-pointer"
 										style={{
@@ -1261,7 +1006,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 												src={src}
 												className="absolute top-[50%] h-[82%] w-auto max-w-none translate-x-[-50%] translate-y-[-50%] test-shadow-darker"
 												style={{
-													// Fanned out around the middle of the slot
 													left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
 													rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
 												}}
@@ -1279,17 +1023,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 												<li
 													key={entry?.key ?? `empty-${i}`}
 													inert={hidden}
-													// A slot with something in it is clickable, so its dashes
-													// march on hover like a button's (see globals.css)
 													className={`relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center ${entry ? "cursor-pointer" : ""}`}
 													style={{
 														opacity:
 															slotsHidden || hidden || openItem?.slot === i + 1
 																? 0
 																: 1,
-														// The second row fades in as the menu glides down,
-														// and out quickly; all of them fade back as an
-														// opened item finishes closing
 														transition: instantSlot(i + 1)
 															? "none"
 															: slotsHidden
@@ -1303,7 +1042,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 													{entry && (
 														<button
 															onClick={() => {
-																// The hats open the wardrobe instead
 																if (entry.item === "hats") openWardrobe();
 																else showItem(entry.key, i + 1);
 															}}
@@ -1323,14 +1061,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 										},
 									)}
 
-									{/* An opened item - starts exactly over its slot, then
-							    stretches across the whole row (both rows, while "view
-							    all" is on) while the other slots fade out */}
 									{openItem && opened && (
 										<li
-											// Taller on portrait screens, with the picture above the
-											// text, since the row is so narrow there: it starts at its
-											// slot's size and grows to fit (see maxHeight/minHeight)
 											className="absolute h-(--slot) portrait:h-auto border-[0.3svh] border-black border-dashed flex portrait:flex-col items-center portrait:items-start gap-[2vw] portrait:gap-0 overflow-hidden"
 											style={{
 												transition: [
@@ -1350,12 +1082,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 														`background-color ${itemOpen ? ITEM_GROW_MS : ITEM_SHRINK_MS}ms ease`,
 													)
 													.join(", "),
-												// Starts (and ends) looking just like its slot
 												backgroundColor: itemOpen
 													? "rgb(255 255 255 / 0.8)"
 													: "rgb(255 255 255 / 0.2)",
-												// It grows from its slot across the whole row - or,
-												// while both rows are showing, over both of them
 												top:
 													itemOpen && allItems
 														? "0"
@@ -1379,10 +1108,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 														: undefined,
 											}}
 										>
-											{/* Its picture - exactly where and as big as it is in the
-											    slot (so it never jumps or fades), shrinking a little
-											    as the item opens and growing back as it closes. Money
-											    shows its bills fanned out, like in its slot */}
 											<div
 												className="relative shrink-0 w-[calc(var(--slot)-0.6svh)] h-[calc(var(--slot)-0.6svh)] flex items-center justify-center"
 												style={{
@@ -1406,10 +1131,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 														/>
 													))
 												) : (
-													// Art can be clicked to view it big
 													<img
-														// A new key when the box turns into a hat, so
-														// the hat pops in
 														key={opened.key}
 														src={opened.image}
 														onClick={
@@ -1431,7 +1153,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 											</div>
 											<div
 												className="flex flex-col gap-[1svh] text-left pr-[2svh] portrait:px-[3vw] portrait:pb-[3vw]"
-												// Fades in as it opens; out fast, before it shrinks
 												style={{
 													opacity: itemOpen ? 1 : 0,
 													transition: `opacity ${itemOpen ? 300 : 120}ms ease`,
@@ -1506,7 +1227,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 				{notebookOpen && <Notebook onClose={() => setNotebookOpen(false)} />}
 				{viewing && <ArtViewer {...viewing} onClose={() => setViewing(null)} />}
 
-				{/* Normal open state */}
 				{pageLoaded && (
 					<img
 						src={asset("/imgs/stage/open.webp")}
@@ -1525,11 +1245,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 					/>
 				)}
 
-				{/* Closed curtains until the ticket is clicked and the opening frames load */}
 				{animationStage === "loading" && (
 					<img
 						src={asset("/imgs/stage/closed.webp")}
-						// Smaller screens get a smaller copy (147KB at 1200px vs 522KB)
 						srcSet={srcSet([
 							["/imgs/stage/closed-1200.webp", 1200],
 							["/imgs/stage/closed-1600.webp", 1600],
@@ -1542,10 +1260,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 					/>
 				)}
 
-				{/* Ticket - click it to open the curtains and enter */}
-				{/* House lights going down before the show - lit in the middle,
-				    where the phones card hangs. Over the closed curtains,
-				    under the ticket and the card */}
 				<div
 					aria-hidden
 					className="fixed inset-0 z-35"
@@ -1561,11 +1275,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 
 				{ticket !== "gone" && (
 					<button
-						// Clicking it again does nothing (see enter). It isn't
-						// actually disabled after the click, so the cursor stays
-						// the same until the ticket's gone - swapping it while the
-						// page is busy starting the curtains made it flicker to the
-						// browser's own cursor
 						onClick={enter}
 						aria-disabled={ticket !== "waiting"}
 						className={`fixed top-[40svh] left-[20vw] portrait:left-[10vw] z-40 cursor-pointer drop-shadow-lg drop-shadow-black/60 test-shadow-darkest ${ticket === "waiting" ? "ticket-shake" : ""}`}
@@ -1573,11 +1282,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					>
 						<img
 							src={asset("/imgs/stage/ticket2.webp")}
-							// Only the drawn ticket counts, not its picture's
-							// see-through corners (see opaqueAt)
 							data-hit
-							// Shown at 50vw (80vw on portrait screens) - smaller screens get the
-							// 700px version
 							srcSet={srcSet([
 								["/imgs/stage/ticket2-700.webp", 700],
 								["/imgs/stage/ticket2.webp", 1400],
@@ -1590,7 +1295,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 							}}
 							alt="Admit one ticket"
 						/>
-						{/* Ripping frames are drawn here, over the same spot */}
 						<canvas
 							ref={ripCanvasRef}
 							className="absolute inset-0 w-full h-full"
@@ -1598,23 +1302,15 @@ export default function Stage({ children }: { children: ReactNode }) {
 					</button>
 				)}
 
-				{/* Closing / opening animation - always on screen (transparent when
-			    idle) so a click only has to draw, not show/hide anything. On
-			    portrait screens all the curtains are a quarter wider than the
-			    screen, so the side drapes don't cover so much of it */}
 				<canvas
 					ref={canvasRef}
 					className="w-screen h-svh top-0 left-0 portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none fixed z-30 pointer-events-none scene-shadow"
 				/>
 
-				{/* Content - no z-index here, so it doesn't form a stacking context:
-			    curtains (z-10) sit above it, buttons (z-20) sit above curtains,
-			    and the animation (z-30) covers everything */}
 				<main className="bg-white/0 border-[0.3svh] border-black/0 w-[65vw] h-[75svh] mx-auto top-[25svh] portrait:w-full portrait:h-[80svh] portrait:top-[20svh] relative">
 					{children}
 				</main>
 
-				{/* Background */}
 				<div className="-z-10 fixed top-0 left-0 h-svh w-screen">
 					{pageLoaded && (
 						<img

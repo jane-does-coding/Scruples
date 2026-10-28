@@ -1,6 +1,3 @@
-// The story's pages, in order: each one's title (as listed in the menu) and
-// address. The addresses say what's on the page; the old /page1 … /page9
-// ones redirect here (see next.config.ts)
 export const STORY_PAGES = [
 	{ title: "Meet Zhenya", href: "/meet-zhenya" },
 	{ title: "Zhenya likes art", href: "/zhenya-likes-art" },
@@ -16,5 +13,4 @@ export const STORY_PAGES = [
 	{ title: "In the spotlight", href: "/in-the-spotlight" },
 ] as const;
 
-// Page n's address (counting from 1)
 export const storyHref = (n: number) => STORY_PAGES[n - 1].href;

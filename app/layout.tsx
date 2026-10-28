@@ -7,7 +7,6 @@ export const metadata: Metadata = {
 	metadataBase: new URL(SITE_URL),
 	title: {
 		default: SITE_NAME,
-		// Each page's own title becomes e.g. "Souvenir shop · Scruples"
 		template: `%s · ${SITE_NAME}`,
 	},
 	description: SITE_DESCRIPTION,
@@ -41,13 +40,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
 	width: "device-width",
 	initialScale: 1,
-	// Fill the whole screen on phones with rounded corners / notches
 	viewportFit: "cover",
-	// The browser bar's colour on phones - the white of the paper
 	themeColor: "#ffffff",
 };
 
-// Describes the site for search engines
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "WebSite",

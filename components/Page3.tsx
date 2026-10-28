@@ -20,10 +20,8 @@ const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 const BUTTON_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 
-// wow.webp and wow-reverse.webp are both 18 frames × 60ms, the GIFs' speed
 const WOW_MS = 1080;
 const WOW_REVERSE_MS = 1080;
-// The Mona Lisa starts rising this long after it's picked (its transitionDelay)
 const MONA_DELAY_MS = 400;
 
 const drop = (shown: boolean, ms = 800, easing = LABEL_DROP) => ({
@@ -38,19 +36,8 @@ export default function Page3({
 }: PageProps) {
 	const [step, setStep] = useState(0);
 
-	// Clicking the souvenir or "Click to enter" swaps the souvenir for the
-	// button pins: souvenir down, label up, then the pins rise in and the
-	// "Next item" and "Exit" labels drop in
 	const [entered, setEntered] = useState(false);
-	// Stays true after the first click, so leaving (Exit) slides things off
-	// screen instead of hiding them instantly
 	const [opened, setOpened] = useState(false);
-	// Which item is up while in the shop: 0 = button pins, 1 = pens,
-	// 2 = notebook, 3 = Mona Lisa, 4 = mystery box.
-	// "Next item" and "Prev item" cycle through them
-	// Buying from the shop. The "Buy…" labels are buttons: clicking one buys
-	// the item into your inventory (the "?" menu) if you can afford it, or
-	// says "Not enough money!" for a moment if you can't
 	const { buy, owned } = useStage();
 	const [tooPoor, setTooPoor] = useState<ItemId | null>(null);
 	const tooPoorTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -71,7 +58,6 @@ export default function Page3({
 	const [item, setItem] = useState(0);
 	const ITEM_COUNT = 5;
 	const enter = () => {
-		// The shop door's bell
 		sound.shopBell();
 		setEntered(true);
 		setOpened(true);
@@ -82,20 +68,11 @@ export default function Page3({
 	const notebookUp = entered && item === 2;
 	const monaUp = entered && item === 3;
 	const boxUp = entered && item === 4;
-	// Once the box has been opened (and the hats are in the inventory), it's
-	// sold out
 	const soldOut = owned.includes("hats");
-	// The doll's animation. On the Mona Lisa it plays "wow" once as the
-	// painting rises, then holds "wow-idle"; leaving the Mona Lisa (Next, Prev
-	// or Exit) plays "wow-reverse" once, then goes back to blinking.
-	// null = the idle doll, blinking every 1-3s like on Page 1
 	const blinkSrc = useBlinkingDoll();
 	const [dollSrc, setDollSrc] = useState<string | null>(null);
 	const wowPlayed = useRef(false);
 
-	// A browser won't restart an animated image whose URL it has already
-	// shown, so the two one-shot animations are loaded once as blobs and get a
-	// fresh object URL each time they play
 	const wowBlobs = useRef<{ wow?: Blob; reverse?: Blob }>({});
 	const playingUrl = useRef<string | null>(null);
 	const freshUrl = (blob: Blob | undefined, fallback: string) => {
@@ -145,22 +122,16 @@ export default function Page3({
 				setTimeout(() => setDollSrc(null), WOW_REVERSE_MS),
 			);
 		}
-		// Leaving mid-"wow" cancels the switch to "wow-idle", and vice versa
 		return () => timers.forEach(clearTimeout);
 	}, [monaUp]);
 
-	// When leaving, the souvenir and "Click to enter" come back after the pins
-	// and labels have started moving away (the entrance in reverse)
 	const leaving = opened && !entered;
 
-	// Once the curtains have opened: the doll drops in and the souvenir rises
-	// in, then "Click to enter", then the Continue button (same timing as Page 2)
 	useEffect(() => {
 		if (!curtainsOpen) return;
 
 		const timers = [
 			[0, 1],
-			// Doll takes 900ms to drop, so this is 0.3s after it lands
 			[1200, 2],
 			[2000, 3],
 		].map(([ms, n]) => setTimeout(() => setStep((s) => Math.max(s, n)), ms));
@@ -170,8 +141,6 @@ export default function Page3({
 
 	return (
 		<div className="h-full flex flex-col items-center justify-center">
-			{/* The page's title, for screen readers and search engines - the shop
-			    itself shows it visually */}
 			<h1 className="sr-only">Zhenya&apos;s souvenir shop</h1>
 
 			<Zhenya
@@ -184,8 +153,6 @@ export default function Page3({
 				alt="Zhenya, a marionette doll on strings"
 			/>
 
-			{/* Money - rises in from the bottom with the shop items as you enter
-			    (0.4s after the click), and sinks again on Exit */}
 			<div
 				className="absolute left-[35vw] bottom-[5svh] portrait:left-[64vw] portrait:bottom-[31svh] z-11 portrait:z-9 test-shadow-darker"
 				style={{
@@ -197,7 +164,6 @@ export default function Page3({
 				<MoneyStick />
 			</div>
 
-			{/* "Click to enter" - lifts back up once clicked */}
 			<button
 				onClick={enter}
 				disabled={entered}
@@ -214,8 +180,6 @@ export default function Page3({
 				Click to enter
 			</button>
 
-			{/* Souvenir - rises in from the bottom with its sticks, and sinks back
-			    down once clicked */}
 			<button
 				onClick={enter}
 				disabled={entered}
@@ -232,7 +196,6 @@ export default function Page3({
 					src={asset("/imgs/shop/souvenir.webp")}
 					className="h-[70svh] portrait:h-[42svh] max-w-none z-5 relative"
 					alt="Souvenir shop"
-					// Only the drawn shop and sticks count (see opaqueAt)
 					data-hit
 				/>
 				<img
@@ -249,8 +212,6 @@ export default function Page3({
 				/>
 			</button>
 
-			{/* Button pins - rise in where the souvenir was, 0.4s after the click
-			    (or after "Next item"), and sink when another item comes up */}
 			<div
 				className="absolute bottom-[5svh] left-[4vw] portrait:left-[8vw] test-shadow-darker"
 				style={{
@@ -276,8 +237,6 @@ export default function Page3({
 				/>
 			</div>
 
-			{/* Pens - same as the pins: rise in 0.4s after "Next item", and sink
-			    when another item comes up */}
 			<div
 				className="absolute bottom-[5svh] left-[10vw] portrait:left-[14vw] test-shadow-darker"
 				style={{
@@ -298,7 +257,6 @@ export default function Page3({
 				/>
 			</div>
 
-			{/* Mona Lisa - same as the pins and pens */}
 			<div
 				className="absolute bottom-[5svh] left-[5vw] portrait:left-[10vw] test-shadow-darker"
 				style={{
@@ -319,7 +277,6 @@ export default function Page3({
 				/>
 			</div>
 
-			{/* Notebook - same as the pins and pens */}
 			<div
 				className="absolute bottom-[1svh] left-[9vw] portrait:left-[12vw] test-shadow-darker"
 				style={{
@@ -340,7 +297,6 @@ export default function Page3({
 				/>
 			</div>
 
-			{/* Mystery box - same as the others */}
 			<div
 				className="absolute bottom-[9svh] left-[6vw] portrait:left-[8vw] test-shadow-darker"
 				style={{
@@ -361,10 +317,8 @@ export default function Page3({
 				/>
 			</div>
 
-			{/* "Next item" - drops in 0.9s after the click */}
 			<button
 				onClick={() => setItem((i) => (i + 1) % ITEM_COUNT)}
-				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
 				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[59svh] left-[28vw] portrait:bottom-[61svh] portrait:left-[8vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[3vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				style={{
@@ -377,15 +331,12 @@ export default function Page3({
 				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
 				Next item
 			</button>
-			{/* "Buy the buttons" - down while the pins are up, lifts away when
-			    another item comes up - moves in time with the pins */}
 			<button
 				onClick={() => tryBuy("pins")}
 				disabled={!pinsUp}
 				tabIndex={pinsUp ? undefined : -1}
 				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[22vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
-					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: pinsUp ? "400ms" : "0ms",
 					transform: pinsUp ? "translateY(0)" : "translateY(-60svh)",
@@ -396,14 +347,12 @@ export default function Page3({
 				{buyText("pins", "Buy the buttons for $10", "You bought the buttons!")}
 			</button>
 
-			{/* "Buy the pens" - same, for the pens */}
 			<button
 				onClick={() => tryBuy("pens")}
 				disabled={!pensUp}
 				tabIndex={pensUp ? undefined : -1}
 				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[22vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
-					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: pensUp ? "400ms" : "0ms",
 					transform: pensUp ? "translateY(0)" : "translateY(-60svh)",
@@ -414,14 +363,12 @@ export default function Page3({
 				{buyText("pens", "Buy the pens for $16", "You bought the pens!")}
 			</button>
 
-			{/* "Buy the Mona Lisa" - same, for the Mona Lisa */}
 			<button
 				onClick={() => tryBuy("mona-lisa")}
 				disabled={!monaUp}
 				tabIndex={monaUp ? undefined : -1}
 				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
-					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: monaUp ? "400ms" : "0ms",
 					transform: monaUp ? "translateY(0)" : "translateY(-60svh)",
@@ -436,14 +383,12 @@ export default function Page3({
 				)}
 			</button>
 
-			{/* "Buy the notebook" - same, for the notebook */}
 			<button
 				onClick={() => tryBuy("notebook")}
 				disabled={!notebookUp}
 				tabIndex={notebookUp ? undefined : -1}
 				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
-					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: notebookUp ? "400ms" : "0ms",
 					transform: notebookUp ? "translateY(0)" : "translateY(-60svh)",
@@ -458,14 +403,12 @@ export default function Page3({
 				)}
 			</button>
 
-			{/* "Buy a mystery box" - same, for the mystery box */}
 			<button
 				onClick={() => tryBuy("mystery-box")}
 				disabled={!boxUp || soldOut}
 				tabIndex={boxUp ? undefined : -1}
 				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[67svh] left-[17vw] portrait:bottom-[53svh] portrait:left-[8vw] portrait:max-w-[62vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={{
-					// Same timing as the item: 0.4s delay, then the same 900ms drop
 					...drop(opened, 900, DOLL_DROP),
 					transitionDelay: boxUp ? "400ms" : "0ms",
 					transform: boxUp ? "translateY(0)" : "translateY(-60svh)",
@@ -482,11 +425,9 @@ export default function Page3({
 						)}
 			</button>
 
-			{/* "Exit" - drops in on the left, 1.1s after the click */}
 			<button
 				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] cursor-pointer mx-auto text-center scribbler absolute bottom-[59svh] left-[2vw] portrait:bottom-[69svh] portrait:left-[8vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				onClick={() => setEntered(!entered)}
-				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
 				style={{
 					...drop(opened),
@@ -499,11 +440,9 @@ export default function Page3({
 				Exit
 			</button>
 
-			{/* "Prev item" - under "Exit", drops in 1.3s after the click */}
 			<button
 				className="text-[3svh] portrait:text-[2.3svh] portrait:z-6 max-w-[70%] mx-auto text-center scribbler absolute bottom-[51svh] left-[-1vw] portrait:bottom-[69svh] portrait:left-[28vw] portrait:px-[3vw] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer"
 				onClick={() => setItem((i) => (i - 1 + ITEM_COUNT) % ITEM_COUNT)}
-				// Off screen (and out of the Tab order) while the shop is closed
 				tabIndex={entered ? undefined : -1}
 				style={{
 					...drop(opened),
@@ -522,7 +461,6 @@ export default function Page3({
 					href="/art-on-social-media"
 					style={{
 						...drop(step >= 3, 900, BUTTON_DROP),
-						// Inline so it beats the component's right-0
 						right: "-5vw",
 						transform: step >= 3 ? "translateY(0)" : "translateY(100svh)",
 					}}
@@ -530,10 +468,6 @@ export default function Page3({
 					Continue {"->"}
 				</PopsicleButton>
 			</div>
-
-			{/* 	<PopsicleButton onClick={previousPage} side="left">
-				{"<-"} Back
-			</PopsicleButton> */}
 		</div>
 	);
 }

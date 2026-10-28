@@ -4,9 +4,6 @@ import { useEffect, useState } from "react";
 import { useStage } from "@/components/Stage";
 import { useDrawings } from "@/lib/drawings";
 
-// /gallery - every drawing from Page 6 on one wall, newest first, each in
-// its frame with who drew it and when. Opened from the last page
-
 const LABEL =
 	"text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
 
@@ -32,7 +29,6 @@ export default function DrawingGallery() {
 
 	return (
 		<div className="h-full">
-			{/* Title - hangs in at the top */}
 			<h1
 				className={`absolute top-[-2svh] left-[50%] -translate-x-[50%] w-max text-[4svh] portrait:text-[2.8svh] z-[9] ${LABEL}`}
 				style={{
@@ -46,7 +42,6 @@ export default function DrawingGallery() {
 				Everyone&apos;s drawings
 			</h1>
 
-			{/* The wall - scrolls if there are more than fit. Rises in */}
 			<div
 				className="absolute inset-x-0 top-[8svh] bottom-0 overflow-y-auto overscroll-contain px-[1vw] pb-[6svh]"
 				style={{
@@ -73,7 +68,6 @@ export default function DrawingGallery() {
 					))}
 				</ul>
 
-				{/* Nothing drawn here yet - just Daphne's */}
 				{onlySamples && (
 					<p className="mt-[4svh] text-center text-[3svh] portrait:text-[2.3svh]">
 						<a

@@ -1,8 +1,5 @@
 import { asset } from "@/lib/asset";
 
-// Everything that can be bought, and what it costs. Bought items show up in
-// the inventory (the "?" menu). `art` = a picture, which can be viewed big
-// from the inventory
 export const ITEMS = {
 	pins: {
 		name: "Art Gallery button pins",
@@ -41,17 +38,12 @@ export const ITEMS = {
 		description:
 			"A smiley face on an easel that Daphne drew for Zhenya, one stroke at a time.",
 	},
-	// Opened from the inventory, it turns into the four hats (one "hats"
-	// slot). After that it's sold out
 	"mystery-box": {
 		name: "Mystery box",
 		price: 10,
 		image: asset("/imgs/shop/mystery-box2.webp"),
 		description: "A cardboard box with four hats inside. Open it to see them!",
 	},
-	// The four hats from the mystery box, kept together in one inventory
-	// slot. Clicking it opens the wardrobe (see HATS). Price 0 - they can't
-	// be sold
 	hats: {
 		name: "Hats",
 		price: 0,
@@ -59,8 +51,6 @@ export const ITEMS = {
 		description:
 			"The Spongebob Hat, the Star vs the Forces of Evil Horns, the Adventure time crown and the Gravity Falls hat, from the mystery box.",
 	},
-	// Not for sale - it's what the magic button makes on Page 5. Price 0 means
-	// it can't be sold
 	"magic-drawing": {
 		name: "The magic button's drawing",
 		art: true,
@@ -73,10 +63,6 @@ export const ITEMS = {
 
 export type ItemId = keyof typeof ITEMS;
 
-// The hats in the mystery box, for Zhenya to try on in the wardrobe.
-// `image` is its preview drawing, cropped close (in the wardrobe's boxes);
-// `wear` is the hat drawn the same size as the doll's images, so it can be
-// laid right over her
 export const HATS = {
 	sailor: {
 		name: "Spongebob Hat",
@@ -101,17 +87,13 @@ export const HATS = {
 };
 export type HatId = keyof typeof HATS;
 
-// You start with three $5 bills
 export const STARTING_MONEY = 15;
 
-// The bills to show for an amount: as many $5s as fit, the rest in $1s
-// (e.g. $7 → one $5 and two $1s)
 export const billsFor = (money: number) => ({
 	fives: Math.floor(money / 5),
 	ones: money % 5,
 });
 
-// Bill images. There's no $1 drawing yet, so $1s use the $5 image for now
 export const BILL_IMAGES = {
 	five: asset("/imgs/shop/money.webp"),
 	one: asset("/imgs/shop/money.webp"),

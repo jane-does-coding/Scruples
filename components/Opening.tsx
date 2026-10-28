@@ -1,11 +1,5 @@
-// The card that hangs in front of the closed curtains as the house lights
-// go down: "please silence your phones", with a picture of a phone -
-// and sound on or off for the show itself. Choosing lifts it away and the
-// curtains open. The order of it all is in Stage.tsx
-
 import { useEffect, useRef } from "react";
 
-// Drops in with a little bounce, and lifts away smoothly
 const BOUNCE = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const LIFT = "cubic-bezier(0.5, 0, 0.75, 0)";
 const BUTTON =
@@ -18,7 +12,6 @@ export function PhoneCard({
 	shown: boolean;
 	onChoose: (on: boolean) => void;
 }) {
-	// Keyboard focus goes to "Sound on" once it's down
 	const soundOn = useRef<HTMLButtonElement>(null);
 	useEffect(() => {
 		if (!shown) return;
@@ -41,10 +34,8 @@ export function PhoneCard({
 					: `transform 600ms ${LIFT}, visibility 0s 600ms`,
 			}}
 		>
-			{/* Its strings, from its two sides */}
 			<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
 			<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-			{/* Placeholder for the phone drawing (to come) */}
 			<div aria-hidden className="w-[9svh] h-[9svh] bg-black/20" />
 			<h2
 				id="phones-card"

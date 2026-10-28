@@ -8,7 +8,6 @@ export const metadata: Metadata = {
 		"Try the hats from the mystery box on Zhenya, a marionette doll.",
 		"/wardrobe",
 	),
-	// Only useful with hats in the inventory, so it's left out of search
 	robots: { index: false },
 };
 

@@ -1,12 +1,6 @@
-// For skipping the drawing on Page 6 (if drawing isn't easy for you): a
-// simple doodle, picked at random, drawn into the frame as if by hand -
-// wobbly lines in the palette's colours. Coordinates are 0-1 across and
-// down the canvas
-
 type Ctx = CanvasRenderingContext2D;
 type Point = [number, number];
 
-// Each line wobbles a little, like it was drawn by hand
 const wobble = () => (Math.random() - 0.5) * 0.012;
 
 const line = (ctx: Ctx, points: Point[], color: string, close = false) => {
@@ -23,14 +17,12 @@ const line = (ctx: Ctx, points: Point[], color: string, close = false) => {
 	ctx.stroke();
 };
 
-// A circle as a ring of wobbly points
 const ring = (r: number, cx: number, cy: number, steps = 24): Point[] =>
 	Array.from({ length: steps + 1 }, (_, i) => {
 		const a = (i / steps) * Math.PI * 2;
 		return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
 	});
 
-// Part of a circle, from angle a to b (radians)
 const arc = (r: number, cx: number, cy: number, a: number, b: number) =>
 	Array.from({ length: 13 }, (_, i): Point => {
 		const t = a + ((b - a) * i) / 12;
@@ -38,7 +30,6 @@ const arc = (r: number, cx: number, cy: number, a: number, b: number) =>
 	});
 
 const DOODLES: ((ctx: Ctx, c: Record<string, string>) => void)[] = [
-	// A sun
 	(ctx, c) => {
 		line(ctx, ring(0.18, 0.5, 0.5), c.yellow);
 		for (let i = 0; i < 10; i++) {
@@ -53,7 +44,6 @@ const DOODLES: ((ctx: Ctx, c: Record<string, string>) => void)[] = [
 			);
 		}
 	},
-	// A flower
 	(ctx, c) => {
 		line(
 			ctx,
@@ -74,7 +64,6 @@ const DOODLES: ((ctx: Ctx, c: Record<string, string>) => void)[] = [
 		}
 		line(ctx, ring(0.06, 0.5, 0.32, 14), c.yellow);
 	},
-	// A house
 	(ctx, c) => {
 		line(
 			ctx,
@@ -118,14 +107,12 @@ const DOODLES: ((ctx: Ctx, c: Record<string, string>) => void)[] = [
 			true,
 		);
 	},
-	// A smiley face
 	(ctx, c) => {
 		line(ctx, ring(0.3, 0.5, 0.5, 28), c.yellow);
 		line(ctx, ring(0.025, 0.4, 0.42, 8), c.brown);
 		line(ctx, ring(0.025, 0.6, 0.42, 8), c.brown);
 		line(ctx, arc(0.17, 0.5, 0.5, 0.2 * Math.PI, 0.8 * Math.PI), c.brown);
 	},
-	// A boat on the sea
 	(ctx, c) => {
 		line(
 			ctx,
@@ -166,7 +153,6 @@ const DOODLES: ((ctx: Ctx, c: Record<string, string>) => void)[] = [
 				c.blue,
 			);
 	},
-	// An autumn tree
 	(ctx, c) => {
 		line(
 			ctx,
@@ -184,7 +170,6 @@ const DOODLES: ((ctx: Ctx, c: Record<string, string>) => void)[] = [
 	},
 ];
 
-// Clears the canvas and draws one of the doodles on it
 export const drawRandomDoodle = (
 	canvas: HTMLCanvasElement,
 	colors: { blue: string; yellow: string; orange: string; brown: string },

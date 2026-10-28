@@ -6,12 +6,6 @@ import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import { HATS, type HatId } from "@/lib/shop";
 
-// /wardrobe - trying on the hats from the mystery box. Zhenya drops in on
-// the left; the hats hang in on the right. Clicking a hat puts it on her
-// (clicking it again, or "No hat", takes it off); "Save" keeps it and goes
-// back to the page you came from, "Cancel" (or Back) goes back without
-// changing it
-
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 
@@ -19,11 +13,9 @@ const LABEL =
 	"relative text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
 const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer`;
 
-// Zhenya - like on Page 1, a little bigger and further right
 const DOLL =
 	"h-[103svh] absolute top-[-32svh] left-[calc(2svh+2vw)] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none";
 
-// A label's two hanging strings
 const Strings = () => (
 	<>
 		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
@@ -31,7 +23,6 @@ const Strings = () => (
 	</>
 );
 
-// Hangs something in from the top once shown
 const hang = (
 	shown: boolean,
 	{ ms = 800, easing = LABEL_DROP, delay = 0 } = {},
@@ -51,7 +42,6 @@ export default function WardrobePage() {
 		return () => clearTimeout(timer);
 	}, [curtainsOpen]);
 
-	// The hat being tried on - starts as the one she has on
 	const [trying, setTrying] = useState(wearing);
 	const hasHats = owned.includes("hats");
 
@@ -59,7 +49,6 @@ export default function WardrobePage() {
 		<div className="h-full">
 			<h1 className="sr-only">Zhenya&apos;s hats</h1>
 
-			{/* Zhenya, and the hat she's trying on (no shadow of its own) */}
 			{/* eslint-disable-next-line @next/next/no-img-element */}
 			<img
 				src={dollSrc}
@@ -83,10 +72,6 @@ export default function WardrobePage() {
 				/>
 			)}
 
-			{/* On the right: the title, the hats two by two, "No hat", then Save and
-			    Cancel - each hanging on its own strings, dropping in one after
-			    another. Higher things sit in front, so the strings of the ones
-			    below run behind them */}
 			<div className="absolute z-6 top-[1svh] right-[5vw] portrait:top-[37svh] portrait:right-auto portrait:left-[50%] portrait:translate-x-[-50%] flex flex-col items-center gap-[2.2svh] portrait:gap-[1.5svh]">
 				<h2
 					className={`${LABEL} text-[4svh] portrait:text-[2.8svh]`}
@@ -125,7 +110,6 @@ export default function WardrobePage() {
 								</li>
 							))}
 						</ul>
-						{/* No hat at all - picked like a hat (solid border when it is) */}
 						<button
 							onClick={() => setTrying(null)}
 							aria-pressed={!trying}
@@ -159,7 +143,6 @@ export default function WardrobePage() {
 						</div>
 					</>
 				) : (
-					// Came here without them (e.g. straight from a link)
 					<a
 						href="/souvenir-shop"
 						onClick={(e) => {
@@ -177,9 +160,6 @@ export default function WardrobePage() {
 				)}
 			</div>
 
-			{/* Back - on a popsicle stick in the bottom-left corner, like on the
-			    painting pages, but a little lower and further left, out of
-			    Zhenya's way. Rises in from the bottom */}
 			<PopsicleButton
 				onClick={goBack}
 				side="left"
