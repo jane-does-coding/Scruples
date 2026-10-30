@@ -11,7 +11,6 @@ import { HATS, ITEMS } from "@/lib/shop";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import Zhenya from "@/components/Zhenya";
 
-
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 
@@ -86,14 +85,11 @@ export default function LastPage() {
 			title: "Your stats",
 			lines: [
 				[`${met}/${CHARACTERS}`, "characters met"],
-				[
-					`${Math.min(reached, PAGE_COUNT)}/${PAGE_COUNT}`,
-					"pages visited",
-				],
+				[`${Math.min(reached, PAGE_COUNT)}/${PAGE_COUNT}`, "pages visited"],
 				entry === "magic"
 					? ["1st", "in the competition"]
 					: entry === "yours"
-						? ["0", "competition wins"]
+						? ["1", "honorable mention"]
 						: ["0", "paintings entered"],
 				[formatPlaytime(seconds), "spent at the theatre"],
 			],
@@ -180,6 +176,29 @@ export default function LastPage() {
 					</button>
 				</section>
 			))}
+
+			<div
+				className="absolute bottom-[3svh] portrait:bottom-[8svh] left-[47%] portrait:left-[38%] translate-x-[-50%] z-9 test-shadow-darker"
+				style={hang(shown, "bottom", { ms: 900, easing: DROP, delay: 1200 })}
+			>
+				<img
+					src={asset("/imgs/stage/popsicle-stick.webp")}
+					className="absolute w-[2vw] portrait:w-[2.5svh] h-[30svh] max-w-none left-[50%] translate-x-[-50%] top-[60%] z-0"
+					alt=""
+					aria-hidden
+				/>
+				<a
+					href="/about"
+					onClick={(e) => {
+						if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+						e.preventDefault();
+						goTo("/about");
+					}}
+					className={`relative block w-max text-[3svh] portrait:text-[2.3svh] z-1 ${BUTTON}`}
+				>
+					Who made this? {"->"}
+				</a>
+			</div>
 
 			<div
 				className="absolute top-[-25svh] right-[calc(3%)] portrait:top-[-20svh] portrait:right-[1vw] w-[26svh] portrait:w-[33vw] h-svh test-shadow-darker"

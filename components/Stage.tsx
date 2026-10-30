@@ -7,6 +7,7 @@ import {
 	useLayoutEffect,
 	useRef,
 	useState,
+	type CSSProperties,
 	type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -18,6 +19,7 @@ import { asset, srcSet } from "@/lib/asset";
 import { opaqueAt } from "@/lib/opaque";
 import { STORY_PAGES, storyHref } from "@/lib/pages";
 import { usePlaytimeCounter } from "@/lib/playtime";
+import { setReadable, useReadableFont } from "@/lib/font";
 import { ALWAYS_PLAY_OPENING } from "@/lib/site";
 import * as sound from "@/lib/sound";
 import {
@@ -58,8 +60,9 @@ const backHref = (pathname: string) => {
 	const n = STORY_PAGES.findIndex((p) => p.href === pathname) + 1;
 	if (n) return n > 1 ? storyHref(n - 1) : null;
 	if (pathname.startsWith("/art-piece/")) return "/zhenya-likes-art";
-	if (pathname === "/lastpage") return "/in-the-spotlight";
+	if (pathname === "/lastpage") return "/the-wheel";
 	if (pathname === "/gallery") return "/lastpage";
+	if (pathname === "/about") return "/lastpage";
 	return null;
 };
 
@@ -78,6 +81,7 @@ type StageContextValue = {
 	hat: string | null;
 	wearing: HatId | null;
 	equip: (hat: HatId | null) => void;
+	pins: string | null;
 	goBack: () => void;
 	reached: number;
 };
@@ -101,7 +105,20 @@ const scatter = (n: number, j: number, which: number) => {
 	return (x - Math.floor(x)) * 2 - 1;
 };
 
-const PAGES = [...STORY_PAGES, { title: "Curtain call", href: "/lastpage" }];
+const MAIN_PAGES = STORY_PAGES.slice(0, -2);
+const EXTRA_PAGES = STORY_PAGES.slice(-2);
+
+const PAGES = [
+	...MAIN_PAGES,
+	{ title: "Curtain call", href: "/lastpage" },
+	...EXTRA_PAGES,
+];
+
+const PAGE_WINDOW = 8;
+const WINDOW_LENGTH = Math.min(PAGES.length, PAGE_WINDOW);
+const PAGE_ROWS = Math.ceil(WINDOW_LENGTH / 2);
+const TALL_PAGES = PAGE_ROWS > 5;
+const COMPACT_UNTIL = 3;
 
 const NOTE =
 	"note-pop fixed top-[0.5svh] right-[calc(1.3vw+max(6.5vw,72px))] portrait:top-[1.5vw] portrait:right-[22vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
@@ -205,6 +222,17 @@ export default function Stage({ children }: { children: ReactNode }) {
 			false,
 		);
 	};
+	const [pinsOn, setPinsOn] = useState(false);
+	const wearPins = (on: boolean) => {
+		setPinsOn(on);
+		notify(
+			on
+				? "Zhenya is wearing the button pins"
+				: "Zhenya took off the button pins",
+			false,
+		);
+		closeItem();
+	};
 	const sell = (item: ItemId) => {
 		setOwned(owned.filter((i) => i !== item));
 		setMoney(money + ITEMS[item].price);
@@ -241,11 +269,27 @@ export default function Stage({ children }: { children: ReactNode }) {
 		glideTimer.current = setTimeout(() => setNavGliding(false), NAV_GLIDE_MS);
 	};
 	const wide = entries.length > WIDE_AFTER;
-	const columns = wide ? 5 : 4;
+	const compact = TALL_PAGES && entries.length < COMPACT_UNTIL;
+	const columns = wide ? 5 : compact ? 3 : 4;
 	const rowSlots = columns - 1;
 	const allSlots = columns * 2 - 1;
 	const canViewAll = entries.length > rowSlots;
-	const allItems = (allItemsOn || wide) && canViewAll;
+	const tallPages = TALL_PAGES && !compact;
+	const allItems = ((allItemsOn || wide) && canViewAll) || tallPages;
+	const twoRows = wide || tallPages;
+	const pageAt = PAGES.findIndex((p) => p.href === pathname);
+	const parentAt = PAGES.findIndex((p) => p.href === backHref(pathname));
+	const windowStart = Math.min(
+		Math.max(
+			(pageAt >= 0 ? pageAt : Math.max(parentAt, 0)) - (PAGE_WINDOW / 2 - 1),
+			0,
+		),
+		PAGES.length - WINDOW_LENGTH,
+	);
+	const windowPages = PAGES.map((p, i) => ({ ...p, i })).slice(
+		windowStart,
+		windowStart + WINDOW_LENGTH,
+	);
 	const setAllItems = (on: boolean) => {
 		setAllItemsState(on);
 		try {
@@ -350,6 +394,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 		sound.menu(navOpen);
 	}, [navOpen]);
 
+	const readableFont = useReadableFont();
 	const [muted, setMutedState] = useState(false);
 	useEffect(() => {
 		const timer = setTimeout(() => setMutedState(sound.isMuted()), 0);
@@ -730,6 +775,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [pathname]);
 
+	const menuOnly: CSSProperties = {
+		opacity: navOpen ? 1 : 0,
+		visibility: navOpen ? "visible" : "hidden",
+		transition: `opacity 300ms ease, visibility 0ms linear ${navOpen ? 0 : 300}ms, filter 900ms ease`,
+	};
+
 	return (
 		<StageContext.Provider
 			value={{
@@ -745,6 +796,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 				hat: wearing && owned.includes("hats") ? HATS[wearing].wear : null,
 				wearing,
 				equip,
+				pins:
+					pinsOn && owned.includes("pins")
+						? asset("/imgs/zhenya/badges-wear.webp")
+						: null,
 				goBack,
 				reached,
 			}}
@@ -755,7 +810,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					aria-expanded={navOpen}
 					aria-controls="nav"
 					aria-label={navOpen ? "Close menu" : "Open menu"}
-					className="fixed top-[0.5svh] font-semibold right-[0.5vw] scribbler text-[2.5svh] cursor-pointer z-23 w-[6.5vw] h-[3vw] min-w-18 min-h-11 portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:w-[18vw] portrait:text-[1.8svh] bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					className="stage-control fixed top-[0.5svh] font-semibold right-[0.5vw] scribbler text-[2.5svh] cursor-pointer z-23 w-[6.5vw] h-[3vw] min-w-18 min-h-11 portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:w-[18vw] portrait:text-[1.8svh] bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
 					menu
 				</button>
@@ -764,7 +819,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 					<button
 						onClick={() => setNavOpen(true)}
 						aria-label={`Page ${pageNumber} of ${PAGES.length} - open the page list`}
-						className="fixed font-semibold bottom-[0.5svh] left-[0.5vw] portrait:bottom-[1.5vw] portrait:left-[1.5vw] z-23 h-[3.5vw] min-h-11 px-[1vw] portrait:px-[3vw] text-[2.5svh] portrait:text-[1.8svh] scribbler cursor-pointer bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+						className="stage-control fixed font-semibold bottom-[0.5svh] left-[0.5vw] portrait:bottom-[1.5vw] portrait:left-[1.5vw] z-23 h-[3.5vw] min-h-11 px-[1vw] portrait:px-[3vw] text-[2.5svh] portrait:text-[1.8svh] scribbler cursor-pointer bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 					>
 						page {pageNumber} of {PAGES.length}
 					</button>
@@ -778,7 +833,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 					aria-pressed={!muted}
 					aria-label={muted ? "Turn sound on" : "Turn sound off"}
 					title={muted ? "Sound off" : "Sound on"}
-					className="fixed top-[calc(1.5svh+max(3vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					style={menuOnly}
+					className="stage-control fixed top-[calc(1.5svh+max(3vw,44px))] right-[0.5vw] portrait:top-[calc(3vw+max(3vw,44px))] portrait:right-[1.5vw] text-[3svh] portrait:text-[2.4svh] cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
 					<svg
 						aria-hidden
@@ -794,6 +850,27 @@ export default function Stage({ children }: { children: ReactNode }) {
 						<path d="M11.4 17.5 V4 c2.5 1.5 5.5 2.2 6.5 5.5" />
 						{muted && <path d="M3 3 L21 21" />}
 					</svg>
+				</button>
+
+				<button
+					onClick={() => setReadable(!readableFont)}
+					aria-pressed={readableFont}
+					aria-label={
+						readableFont
+							? "Use the handwritten font"
+							: "Use an easy-to-read font"
+					}
+					title={readableFont ? "Easy-to-read font" : "Handwritten font"}
+					style={menuOnly}
+					className="stage-control fixed top-[calc(2.5svh+max(3vw,44px)+max(3.5vw,44px))] right-[0.5vw] portrait:top-[calc(4.5vw+max(3vw,44px)+max(3.5vw,44px))] portrait:right-[1.5vw] text-[2.6svh] portrait:text-[2svh] cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+				>
+					<span
+						className={
+							readableFont ? "font-sample-hand" : "font-sample-readable"
+						}
+					>
+						Aa
+					</span>
 				</button>
 
 				<p role="status" aria-live="polite" className="sr-only">
@@ -828,7 +905,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 							goBack();
 						}}
 						aria-label="Back"
-						className="fixed top-[0.5svh] left-[0.5vw] text-[3.75svh] font-extrabold cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 portrait:top-[1.5vw] portrait:left-[1.5vw] portrait:text-[2.4svh] bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+						className="stage-control fixed top-[0.5svh] left-[0.5vw] text-[3.75svh] font-extrabold cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 portrait:top-[1.5vw] portrait:left-[1.5vw] portrait:text-[2.4svh] bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 					>
 						{"<-"}
 					</a>
@@ -891,7 +968,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 						className={`${navGliding ? "nav-smooth" : "nav-bounce"} absolute inset-x-0 bottom-[45%] flex flex-col items-center gap-[2svh] text-[3svh] pt-[3svh]`}
 						style={{
 							transform:
-								allItems && !wide ? `translateY(calc(-1 * ${ROW}))` : "none",
+								allItems && !twoRows ? `translateY(calc(-1 * ${ROW}))` : "none",
 						}}
 					>
 						<div
@@ -900,14 +977,40 @@ export default function Stage({ children }: { children: ReactNode }) {
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
 								<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
 								<ol
-									className={`locked-pages min-h-(--slot) ${wide ? "w-[min(36svh,calc(96vw-5*var(--slot)-4*var(--slot-gap)-3vw))] grid-cols-1 grid-rows-[repeat(10,auto)] portrait:grid-cols-2 portrait:grid-rows-[repeat(5,auto)]" : "w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] grid-cols-2 grid-rows-[repeat(5,auto)]"} portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.4svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.2svh] portrait:text-[1.9svh] leading-[1.15]`}
+									style={
+										{
+											"--half": PAGE_ROWS,
+											"--third": Math.ceil(WINDOW_LENGTH / 3),
+											"--all": WINDOW_LENGTH,
+										} as React.CSSProperties
+									}
+									className={`locked-pages ${tallPages ? "min-h-[calc(2*var(--slot)+var(--slot-gap))]" : "min-h-(--slot)"} ${compact ? "w-[min(84svh,calc(96vw-3*var(--slot)-2*var(--slot-gap)-3vw))] grid-cols-3 grid-rows-[repeat(var(--third),auto)] portrait:grid-cols-2 portrait:grid-rows-[repeat(var(--half),auto)]" : wide ? "w-[min(36svh,calc(96vw-5*var(--slot)-4*var(--slot-gap)-3vw))] grid-cols-1 grid-rows-[repeat(var(--all),auto)] portrait:grid-cols-2 portrait:grid-rows-[repeat(var(--half),auto)]" : "w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] grid-cols-2 grid-rows-[repeat(var(--half),auto)]"} portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.4svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.2svh] portrait:text-[1.9svh] leading-[1.15]`}
 								>
-									{PAGES.map(({ title, href }, i) => {
+									{windowPages.map(({ title, href, i }, k) => {
 										const n = i + 1;
-										const here = pathname === href;
-										if (n > reached && !here)
+										if (
+											(k === 0 && windowStart > 0) ||
+											(k === WINDOW_LENGTH - 1 &&
+												windowStart + WINDOW_LENGTH < PAGES.length)
+										)
 											return (
-												<li key={href}>
+												<li
+													key={href}
+													aria-hidden
+													className="py-[0.15svh] tracking-[0.2em]"
+												>
+													...
+												</li>
+											);
+										const here = pathname === href;
+										const isExtras = i === MAIN_PAGES.length + 1;
+										const isExtraPage = i > MAIN_PAGES.length;
+
+										return (
+											<li key={href}>
+												{isExtras && <div className="font-bold">Extras</div>}
+
+												{n > reached && !here && !isExtraPage ? (
 													<span
 														aria-disabled
 														title="Not yet - keep going through the story"
@@ -935,26 +1038,24 @@ export default function Stage({ children }: { children: ReactNode }) {
 															{`${n}. ${title}`} (locked)
 														</span>
 													</span>
-												</li>
-											);
-										return (
-											<li key={href}>
-												<a
-													href={href}
-													onClick={(e) => {
-														if (here) {
-															e.preventDefault();
-															setNavOpen(false);
-															return;
-														}
-														linkClick(href, () => setNavOpen(false))(e);
-													}}
-													aria-current={here ? "page" : undefined}
-													className={`block py-[0.15svh] cursor-pointer hover:underline decoration-dashed underline-offset-4 ${here ? "underline" : ""}`}
-												>
-													{here ? "-> " : `${n}. `}
-													{title}
-												</a>
+												) : (
+													<a
+														href={href}
+														onClick={(e) => {
+															if (here) {
+																e.preventDefault();
+																setNavOpen(false);
+																return;
+															}
+															linkClick(href, () => setNavOpen(false))(e);
+														}}
+														aria-current={here ? "page" : undefined}
+														className={`block py-[0.15svh] cursor-pointer hover:underline decoration-dashed underline-offset-4 ${here ? "underline" : ""}`}
+													>
+														{here ? "-> " : `${n}. `}
+														{title}
+													</a>
+												)}
 											</li>
 										);
 									})}
@@ -966,7 +1067,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 									<h2 className="text-[4svh] portrait:text-[3svh]">
 										Inventory
 									</h2>
-									{canViewAll && !wide && (
+									{canViewAll && !wide && !tallPages && (
 										<button
 											onClick={() => {
 												glideNav();
@@ -981,7 +1082,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 									)}
 								</div>
 								<ul
-									className={`relative grid ${wide ? "grid-cols-5 h-[calc(2*var(--slot)+var(--slot-gap))]" : "grid-cols-4 h-(--slot)"} auto-rows-(--slot) gap-(--slot-gap)`}
+									className={`relative grid ${wide ? "grid-cols-5" : compact ? "grid-cols-3" : "grid-cols-4"} ${twoRows ? "h-[calc(2*var(--slot)+var(--slot-gap))]" : "h-(--slot)"} auto-rows-(--slot) gap-(--slot-gap)`}
 								>
 									<li
 										className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed cursor-pointer"
@@ -1175,6 +1276,14 @@ export default function Stage({ children }: { children: ReactNode }) {
 															className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
 														>
 															Use
+														</button>
+													)}
+													{opened.item === "pins" && (
+														<button
+															onClick={() => wearPins(!pinsOn)}
+															className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
+														>
+															{pinsOn ? "Take off" : "Wear"}
 														</button>
 													)}
 													{opened.item === "mystery-box" && (

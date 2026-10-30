@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
-import useFrownDoll, { FROWN_MS } from "@/components/useFrownDoll";
+import useFrownDoll, {
+	FROWN_MS,
+	ZHENYA_FROWN,
+} from "@/components/useFrownDoll";
 import useHeheDoll, { HEHE_MS } from "@/components/useHeheDoll";
 import useWowDoll from "@/components/useWowDoll";
 import { asset } from "@/lib/asset";
@@ -61,11 +64,45 @@ const ANSWER_START_MS = (CHAT_ROWS - 1) * CHAT_EXIT_STAGGER_MS + 800;
 
 const DAPHNE_ANSWER = [
 	"Well, art is not just a representation of the world,",
-	"but also how I see it,",
-	"and I'm able to use art to share it with others.",
-	"I truly feel a connection with the world and the people who I share my art with,",
-	"since I'm letting them take a peek into my mind and soul,",
-	"and share a part of myself with them.",
+	"but also of how I see it - and art lets me share that with others.",
+	"I truly feel a connection with the world and the people I share my art with,",
+	"since I'm letting them peek into my mind and soul, and sharing a part of myself with them.",
+];
+const LAST_ANSWER = DAPHNE_ANSWER[DAPHNE_ANSWER.length - 1];
+
+const PROPS = [
+	{
+		line: 0,
+		src: asset("/imgs/daphne/earth.webp"),
+		alt: "The Earth, held up on a popsicle stick",
+		size: "h-[24svh] portrait:h-[13svh] bottom-[4svh] portrait:bottom-[3svh]",
+		stick: "top-[75%] h-[40svh]",
+		tilt: "-4deg",
+	},
+	{
+		line: 1,
+		src: asset("/imgs/daphne/glasses.webp"),
+		alt: "A pair of glasses, held up on a popsicle stick",
+		size: "h-[15svh] portrait:h-[8svh] bottom-[7svh] portrait:bottom-[5svh] ml-[-2.5vw] portrait:ml-0",
+		stick: "top-[1svh] h-[44svh]",
+		tilt: "3deg",
+	},
+	{
+		line: 2,
+		src: asset("/imgs/daphne/palette.webp"),
+		alt: "A paint palette, held up on a popsicle stick",
+		size: "h-[24svh] portrait:h-[13svh] bottom-[4svh] portrait:bottom-[3svh]",
+		stick: "top-[75%] h-[40svh]",
+		tilt: "-3deg",
+	},
+	{
+		line: 3,
+		src: asset("/imgs/daphne/heart.webp"),
+		alt: "A heart, held up on a popsicle stick",
+		size: "h-[26svh] portrait:h-[14svh] bottom-[4svh] portrait:bottom-[3svh]",
+		stick: "top-[75%] h-[40svh]",
+		tilt: "5deg",
+	},
 ];
 
 const hang = (
@@ -128,6 +165,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	const daphneSaid = useLeaving(daphneSays);
 	const nextUp = answerLine !== null && answerLine < DAPHNE_ANSWER.length - 1;
 	const answerDone = answerLine === DAPHNE_ANSWER.length - 1;
+	const backUp = answerLine !== null && answerLine > 0;
 
 	const blinkSrc = useBlinkingDoll();
 	const daphneBlinkSrc = useBlinkingDoll(DAPHNE);
@@ -153,7 +191,8 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 		face === "frown" ? (frown.src ?? hehe.src) : (hehe.src ?? frown.src);
 	const daphneSrc = daphnePaint ?? faceSrc ?? daphneBlinkSrc;
 	const wow = useWowDoll();
-	const dollSrc = wow.src ?? blinkSrc;
+	const zhenyaFrown = useFrownDoll(ZHENYA_FROWN);
+	const dollSrc = wow.src ?? zhenyaFrown.src ?? blinkSrc;
 
 	useEffect(() => {
 		if (!curtainsOpen) return;
@@ -215,7 +254,11 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 		const result = buyItem("daphne-drawing");
 		if (result === "not-enough-money") {
 			setPlea("poor");
-			later(3000, () => draw(true, true));
+			later(600, zhenyaFrown.playFrown);
+			later(3000, () => {
+				zhenyaFrown.playFrownReverse();
+				draw(true, true);
+			});
 			return;
 		}
 		draw(false);
@@ -753,6 +796,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					<p
 						key={`was-${daphneSaid}`}
 						aria-hidden
+						style={{ top: daphneSaid === LAST_ANSWER ? "-1svh" : 0 }}
 						className="hang-out absolute top-0 left-[50%] translate-x-[-50%] w-max max-w-[24vw] portrait:max-w-[84vw] z-2 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 					>
 						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
@@ -763,6 +807,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				{daphneSays && (
 					<p
 						key={daphneSays}
+						style={{ top: daphneSays === LAST_ANSWER ? "-1svh" : 0 }}
 						className="hang-in absolute top-0 left-[50%] translate-x-[-50%] w-max max-w-[24vw] portrait:max-w-[84vw] z-1 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 					>
 						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
@@ -774,14 +819,58 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					onClick={() => setAnswerLine((line) => (line ?? 0) + 1)}
 					disabled={!nextUp}
 					tabIndex={nextUp ? undefined : -1}
-					className="absolute top-[18svh] left-[80%] portrait:top-[16svh] portrait:left-[75%] translate-x-[-50%] w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+					className="absolute top-[21svh] left-[80%] portrait:top-[16svh] portrait:left-[75%] translate-x-[-50%] w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 					style={hang(answerLine !== null, nextUp, "top", { delay: 400 })}
 				>
 					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
 					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
 					next {"->"}
 				</button>
+				<button
+					onClick={() => setAnswerLine((line) => Math.max(0, (line ?? 0) - 1))}
+					disabled={!backUp}
+					tabIndex={backUp ? undefined : -1}
+					className="absolute top-[21svh] left-[20%] portrait:top-[16svh] portrait:left-[25%] translate-x-[-50%] w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
+					style={hang(answerLine !== null && answerLine > 0, backUp, "top", {
+						delay: 400,
+					})}
+				>
+					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
+					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+					{"<-"} back
+				</button>
 			</div>
+
+			{PROPS.map(({ line, src, alt, size, stick, tilt }, i) => {
+				const shown = answerLine !== null && answerLine >= line;
+				const up =
+					shown && (i === PROPS.length - 1 || answerLine < PROPS[i + 1].line);
+				return (
+					<div
+						key={src}
+						className={`absolute left-[60%] portrait:left-[66%] translate-x-[-50%] ${size} z-5 test-shadow-darker`}
+						style={{
+							...hang(shown, up, "bottom", {
+								ms: 900,
+								easing: DOLL_DROP,
+							}),
+							rotate: tilt,
+						}}
+					>
+						<img
+							src={asset("/imgs/stage/popsicle-stick.webp")}
+							className={`absolute w-[2vw] portrait:w-[2.5svh] max-w-none left-[50%] translate-x-[-50%] ${stick} z-0`}
+							alt=""
+							aria-hidden
+						/>
+						<img
+							src={src}
+							className="relative z-1 h-full w-auto max-w-none"
+							alt={alt}
+						/>
+					</div>
+				);
+			})}
 
 			<PopsicleButton
 				onClick={nextPage}

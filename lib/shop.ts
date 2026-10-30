@@ -59,6 +59,20 @@ export const ITEMS = {
 		description:
 			"A drawing of lilies in a frame. The magic button made it in a second - nobody drew it.",
 	},
+	prize: {
+		name: "1st place trophy",
+		price: 0,
+		image: asset("/imgs/awards/prize.webp"),
+		description:
+			"The first place ribbon from the Annual Art Competition, won with the magic button's drawing.",
+	},
+	"honorable-mention": {
+		name: "Honorable mention ribbon",
+		price: 0,
+		image: asset("/imgs/awards/honorable-mention.webp"),
+		description:
+			"An honorable mention from the Annual Art Competition, for a drawing Zhenya made herself.",
+	},
 } as const;
 
 export type ItemId = keyof typeof ITEMS;

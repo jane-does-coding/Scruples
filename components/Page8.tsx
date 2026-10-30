@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import useFrownDoll, { ZHENYA_FROWN } from "@/components/useFrownDoll";
 import usePortrait from "@/components/usePortrait";
 import useWowDoll from "@/components/useWowDoll";
 import Zhenya from "@/components/Zhenya";
@@ -25,6 +26,7 @@ const TITLE_MS = 400;
 const REVEAL_MS = 1800;
 const REACTION_DELAY_MS = 1300;
 const COMPLAINT_GAP_MS = 200;
+const AWARD_DELAY_MS = 1100;
 
 const hang = (
 	shown: boolean,
@@ -97,6 +99,17 @@ const TALK = [
 	},
 ];
 
+const AWARDS = {
+	prize: {
+		src: asset("/imgs/awards/prize.webp"),
+		alt: "A first place trophy",
+	},
+	"honorable-mention": {
+		src: asset("/imgs/awards/honorable-mention.webp"),
+		alt: "An honorable mention ribbon",
+	},
+};
+
 export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 	const [entry, setEntry] = useState<Competitor["entry"]>("yours");
 	useEffect(() => {
@@ -105,13 +118,15 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 		return () => clearTimeout(timer);
 	}, []);
 	const won = entry === "magic";
+	const award = AWARDS[won ? "prize" : "honorable-mention"];
 
-	const { myDrawing } = useStage();
+	const { myDrawing, give } = useStage();
 	const saved = useDrawings().find((d) => !d.id.startsWith("sample"));
 	const yours = myDrawing ?? saved?.image ?? null;
 
 	const blinkSrc = useBlinkingDoll();
 	const wow = useWowDoll();
+	const frown = useFrownDoll(ZHENYA_FROWN);
 
 	const [step, setStep] = useState(0);
 	const [complaints, setComplaints] = useState(0);
@@ -140,15 +155,23 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 
 	useEffect(() => {
 		if (step !== 2) return;
-		const t = setTimeout(
-			() => (won ? sound.fanfare() : sound.sadTrombone()),
-			500,
-		);
-		return () => clearTimeout(t);
+		const t = [
+			setTimeout(() => (won ? sound.fanfare() : sound.sadTrombone()), 500),
+			setTimeout(
+				() => give(won ? "prize" : "honorable-mention"),
+				AWARD_DELAY_MS + 600,
+			),
+		];
+		return () => t.forEach(clearTimeout);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [step, won]);
 
 	useEffect(() => {
-		if (!won) return;
+		if (!won) {
+			if (step !== 2) return;
+			const t = setTimeout(() => frown.playFrown(), 600);
+			return () => clearTimeout(t);
+		}
 		if (step === 2) {
 			const t = setTimeout(() => wow.playWow(), 600);
 			return () => clearTimeout(t);
@@ -160,10 +183,10 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 			...COMPLAINTS.map((_, i) =>
 				setTimeout(() => setComplaints(i + 1), 400 + i * COMPLAINT_GAP_MS),
 			),
-			setTimeout(
-				() => setComplaints(COMPLAINTS.length + 1),
-				lastComplaint + 2000,
-			),
+			setTimeout(() => {
+				setComplaints(COMPLAINTS.length + 1);
+				frown.playFrown();
+			}, lastComplaint + 2000),
 			setTimeout(() => setShowContinue(true), lastComplaint + 3500),
 		];
 		return () => t.forEach(clearTimeout);
@@ -175,6 +198,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 		setPicks((p) => [...p, a]);
 		later(700, () => setReplied(q + 1));
 		if (q !== TALK.length - 1) return;
+		later(700, frown.playFrownReverse);
 		setCleared(q);
 		later(2200, () => setShowContinue(true));
 	};
@@ -208,8 +232,8 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 			</p>
 
 			<Zhenya
-				src={wow.src ?? blinkSrc}
-				className="h-svh absolute top-[-30svh] left-[-9vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"
+				src={frown.src ?? wow.src ?? blinkSrc}
+				className="h-svh absolute top-[-32svh] left-[-9vw] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none test-shadow"
 				style={{
 					...hang(step >= 1, step >= 1, "top", {
 						ms: 900,
@@ -260,7 +284,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 
 			{!won && (
 				<figure
-					className="absolute top-[14svh] right-[1vw] portrait:right-auto portrait:left-[4vw] portrait:top-[42svh] z-4 flex flex-col items-center gap-[1.5svh] portrait:gap-[1svh]"
+					className="absolute top-[12svh] right-[1vw] portrait:right-auto portrait:left-[4vw] portrait:top-[42svh] z-4 flex flex-col items-center gap-[1.5svh] portrait:gap-[1svh]"
 					style={hang(revealed, revealed && !talking, "top", {
 						ms: 900,
 						easing: DOLL_DROP,
@@ -283,7 +307,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 						className={`${LABEL} relative z-1 w-max max-w-[20vw] portrait:max-w-[44vw] text-[2.6svh] portrait:text-[1.8svh]`}
 					>
 						<Strings />
-						No place - Zhenya
+						Honorable mention - Zhenya
 					</figcaption>
 				</figure>
 			)}
@@ -306,7 +330,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				onClick={() => setStep(3)}
 				disabled={!revealed || talking}
 				tabIndex={revealed && !talking ? undefined : -1}
-				className={`${BUTTON} absolute top-[52svh] right-[8vw] portrait:right-[6vw] portrait:top-[66svh] w-max text-[3.5svh] portrait:text-[2.6svh] z-6`}
+				className={`${BUTTON} absolute top-[52svh] right-[1vw] portrait:right-[3vw] portrait:top-[66svh] w-max text-[3.5svh] portrait:text-[2.6svh] z-1`}
 				style={hang(revealed, revealed && !talking, "top", {
 					delay: REACTION_DELAY_MS,
 				})}
@@ -314,6 +338,29 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 				<Strings />
 				{won ? "Yayy!" : "Oh.."}
 			</button>
+
+			<div
+				className={`absolute ${won ? "top-[34svh] right-[12vw]" : "top-[50svh] right-[11vw]"} portrait:top-[58svh] portrait:right-[20vw] z-5 test-shadow-darker`}
+				style={hang(revealed, revealed && !talking, "bottom", {
+					ms: 900,
+					easing: DOLL_DROP,
+					delay: AWARD_DELAY_MS,
+				})}
+			>
+				{/* eslint-disable-next-line @next/next/no-img-element */}
+				<img
+					src={asset("/imgs/stage/popsicle-stick.webp")}
+					className="absolute w-[2vw] portrait:w-[2.5svh] h-[45svh] max-w-none left-[50%] translate-x-[-50%] top-[80%] z-0"
+					alt=""
+					aria-hidden
+				/>
+				{/* eslint-disable-next-line @next/next/no-img-element */}
+				<img
+					src={award.src}
+					className={`relative z-1 ${won ? "h-[30svh]" : "h-[22svh]"} portrait:h-[16svh] w-auto max-w-none`}
+					alt={award.alt}
+				/>
+			</div>
 
 			<div className="absolute top-[1svh] right-[2vw] w-[25vw] portrait:top-[2svh] portrait:left-[4vw] portrait:right-[4vw] portrait:w-auto flex flex-col items-stretch gap-[0.9svh] portrait:gap-[1svh]">
 				{won ? (

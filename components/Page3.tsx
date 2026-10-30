@@ -1,6 +1,7 @@
 import PopsicleButton from "@/components/PopsicleButton";
 import { useEffect, useRef, useState } from "react";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import useFrownDoll, { ZHENYA_FROWN } from "@/components/useFrownDoll";
 import MoneyStick from "@/components/MoneyStick";
 import * as sound from "@/lib/sound";
 import { useStage } from "@/components/Stage";
@@ -42,11 +43,19 @@ export default function Page3({
 	const [tooPoor, setTooPoor] = useState<ItemId | null>(null);
 	const tooPoorTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 	useEffect(() => () => clearTimeout(tooPoorTimer.current), []);
+	const frown = useFrownDoll(ZHENYA_FROWN);
+	const frowning = useRef(false);
 	const tryBuy = (item: ItemId) => {
 		if (buy(item) !== "not-enough-money") return;
 		setTooPoor(item);
+		if (!frowning.current) frown.playFrown();
+		frowning.current = true;
 		clearTimeout(tooPoorTimer.current);
-		tooPoorTimer.current = setTimeout(() => setTooPoor(null), 1500);
+		tooPoorTimer.current = setTimeout(() => {
+			setTooPoor(null);
+			frowning.current = false;
+			frown.playFrownReverse();
+		}, 1500);
 	};
 	const buyText = (item: ItemId, text: string, boughtText: string) =>
 		owned.includes(item)
@@ -144,7 +153,7 @@ export default function Page3({
 			<h1 className="sr-only">Zhenya&apos;s souvenir shop</h1>
 
 			<Zhenya
-				src={dollSrc ?? blinkSrc}
+				src={frown.src ?? dollSrc ?? blinkSrc}
 				className="h-svh absolute top-[-32.5svh] right-[-5vw] portrait:h-[46svh] portrait:top-[-12svh] portrait:right-[-6svh] max-w-none test-shadow-darker z-5 scale-x-[-1]"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),

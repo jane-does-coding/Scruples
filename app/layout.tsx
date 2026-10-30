@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Atkinson_Hyperlegible_Next } from "next/font/google";
 import Stage from "@/components/Stage";
+import { FONT_SCRIPT } from "@/lib/fontScript";
 import { OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -53,10 +55,21 @@ const jsonLd = {
 	inLanguage: "en",
 };
 
+const readable = Atkinson_Hyperlegible_Next({
+	subsets: ["latin"],
+	variable: "--font-readable",
+	display: "swap",
+});
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
 	return (
-		<html lang="en" className="h-full antialiased">
+		<html
+			lang="en"
+			className={`h-full antialiased ${readable.variable}`}
+			suppressHydrationWarning
+		>
 			<head>
+				<script dangerouslySetInnerHTML={{ __html: FONT_SCRIPT }} />
 				<link
 					rel="preload"
 					href="/scribbler-font/Scribbler.woff2"

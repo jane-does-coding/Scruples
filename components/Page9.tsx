@@ -133,6 +133,14 @@ export default function Page9({ curtainsOpen }: PageProps) {
 		return () => timers.forEach(clearTimeout);
 	}, [step]);
 
+	const spotClass = step >= 2 ? (stage < 2 ? "spot-on" : "spot-off") : "";
+	const spotOpacity = step >= 2 && stage < 2 ? 1 : 0;
+	useEffect(() => {
+		const root = document.documentElement;
+		root.classList.toggle("dim-controls", step >= 2 && stage < 2);
+		return () => root.classList.remove("dim-controls");
+	}, [step, stage]);
+
 	const [flipped, setFlipped] = useState(false);
 	const portrait = usePortrait();
 	const labelPlace = (i: number, top: string, left: string) =>
@@ -168,11 +176,9 @@ export default function Page9({ curtainsOpen }: PageProps) {
 
 			<div
 				aria-hidden
-				className={`fixed inset-0 z-11 pointer-events-none ${
-					step >= 2 ? (stage < 2 ? "spot-on" : "spot-off") : ""
-				}`}
+				className={`fixed inset-0 z-11 pointer-events-none ${spotClass}`}
 				style={{
-					opacity: step >= 2 && stage < 2 ? 1 : 0,
+					opacity: spotOpacity,
 					background: portrait
 						? "radial-gradient(circle at 50% 52%, transparent 0, transparent min(30svh, 46vw), rgba(0, 0, 0, 0.72) calc(min(30svh, 46vw) + 1svh))"
 						: "radial-gradient(circle at 50% 60%, transparent 0, transparent 33svh, rgba(0, 0, 0, 0.72) 34svh)",
@@ -231,8 +237,8 @@ export default function Page9({ curtainsOpen }: PageProps) {
 			</PopsicleButton>
 
 			<PopsicleButton
-				onClick={() => goTo("/lastpage")}
-				href="/lastpage"
+				onClick={() => goTo("/the-wheel")}
+				href="/the-wheel"
 				style={{
 					...hang(stage >= 2, stage >= 2, "bottom", {
 						ms: 900,

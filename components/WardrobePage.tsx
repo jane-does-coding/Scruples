@@ -33,7 +33,8 @@ const hang = (
 });
 
 export default function WardrobePage() {
-	const { curtainsOpen, goTo, goBack, owned, wearing, equip } = useStage();
+	const { curtainsOpen, goTo, goBack, owned, wearing, equip, pins } =
+		useStage();
 	const dollSrc = useBlinkingDoll();
 	const [shown, setShown] = useState(false);
 	useEffect(() => {
@@ -60,6 +61,16 @@ export default function WardrobePage() {
 						: "Zhenya, a marionette doll on strings"
 				}
 			/>
+			{pins && (
+				// eslint-disable-next-line @next/next/no-img-element
+				<img
+					src={pins}
+					className={`${DOLL} z-5 pointer-events-none`}
+					style={hang(shown, { ms: 900, easing: DOLL_DROP })}
+					alt=""
+					aria-hidden
+				/>
+			)}
 			{trying && (
 				// eslint-disable-next-line @next/next/no-img-element
 				<img

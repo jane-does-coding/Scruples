@@ -559,3 +559,35 @@ button {
 		transition-delay: 0ms !important;
 	}
 }
+
+html.readable-font *,
+html.readable-font .scribbler {
+	font-family: var(--font-readable), system-ui, sans-serif;
+}
+
+.font-sample-hand,
+html.readable-font .font-sample-hand {
+	font-family: "scribbler", serif;
+}
+
+.font-sample-readable,
+html.readable-font .font-sample-readable {
+	font-family: var(--font-readable), system-ui, sans-serif;
+}
+
+.stage-control {
+	transition: filter 900ms ease;
+}
+
+html.dim-controls .stage-control {
+	--tw-brightness: brightness(78%);
+}
+
+.scrollbar-hide {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+	display: none; /* Chrome, Safari */
+}
