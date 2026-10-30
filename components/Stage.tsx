@@ -55,6 +55,11 @@ const LIGHTS_DOWN_AT_MS = 500;
 const PHONE_CARD_AT_MS = 1600;
 const PHONE_CARD_LIFT_MS = 600;
 const OPENING_SEEN_KEY = "scruples-opening-seen";
+const PROGRESS_KEY = "scruples-progress";
+const ONLY_ONE: Partial<Record<ItemId, ItemId>> = {
+	prize: "honorable-mention",
+	"honorable-mention": "prize",
+};
 
 const backHref = (pathname: string) => {
 	const n = STORY_PAGES.findIndex((p) => p.href === pathname) + 1;
@@ -94,11 +99,22 @@ type Drawing = {
 };
 
 const SLOTS = 3;
-const WIDE_AFTER = 8;
 const ITEM_GROW_MS = 400;
 const ITEM_SHRINK_MS = 350;
 const ITEM_FADE_MS = 200;
 const NAV_GLIDE_MS = 650;
+const NAV_REOPEN_MS = 800;
+const TEST_ITEMS: ItemId[] = [
+	/* "pins",
+	"pens",
+	"notebook",
+	 "mona-lisa",
+	"daphne-drawing",
+	"hats",
+	"magic-drawing",
+	"prize",
+	"honorable-mention", */
+];
 const ROW = "(var(--slot) + var(--slot-gap))";
 const scatter = (n: number, j: number, which: number) => {
 	const x = Math.sin(n * 12.9898 + j * 78.233 + which * 37.719) * 43758.5453;
@@ -114,11 +130,10 @@ const PAGES = [
 	...EXTRA_PAGES,
 ];
 
-const PAGE_WINDOW = 8;
-const WINDOW_LENGTH = Math.min(PAGES.length, PAGE_WINDOW);
-const PAGE_ROWS = Math.ceil(WINDOW_LENGTH / 2);
-const TALL_PAGES = PAGE_ROWS > 5;
-const COMPACT_UNTIL = 3;
+const PAGE_WINDOW = 10;
+
+const INVENTORY_ARROW =
+	"relative text-[2svh] portrait:text-[1.7svh] bg-white border-[0.2svh] border-black border-dashed px-[0.8vw] portrait:px-[2vw] cursor-pointer disabled:opacity-30 disabled:cursor-default";
 
 const NOTE =
 	"note-pop fixed top-[0.5svh] right-[calc(1.3vw+max(6.5vw,72px))] portrait:top-[1.5vw] portrait:right-[22vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
@@ -152,6 +167,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 	const chooseSound = (on: boolean) => {
 		if (!openingDone.current) return;
 		sound.setMuted(!on);
+		try {
+			localStorage.setItem(OPENING_SEEN_KEY, "1");
+		} catch {}
 		setPhoneCard(false);
 		openingTimers.current.push(
 			setTimeout(openingDone.current, PHONE_CARD_LIFT_MS),
@@ -164,7 +182,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 	const [navOpen, setNavOpen] = useState(false);
 
 	const [money, setMoney] = useState(STARTING_MONEY);
-	const [owned, setOwned] = useState<ItemId[]>([]);
+	const [owned, setOwned] = useState<ItemId[]>(TEST_ITEMS);
 	const [note, setNote] = useState<{
 		text: string;
 		id: number;
@@ -188,7 +206,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 	};
 	const give = (item: ItemId) => {
 		if (owned.includes(item)) return;
-		setOwned([...owned, item]);
+		setOwned([...owned.filter((i) => i !== ONLY_ONE[item]), item]);
 		notify(`${ITEMS[item].name} was added to inventory`);
 		itemAdded();
 	};
@@ -268,27 +286,74 @@ export default function Stage({ children }: { children: ReactNode }) {
 		clearTimeout(glideTimer.current);
 		glideTimer.current = setTimeout(() => setNavGliding(false), NAV_GLIDE_MS);
 	};
-	const wide = entries.length > WIDE_AFTER;
-	const compact = TALL_PAGES && entries.length < COMPACT_UNTIL;
-	const columns = wide ? 5 : compact ? 3 : 4;
+	const columns = 4;
 	const rowSlots = columns - 1;
 	const allSlots = columns * 2 - 1;
 	const canViewAll = entries.length > rowSlots;
-	const tallPages = TALL_PAGES && !compact;
-	const allItems = ((allItemsOn || wide) && canViewAll) || tallPages;
-	const twoRows = wide || tallPages;
+	const scrolling = entries.length > allSlots;
+	const [scrollColumn, setScrollColumn] = useState(0);
+	const SCROLL_COLUMNS = 3;
+	const lastColumn = Math.max(
+		Math.ceil(
+			(Math.ceil((entries.length + 1) / 2) - columns) / SCROLL_COLUMNS,
+		) * SCROLL_COLUMNS,
+		0,
+	);
+	const firstColumn = Math.min(scrollColumn, lastColumn);
+	const cells = Array.from({ length: columns * 2 }, (_, k) => {
+		const g = scrolling
+			? (firstColumn + (k % columns)) * 2 + Math.floor(k / columns)
+			: k;
+		return { g, entry: g > 0 ? entries[g - 1] : undefined };
+	});
+	const scrollInventory = (direction: number) => {
+		if (openItem) closeItem();
+		setScrollColumn(
+			Math.max(
+				0,
+				Math.min(firstColumn + direction * SCROLL_COLUMNS, lastColumn),
+			),
+		);
+	};
+	const [allPages, setAllPages] = useState(false);
+	const reopening = useRef(false);
+	const reopenNav = (all: boolean) => {
+		if (openItem) closeItem();
+		reopening.current = true;
+		setNavOpen(false);
+		setTimeout(() => {
+			setAllPages(all);
+			setNavOpen(true);
+			reopening.current = false;
+		}, NAV_REOPEN_MS);
+	};
+	useEffect(() => {
+		if (navOpen || reopening.current) return;
+		const timer = setTimeout(() => setAllPages(false), NAV_GLIDE_MS);
+		return () => clearTimeout(timer);
+	}, [navOpen]);
+	const itemRows = (allItemsOn && canViewAll) || scrolling;
+	const tallPages = (allPages || itemRows) && PAGES.length > PAGE_WINDOW;
+	const allItems = itemRows || tallPages;
+	const twoRows = tallPages || scrolling;
 	const pageAt = PAGES.findIndex((p) => p.href === pathname);
 	const parentAt = PAGES.findIndex((p) => p.href === backHref(pathname));
-	const windowStart = Math.min(
-		Math.max(
-			(pageAt >= 0 ? pageAt : Math.max(parentAt, 0)) - (PAGE_WINDOW / 2 - 1),
-			0,
-		),
-		PAGES.length - WINDOW_LENGTH,
-	);
+	const windowLength = tallPages
+		? PAGES.length
+		: Math.min(PAGES.length, PAGE_WINDOW);
+	const windowStart = tallPages
+		? 0
+		: Math.min(
+				Math.max(
+					(pageAt >= 0 ? pageAt : Math.max(parentAt, 0)) -
+						(PAGE_WINDOW / 2 - 1),
+					0,
+				),
+				PAGES.length - windowLength,
+			);
 	const windowPages = PAGES.map((p, i) => ({ ...p, i })).slice(
 		windowStart,
-		windowStart + WINDOW_LENGTH,
+		windowStart + windowLength,
 	);
 	const setAllItems = (on: boolean) => {
 		setAllItemsState(on);
@@ -578,9 +643,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 	};
 
 	const playOpening = () => {
-		try {
-			sessionStorage.setItem(OPENING_SEEN_KEY, "1");
-		} catch {}
 		sound.startMurmur();
 		const at = (ms: number, then: () => void) =>
 			openingTimers.current.push(setTimeout(then, ms));
@@ -606,8 +668,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 		let seen = true;
 		try {
 			seen =
-				!ALWAYS_PLAY_OPENING &&
-				sessionStorage.getItem(OPENING_SEEN_KEY) === "1";
+				!ALWAYS_PLAY_OPENING && localStorage.getItem(OPENING_SEEN_KEY) === "1";
 		} catch {}
 
 		const ripThenOpen = () => {
@@ -755,6 +816,33 @@ export default function Stage({ children }: { children: ReactNode }) {
 	usePlaytimeCounter();
 
 	const [reached, setReached] = useState(0);
+	const [progressLoaded, setProgressLoaded] = useState(false);
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			try {
+				const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) ?? "null");
+				if (saved) {
+					setReached((furthest) => Math.max(furthest, saved.reached ?? 0));
+					setMoney(saved.money ?? STARTING_MONEY);
+					setOwned(saved.owned ?? []);
+					setDrawings(saved.drawings ?? []);
+					setWearing(saved.wearing ?? null);
+					setPinsOn(saved.pinsOn ?? false);
+				}
+			} catch {}
+			setProgressLoaded(true);
+		}, 0);
+		return () => clearTimeout(timer);
+	}, []);
+	useEffect(() => {
+		if (!progressLoaded) return;
+		try {
+			localStorage.setItem(
+				PROGRESS_KEY,
+				JSON.stringify({ reached, money, owned, drawings, wearing, pinsOn }),
+			);
+		} catch {}
+	}, [progressLoaded, reached, money, owned, drawings, wearing, pinsOn]);
 	useEffect(() => {
 		const timer = setTimeout(
 			() => setReached((furthest) => Math.max(furthest, pageNumber)),
@@ -924,7 +1012,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				<nav
 					id="nav"
 					inert={!navOpen}
-					className={`${navGliding ? "nav-smooth" : "nav-bounce"} ${wide ? "inv-wide" : ""} fixed inset-x-0 bottom-[10svh] z-22 drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
+					className={`${navGliding ? "nav-smooth" : "nav-bounce"} fixed inset-x-0 bottom-[10svh] z-22 drop-shadow-lg drop-shadow-black/40 ${navOpen ? "test-shadow-darker" : ""}`}
 					style={{
 						transform: navOpen
 							? allItems
@@ -975,99 +1063,141 @@ export default function Stage({ children }: { children: ReactNode }) {
 							className={`flex portrait:flex-col items-end portrait:items-center gap-[3vw] portrait:gap-[2.5svh]`}
 						>
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
-								<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
-								<ol
-									style={
-										{
-											"--half": PAGE_ROWS,
-											"--third": Math.ceil(WINDOW_LENGTH / 3),
-											"--all": WINDOW_LENGTH,
-										} as React.CSSProperties
-									}
-									className={`locked-pages ${tallPages ? "min-h-[calc(2*var(--slot)+var(--slot-gap))]" : "min-h-(--slot)"} ${compact ? "w-[min(84svh,calc(96vw-3*var(--slot)-2*var(--slot-gap)-3vw))] grid-cols-3 grid-rows-[repeat(var(--third),auto)] portrait:grid-cols-2 portrait:grid-rows-[repeat(var(--half),auto)]" : wide ? "w-[min(36svh,calc(96vw-5*var(--slot)-4*var(--slot-gap)-3vw))] grid-cols-1 grid-rows-[repeat(var(--all),auto)] portrait:grid-cols-2 portrait:grid-rows-[repeat(var(--half),auto)]" : "w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] grid-cols-2 grid-rows-[repeat(var(--half),auto)]"} portrait:h-auto portrait:w-[87.5vw] px-[1.5svh] py-[1.2svh] grid grid-flow-col content-center gap-x-[2vw] portrait:gap-x-[3vw] gap-y-[0.4svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.2svh] portrait:text-[1.9svh] leading-[1.15]`}
+								<div className="flex items-baseline gap-[1.2vw] portrait:gap-[3vw]">
+									<h2 className="text-[4svh] portrait:text-[3svh]">Pages</h2>
+									{allPages && !itemRows && tallPages && (
+										<button
+											onClick={() => reopenNav(false)}
+											className="relative text-[2svh] portrait:text-[1.7svh] bg-white border-[0.2svh] border-black border-dashed px-[0.8vw] portrait:px-[2vw] cursor-pointer"
+										>
+											view less
+										</button>
+									)}
+								</div>
+								<div
+									className={`${twoRows ? "h-[calc(2*var(--slot)+var(--slot-gap))]" : "h-(--slot)"} overflow-hidden w-[min(54svh,calc(96vw-4*var(--slot)-3*var(--slot-gap)-3vw))] portrait:h-auto portrait:w-[87.5vw] flex items-center px-[1.5svh] py-[1.2svh] bg-white/20 border-[0.3svh] border-black border-dashed text-[2.2svh] portrait:text-[1.9svh] leading-[1.15]`}
 								>
-									{windowPages.map(({ title, href, i }, k) => {
-										const n = i + 1;
-										if (
-											(k === 0 && windowStart > 0) ||
-											(k === WINDOW_LENGTH - 1 &&
-												windowStart + WINDOW_LENGTH < PAGES.length)
-										)
+									<ol
+										className={`locked-pages w-full columns-2 gap-x-[2vw] portrait:gap-x-[3vw] [&>li]:break-inside-avoid [&>li]:mb-[0.4svh]`}
+									>
+										{windowPages.map(({ title, href, i }, k) => {
+											const n = i + 1;
+											if (
+												(k === 0 && windowStart > 0) ||
+												(k === windowLength - 1 &&
+													windowStart + windowLength < PAGES.length)
+											)
+												return (
+													<li key={href}>
+														<button
+															onClick={() => reopenNav(true)}
+															aria-label="Show all pages"
+															className="py-[0.15svh] tracking-[0.2em] font-extrabold cursor-pointer hover:underline decoration-dashed underline-offset-4"
+														>
+															...
+														</button>
+													</li>
+												);
+											const here = pathname === href;
+											const isExtras = i === MAIN_PAGES.length + 1;
+											const isExtraPage = i > MAIN_PAGES.length;
+
 											return (
-												<li
-													key={href}
-													aria-hidden
-													className="py-[0.15svh] tracking-[0.2em]"
-												>
-													...
+												<li key={href}>
+													{isExtras && <div className="font-bold">Extras</div>}
+
+													{n > reached + 1 && !here && !isExtraPage ? (
+														<span
+															aria-disabled
+															title="Not yet - keep going through the story"
+															className="block py-[0.15svh] text-black/35 cursor-not-allowed"
+														>
+															<span
+																aria-hidden
+															>{`${n}. ${title.replace(/\S/g, "x")}`}</span>
+															<span className="sr-only">
+																{`Page ${n}`} (locked)
+															</span>
+														</span>
+													) : n > reached && !here && !isExtraPage ? (
+														<span
+															aria-disabled
+															title="Not yet - keep going through the story"
+															className="locked block py-[0.15svh] text-black/35 cursor-not-allowed"
+														>
+															<span aria-hidden>
+																{[...`${n}. ${title}`].map((letter, j) => (
+																	<span
+																		key={j}
+																		className="scatter"
+																		style={
+																			{
+																				"--dx": `${(scatter(n, j, 1) * 0.05).toFixed(2)}em`,
+																				"--dy": `${(scatter(n, j, 2) * 0.15).toFixed(2)}em`,
+																				"--r": `${Math.round(scatter(n, j, 3) * 10)}deg`,
+																				"--delay": `${(scatter(n, j, 4) * 0.7).toFixed(2)}s`,
+																			} as React.CSSProperties
+																		}
+																	>
+																		{letter}
+																	</span>
+																))}
+															</span>
+															<span className="sr-only">
+																{`${n}. ${title}`} (locked)
+															</span>
+														</span>
+													) : (
+														<a
+															href={href}
+															onClick={(e) => {
+																if (here) {
+																	e.preventDefault();
+																	setNavOpen(false);
+																	return;
+																}
+																linkClick(href, () => setNavOpen(false))(e);
+															}}
+															aria-current={here ? "page" : undefined}
+															className={`block py-[0.15svh] cursor-pointer hover:underline decoration-dashed underline-offset-4 ${here ? "underline" : ""}`}
+														>
+															{here ? "-> " : `${n}. `}
+															{title}
+														</a>
+													)}
 												</li>
 											);
-										const here = pathname === href;
-										const isExtras = i === MAIN_PAGES.length + 1;
-										const isExtraPage = i > MAIN_PAGES.length;
-
-										return (
-											<li key={href}>
-												{isExtras && <div className="font-bold">Extras</div>}
-
-												{n > reached && !here && !isExtraPage ? (
-													<span
-														aria-disabled
-														title="Not yet - keep going through the story"
-														className="locked block py-[0.15svh] text-black/35 cursor-not-allowed"
-													>
-														<span aria-hidden>
-															{[...`${n}. ${title}`].map((letter, j) => (
-																<span
-																	key={j}
-																	className="scatter"
-																	style={
-																		{
-																			"--dx": `${(scatter(n, j, 1) * 0.05).toFixed(2)}em`,
-																			"--dy": `${(scatter(n, j, 2) * 0.15).toFixed(2)}em`,
-																			"--r": `${Math.round(scatter(n, j, 3) * 10)}deg`,
-																			"--delay": `${(scatter(n, j, 4) * 0.7).toFixed(2)}s`,
-																		} as React.CSSProperties
-																	}
-																>
-																	{letter}
-																</span>
-															))}
-														</span>
-														<span className="sr-only">
-															{`${n}. ${title}`} (locked)
-														</span>
-													</span>
-												) : (
-													<a
-														href={href}
-														onClick={(e) => {
-															if (here) {
-																e.preventDefault();
-																setNavOpen(false);
-																return;
-															}
-															linkClick(href, () => setNavOpen(false))(e);
-														}}
-														aria-current={here ? "page" : undefined}
-														className={`block py-[0.15svh] cursor-pointer hover:underline decoration-dashed underline-offset-4 ${here ? "underline" : ""}`}
-													>
-														{here ? "-> " : `${n}. `}
-														{title}
-													</a>
-												)}
-											</li>
-										);
-									})}
-								</ol>
+										})}
+									</ol>
+								</div>
 							</section>
 
 							<section className="flex flex-col items-center gap-[2svh] portrait:gap-[1svh]">
 								<div className="flex items-baseline gap-[1.2vw] portrait:gap-[3vw]">
+									{scrolling && (
+										<button
+											onClick={() => scrollInventory(-1)}
+											disabled={firstColumn === 0}
+											aria-label="Scroll inventory left"
+											className={INVENTORY_ARROW}
+										>
+											{"<-"}
+										</button>
+									)}
 									<h2 className="text-[4svh] portrait:text-[3svh]">
 										Inventory
 									</h2>
-									{canViewAll && !wide && !tallPages && (
+									{scrolling && (
+										<button
+											onClick={() => scrollInventory(1)}
+											disabled={firstColumn === lastColumn}
+											aria-label="Scroll inventory right"
+											className={INVENTORY_ARROW}
+										>
+											{"->"}
+										</button>
+									)}
+									{canViewAll && !scrolling && !allPages && (
 										<button
 											onClick={() => {
 												glideNav();
@@ -1082,85 +1212,88 @@ export default function Stage({ children }: { children: ReactNode }) {
 									)}
 								</div>
 								<ul
-									className={`relative grid ${wide ? "grid-cols-5" : compact ? "grid-cols-3" : "grid-cols-4"} ${twoRows ? "h-[calc(2*var(--slot)+var(--slot-gap))]" : "h-(--slot)"} auto-rows-(--slot) gap-(--slot-gap)`}
+									className={`relative grid grid-cols-4 ${twoRows ? "h-[calc(2*var(--slot)+var(--slot-gap))]" : "h-(--slot)"} auto-rows-(--slot) gap-(--slot-gap)`}
 								>
-									<li
-										className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed cursor-pointer"
-										style={{
-											opacity: slotsHidden || openItem?.slot === 0 ? 0 : 1,
-											transition: instantSlot(0)
-												? "none"
-												: `opacity ${slotsHidden ? 300 : ITEM_FADE_MS}ms ease`,
-										}}
-										onClick={() => showItem("money", 0)}
-										onKeyDown={(e) => {
-											if (e.key === "Enter" || e.key === " ")
-												showItem("money", 0);
-										}}
-										role="button"
-										tabIndex={0}
-										aria-label={`$${money} - ${bills.fives} $5 bills and ${bills.ones} $1 bills - details`}
-									>
-										{moneyBills.map((src, i, all) => (
-											<img
-												key={i}
-												src={src}
-												className="absolute top-[50%] h-[82%] w-auto max-w-none translate-x-[-50%] translate-y-[-50%] test-shadow-darker"
-												style={{
-													left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
-													rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
-												}}
-												alt=""
-											/>
-										))}
-										<span className="absolute bottom-[0.5svh] right-[0.5vw] bg-white border-[0.2svh] border-black px-[0.5vw] text-[2.5svh] leading-tight">
-											${money}
-										</span>
-									</li>
-									{Array.from({ length: allSlots }, (_, i) => entries[i]).map(
-										(entry, i) => {
-											const hidden = i >= rowSlots && !allItems;
+									{cells.map(({ g, entry }, k) => {
+										if (g === 0)
 											return (
 												<li
-													key={entry?.key ?? `empty-${i}`}
-													inert={hidden}
-													className={`relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center ${entry ? "cursor-pointer" : ""}`}
+													key="money"
+													className="relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed cursor-pointer"
 													style={{
 														opacity:
-															slotsHidden || hidden || openItem?.slot === i + 1
-																? 0
-																: 1,
-														transition: instantSlot(i + 1)
+															slotsHidden || openItem?.slot === k ? 0 : 1,
+														transition: instantSlot(k)
 															? "none"
-															: slotsHidden
-																? "opacity 300ms ease"
-																: openItem
-																	? `opacity ${ITEM_FADE_MS}ms ease`
-																	: `opacity ${hidden ? 200 : 450}ms ease ${i >= rowSlots && !hidden ? 150 : 0}ms`,
+															: `opacity ${slotsHidden ? 300 : ITEM_FADE_MS}ms ease`,
 													}}
-													aria-label={entry ? undefined : "Empty slot"}
+													onClick={() => showItem("money", k)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter" || e.key === " ")
+															showItem("money", k);
+													}}
+													role="button"
+													tabIndex={0}
+													aria-label={`$${money} - ${bills.fives} $5 bills and ${bills.ones} $1 bills - details`}
 												>
-													{entry && (
-														<button
-															onClick={() => {
-																if (entry.item === "hats") openWardrobe();
-																else showItem(entry.key, i + 1);
+													{moneyBills.map((src, i, all) => (
+														<img
+															key={i}
+															src={src}
+															className="absolute top-[50%] h-[82%] w-auto max-w-none translate-x-[-50%] translate-y-[-50%] test-shadow-darker"
+															style={{
+																left: `${50 + (i - (all.length - 1) / 2) * 12}%`,
+																rotate: `${(i - (all.length - 1) / 2) * 8}deg`,
 															}}
-															className="w-full h-full flex items-center justify-center cursor-pointer"
-															aria-label={`${entry.name} - details`}
-														>
-															<img
-																src={entry.image}
-																className="max-h-[90%] max-w-[90%] w-auto h-auto test-shadow-darker"
-																alt={entry.name}
-																title={entry.name}
-															/>
-														</button>
-													)}
+															alt=""
+														/>
+													))}
+													<span className="absolute bottom-[0.5svh] right-[0.5vw] bg-white border-[0.2svh] border-black px-[0.5vw] text-[2.5svh] leading-tight">
+														${money}
+													</span>
 												</li>
 											);
-										},
-									)}
+										const hidden = k >= columns && !allItems;
+										return (
+											<li
+												key={entry?.key ?? `empty-${g}`}
+												inert={hidden}
+												className={`relative w-(--slot) h-(--slot) bg-white/20 border-[0.3svh] border-black border-dashed flex items-center justify-center ${entry ? "cursor-pointer" : ""}`}
+												style={{
+													opacity:
+														slotsHidden || hidden || openItem?.slot === k
+															? 0
+															: 1,
+													transition: instantSlot(k)
+														? "none"
+														: slotsHidden
+															? "opacity 300ms ease"
+															: openItem
+																? `opacity ${ITEM_FADE_MS}ms ease`
+																: `opacity ${hidden ? 200 : 450}ms ease ${k >= columns && !hidden ? 150 : 0}ms`,
+												}}
+												aria-label={entry ? undefined : "Empty slot"}
+											>
+												{entry && (
+													<button
+														onClick={() => {
+															if (entry.item === "hats") openWardrobe();
+															else showItem(entry.key, k);
+														}}
+														className="w-full h-full flex items-center justify-center cursor-pointer"
+														aria-label={`${entry.name} - details`}
+													>
+														<img
+															src={entry.image}
+															className="max-h-[90%] max-w-[90%] w-auto h-auto test-shadow-darker"
+															alt={entry.name}
+															title={entry.name}
+														/>
+													</button>
+												)}
+											</li>
+										);
+									})}
 
 									{openItem && opened && (
 										<li

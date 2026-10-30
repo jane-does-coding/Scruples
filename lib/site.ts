@@ -1,6 +1,6 @@
 export const SITE_NAME = "Scruples";
 
-export const ALWAYS_PLAY_OPENING = true;
+export const ALWAYS_PLAY_OPENING = false;
 
 export const SITE_DESCRIPTION =
 	"Step through the curtains and meet Zhenya, a marionette doll who loves art - wander past famous paintings, browse a tiny souvenir shop, and see how artists share their work online.";

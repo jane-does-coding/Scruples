@@ -154,3 +154,5 @@ Art for when Daphne explains why she likes creating art
 End screen zoom-out assets and animation
 Creator page / “who am I”
 Draw an award for the art competition (or an honorable mention)
+
+At 13 pages it took me 3 mins to go through the whole website, without details

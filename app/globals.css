@@ -78,17 +78,6 @@ button:disabled,
 	}
 }
 
-.inv-wide {
-	--slot: 19svh;
-}
-
-@media (orientation: portrait) {
-	.inv-wide {
-		--slot: 16vw;
-		--slot-gap: 2vw;
-	}
-}
-
 html,
 body {
 	overscroll-behavior: none;
