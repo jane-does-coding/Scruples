@@ -65,7 +65,7 @@ const backHref = (pathname: string) => {
 	const n = STORY_PAGES.findIndex((p) => p.href === pathname) + 1;
 	if (n) return n > 1 ? storyHref(n - 1) : null;
 	if (pathname.startsWith("/art-piece/")) return "/zhenya-likes-art";
-	if (pathname === "/lastpage") return "/the-wheel";
+	if (pathname === "/lastpage") return "/in-the-spotlight";
 	if (pathname === "/gallery") return "/lastpage";
 	if (pathname === "/about") return "/lastpage";
 	return null;

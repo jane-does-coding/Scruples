@@ -11,7 +11,6 @@ export const STORY_PAGES = [
 	{ title: "The art competition", href: "/art-competition" },
 	{ title: "The results", href: "/competition-results" },
 	{ title: "In the spotlight", href: "/in-the-spotlight" },
-	{ title: "The wheel", href: "/the-wheel" },
 	{ title: "About the creator", href: "/about" },
 	{ title: "The gallery", href: "/gallery" },
 ] as const;

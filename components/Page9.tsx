@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
-import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import usePortrait from "@/components/usePortrait";
 import { asset } from "@/lib/asset";
@@ -73,7 +72,6 @@ const LABELS_OUT_MS = FLIP_MS + 2000;
 const SPOTLIGHT_OFF_MS = (LABELS.length - 1) * LABEL_EXIT_STAGGER_MS + 800;
 
 export default function Page9({ curtainsOpen }: PageProps) {
-	const { goTo } = useStage();
 	const [step, setStep] = useState(0);
 	const blinkSrc = useBlinkingDoll();
 
@@ -236,23 +234,16 @@ export default function Page9({ curtainsOpen }: PageProps) {
 				Whaaa-
 			</PopsicleButton>
 
-			<PopsicleButton
-				onClick={() => goTo("/the-wheel")}
-				href="/the-wheel"
-				style={{
-					...hang(stage >= 2, stage >= 2, "bottom", {
-						ms: 900,
-						easing: BUTTON_DROP,
-						delay: 2200,
-					}),
-					right: "-5vw",
-					bottom: "-2svh",
-					filter: "drop-shadow(12px 12px 2px #000000a0)",
-					zIndex: 20,
-				}}
+			<p
+				className={`${LABEL} absolute top-[14svh] portrait:top-[18svh] left-[8vw] portrait:left-[6vw] w-max text-[5svh] portrait:text-[3svh] z-9`}
+				style={hang(stage >= 2, stage >= 2, "top", {
+					ms: 900,
+					delay: 2200,
+				})}
 			>
-				Continue {"->"}
-			</PopsicleButton>
+				<Strings />
+				Coming soon
+			</p>
 
 			<Zhenya
 				src={tweakSrc ?? blinkSrc}

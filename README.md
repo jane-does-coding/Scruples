@@ -142,7 +142,7 @@ A short screen recording or GIF of the best moments (the opening, a painting ope
 
 Good phone screenshots, since mobile is judged too.
 
-Credits that say who drew and built it.
+Credits that say who drew and built it.s
 
 Todo list:
 
