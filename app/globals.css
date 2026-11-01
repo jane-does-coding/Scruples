@@ -580,3 +580,21 @@ html.dim-controls .stage-control {
 .scrollbar-hide::-webkit-scrollbar {
 	display: none; /* Chrome, Safari */
 }
+
+html.zoomed-out .stage-curtain {
+	visibility: hidden !important;
+}
+
+.panel-sway {
+	transform-origin: 50% -100svh;
+	animation: panel-sway 5s ease-in-out 1.2s infinite alternate;
+}
+
+@keyframes panel-sway {
+	from {
+		rotate: -0.4deg;
+	}
+	to {
+		rotate: 0.4deg;
+	}
+}

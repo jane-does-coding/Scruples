@@ -65,7 +65,7 @@ const backHref = (pathname: string) => {
 	const n = STORY_PAGES.findIndex((p) => p.href === pathname) + 1;
 	if (n) return n > 1 ? storyHref(n - 1) : null;
 	if (pathname.startsWith("/art-piece/")) return "/zhenya-likes-art";
-	if (pathname === "/lastpage") return "/in-the-spotlight";
+	if (pathname === "/lastpage") return "/cutting-the-strings";
 	if (pathname === "/gallery") return "/lastpage";
 	if (pathname === "/about") return "/lastpage";
 	return null;
@@ -121,8 +121,8 @@ const scatter = (n: number, j: number, which: number) => {
 	return (x - Math.floor(x)) * 2 - 1;
 };
 
-const MAIN_PAGES = STORY_PAGES.slice(0, -2);
-const EXTRA_PAGES = STORY_PAGES.slice(-2);
+const MAIN_PAGES = STORY_PAGES.filter((p) => !("extra" in p));
+const EXTRA_PAGES = STORY_PAGES.filter((p) => "extra" in p);
 
 const PAGES = [
 	...MAIN_PAGES,
@@ -1479,7 +1479,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 						])}
 						sizes="100vw"
 						fetchPriority="low"
-						className="w-screen h-svh top-0 left-0 portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none fixed z-10 pointer-events-none scene-shadow"
+						className="stage-curtain w-screen h-svh top-0 left-0 portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none fixed z-10 pointer-events-none scene-shadow"
 						style={{
 							visibility: animationStage === "idle" ? "visible" : "hidden",
 						}}
