@@ -9,7 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		changeFrequency: "monthly" as const,
 		priority: i === 0 ? 1 : 0.8,
 	}));
-	const ending = ["/lastpage", "/gallery", "/about"].map((path) => ({
+	const ending = ["/gallery", "/about"].map((path) => ({
 		url: `${SITE_URL}${path}`,
 		changeFrequency: "weekly" as const,
 		priority: 0.7,

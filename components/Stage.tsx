@@ -65,9 +65,6 @@ const backHref = (pathname: string) => {
 	const n = STORY_PAGES.findIndex((p) => p.href === pathname) + 1;
 	if (n) return n > 1 ? storyHref(n - 1) : null;
 	if (pathname.startsWith("/art-piece/")) return "/zhenya-likes-art";
-	if (pathname === "/lastpage") return "/cutting-the-strings";
-	if (pathname === "/gallery") return "/lastpage";
-	if (pathname === "/about") return "/lastpage";
 	return null;
 };
 
@@ -124,11 +121,7 @@ const scatter = (n: number, j: number, which: number) => {
 const MAIN_PAGES = STORY_PAGES.filter((p) => !("extra" in p));
 const EXTRA_PAGES = STORY_PAGES.filter((p) => "extra" in p);
 
-const PAGES = [
-	...MAIN_PAGES,
-	{ title: "Curtain call", href: "/lastpage" },
-	...EXTRA_PAGES,
-];
+const PAGES = [...MAIN_PAGES, ...EXTRA_PAGES];
 
 const PAGE_WINDOW = 10;
 

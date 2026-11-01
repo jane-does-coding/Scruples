@@ -13,8 +13,8 @@ export const STORY_PAGES = [
 	{ title: "In the spotlight", href: "/in-the-spotlight" },
 	{ title: "Cutting the strings", href: "/cutting-the-strings" },
 	{ title: "About the creator", href: "/about", extra: true },
-	{ title: "The gallery", href: "/gallery", extra: true },
 	{ title: "The progress", href: "/the-progress", extra: true },
+	{ title: "The gallery", href: "/gallery", extra: true },
 ] as const;
 
 export const storyHref = (n: number) => STORY_PAGES[n - 1].href;

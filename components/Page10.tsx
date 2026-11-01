@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
+import useStats, { type Stat } from "@/components/useStats";
 import usePortrait from "@/components/usePortrait";
 import Zhenya from "@/components/Zhenya";
 import { asset } from "@/lib/asset";
+import { useDrawings } from "@/lib/drawings";
+import { STORY_PAGES } from "@/lib/pages";
 import * as sound from "@/lib/sound";
 
 type PageProps = {
@@ -31,12 +33,24 @@ const START_SCALE = 1 / END_HOLE.size;
 const ORIGIN_X = (START_HOLE.x - START_SCALE * END_HOLE.x) / (1 - START_SCALE);
 const ORIGIN_Y = (START_HOLE.y - START_SCALE * END_HOLE.y) / (1 - START_SCALE);
 
-const LINES = [
-	"Bad art is better than AI art.",
-	"Go out there and create magic of your own,",
-	"rather than having AI steal other people's art.",
-];
 const PANEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
+const STICK = asset("/imgs/stage/popsicle-stick.webp");
+const EXTRAS = STORY_PAGES.filter((p) => "extra" in p);
+
+const LABEL =
+	"relative text-center scribbler bg-white border-[0.2svh] border-black px-[0.8vw] portrait:px-[2vw] py-[0.4svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
+const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer`;
+const DROP_STAGGER_MS = 350;
+const STATS_IN_MS = 1500;
+const GALLERY_IN_MS = STATS_IN_MS + 11 * DROP_STAGGER_MS;
+const EXTRAS_IN_MS = GALLERY_IN_MS + 1200;
+
+const Strings = () => (
+	<>
+		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[0.8vw] absolute"></span>
+		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[0.8vw] absolute"></span>
+	</>
+);
 
 const DOLL = { height: 100, top: -28, left: 50 };
 const PHONE_DOLL = { height: 60, top: -8, left: 50 };
@@ -63,8 +77,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 	const [cutShowing, setCutShowing] = useState(false);
 	const [gone, setGone] = useState(false);
 	const [zoom, setZoom] = useState<"in" | "out">("in");
-	const [rolling, setRolling] = useState(false);
-	const [done, setDone] = useState(false);
+	const [settled, setSettled] = useState(false);
 	const cutBlob = useRef<Blob | null>(null);
 	const [theatre, setTheatre] = useState(
 		asset("/imgs/stage/theatre-white.webp"),
@@ -101,13 +114,30 @@ export default function Page10({ curtainsOpen }: PageProps) {
 		at(CUT_AT_MS + CUT_MS - FADE_MS, () => setGone(true));
 		at(ZOOM_AT_MS, () => {
 			setZoom("out");
-			setRolling(true);
 			sound.startMurmur();
 			sound.whoosh(ZOOM_MS);
 		});
-		at(ZOOM_AT_MS + ZOOM_MS + 1500, () => setDone(true));
+		at(ZOOM_AT_MS, () => setSettled(true));
 		return () => timers.forEach(clearTimeout);
 	}, [curtainsOpen]);
+
+	const drawings = useDrawings();
+	const stats: Stat[] = [
+		...useStats(settled).flatMap(({ lines }) => lines),
+		[`${drawings.length}`, "drawings in the gallery"],
+	];
+	const place = (i: number) => ({
+		zIndex: 10 - i,
+		transition: `transform 800ms ${PANEL_DROP} ${settled ? STATS_IN_MS + i * DROP_STAGGER_MS : 0}ms`,
+		transform: settled ? "translateY(0)" : "translateY(-110svh)",
+	});
+
+	const loop = drawings.length
+		? Array.from(
+				{ length: Math.max(5, drawings.length) },
+				(_, i) => drawings[i % drawings.length],
+			)
+		: [];
 
 	useEffect(() => {
 		if (!cutSrc?.startsWith("blob:")) return;
@@ -117,9 +147,6 @@ export default function Page10({ curtainsOpen }: PageProps) {
 	return (
 		<div className="h-full relative">
 			<h1 className="sr-only">Cutting the strings</h1>
-			<p role="status" aria-live="polite" className="sr-only">
-				{gone ? LINES.join(" ") : ""}
-			</p>
 
 			<Zhenya
 				src={blinkSrc}
@@ -154,10 +181,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 			)}
 
 			{
-				<div
-					aria-hidden
-					className="fixed top-0 left-0 w-screen h-svh portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none z-12 pointer-events-none overflow-hidden"
-				>
+				<div className="fixed top-0 left-0 w-screen h-svh portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none z-12 pointer-events-none overflow-hidden">
 					<div
 						className="absolute inset-0"
 						style={{
@@ -168,28 +192,108 @@ export default function Page10({ curtainsOpen }: PageProps) {
 						}}
 					>
 						<div
-							className="absolute w-max max-w-[60%] portrait:max-w-[70%] text-center scribbler text-[4svh] portrait:text-[2.6svh] leading-snug"
+							className="absolute top-0 left-[68%] translate-x-[-50%] h-[68%] w-[24svh] portrait:hidden overflow-hidden test-shadow-darker"
 							style={{
-								left: `${END_HOLE.x}%`,
-								top: `${END_HOLE.y}%`,
-								transform: `translate(-50%, -50%) scale(${END_HOLE.size})`,
+								opacity: settled ? 1 : 0,
+								transition: `opacity 900ms ease ${GALLERY_IN_MS}ms`,
 							}}
 						>
-							<div
-								style={{
-									transform: rolling ? "translateY(0)" : "translateY(-80svh)",
-									transition: `transform 1200ms ${PANEL_DROP}`,
-								}}
-							>
-								<div className="panel-sway relative flex flex-col items-center gap-[1svh] bg-white border-[0.3svh] border-black px-[2vw] portrait:px-[4vw] py-[2svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker">
-									<span className="w-[0.15svh] bg-black/60 h-[200svh] top-[-200svh] left-[2vw] absolute"></span>
-									<span className="w-[0.15svh] bg-black/60 h-[200svh] top-[-200svh] right-[2vw] absolute"></span>
-									{LINES.map((line) => (
-										<p key={line}>{line}</p>
+							<span className="w-[0.1vw] min-w-px bg-black/60 h-full top-0 left-[15%] absolute"></span>
+							<span className="w-[0.1vw] min-w-px bg-black/60 h-full top-0 right-[15%] absolute"></span>
+							{loop.length > 0 && (
+								<div
+									className="flex flex-col marquee-up hover-pause pointer-events-auto"
+									style={{ animationDuration: `${loop.length * 7}s` }}
+								>
+									{[0, 1].map((copy) => (
+										<ul
+											key={copy}
+											className="flex flex-col gap-[2svh] pb-[2svh]"
+											aria-hidden={copy === 1}
+										>
+											{loop.map((drawing, i) => (
+												<li key={`${drawing.id}-${i}`}>
+													<img
+														src={drawing.image}
+														className="w-full h-auto"
+														alt={`A drawing by ${drawing.by.toLowerCase()}, in a picture frame`}
+													/>
+												</li>
+											))}
+										</ul>
 									))}
 								</div>
-							</div>
+							)}
 						</div>
+
+						<section className="absolute top-[17%] left-[42%] portrait:top-[16%] portrait:left-[50%] translate-x-[-50%] w-[30%] portrait:w-[50%] flex flex-col items-center gap-[1.2svh]">
+							<h2
+								className={`${LABEL} w-max text-[3.5svh] portrait:text-[1.6svh]`}
+								style={place(0)}
+							>
+								<Strings />
+								Your stats
+							</h2>
+							<div className="grid grid-cols-3 gap-[1.2svh] w-full">
+								{stats.map(([value, label], i) => (
+									<p
+										key={i}
+										className={`${LABEL} flex flex-col items-center justify-center gap-[0.4svh] min-h-[8svh] portrait:min-h-[5svh] border-[0.3svh]`}
+										style={place(i + 1)}
+									>
+										<Strings />
+										<span className="text-[4svh] portrait:text-[1.9svh] leading-none whitespace-nowrap">
+											{value}
+										</span>
+										<span className="text-[1.8svh] portrait:text-[1svh] leading-tight text-black/70">
+											{label}
+										</span>
+									</p>
+								))}
+							</div>
+						</section>
+
+						<nav
+							aria-label="Extras"
+							className="absolute top-[58%] left-[42%] portrait:top-[44%] portrait:left-[50%] translate-x-[-50%] w-max portrait:w-[54%] flex flex-wrap justify-center items-start gap-[1.4vw] portrait:gap-x-[2vw] portrait:gap-y-[4svh]"
+						>
+							{EXTRAS.map(({ title, href }, i) => (
+								<div
+									key={href}
+									className="relative test-shadow-darker"
+									style={{
+										transition: `transform 900ms ${DOLL_DROP} ${settled ? EXTRAS_IN_MS + i * DROP_STAGGER_MS : 0}ms`,
+										transform: settled ? "translateY(0)" : "translateY(60svh)",
+									}}
+								>
+									<img
+										src={STICK}
+										className="absolute w-[2vw] portrait:w-[2.5svh] h-[30svh] max-w-none left-[50%] translate-x-[-50%] top-[60%] z-0"
+										alt=""
+										aria-hidden
+									/>
+									<a
+										href={href}
+										onClick={(e) => {
+											if (
+												e.metaKey ||
+												e.ctrlKey ||
+												e.shiftKey ||
+												e.button !== 0
+											)
+												return;
+											e.preventDefault();
+											goTo(href);
+										}}
+										tabIndex={settled ? undefined : -1}
+										className={`${BUTTON} block w-max text-[2.3svh] portrait:text-[1.3svh] pointer-events-auto z-1`}
+									>
+										{title} {"->"}
+									</a>
+								</div>
+							))}
+						</nav>
+
 						<img
 							src={theatre}
 							className="absolute inset-0 w-full h-full scene-shadow"
@@ -198,20 +302,6 @@ export default function Page10({ curtainsOpen }: PageProps) {
 					</div>
 				</div>
 			}
-
-			<PopsicleButton
-				onClick={() => goTo("/lastpage")}
-				href="/lastpage"
-				style={{
-					...hang(done, "bottom"),
-					right: "-5vw",
-					bottom: "-2svh",
-					filter: "drop-shadow(12px 12px 2px #000000a0)",
-					zIndex: 20,
-				}}
-			>
-				Continue {"->"}
-			</PopsicleButton>
 		</div>
 	);
 }
