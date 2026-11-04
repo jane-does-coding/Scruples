@@ -10,6 +10,7 @@ import Page7 from "@/components/Page7";
 import Page8 from "@/components/Page8";
 import Page9 from "@/components/Page9";
 import Page10 from "@/components/Page10";
+import Page11 from "@/components/Page11";
 import { useStage } from "@/components/Stage";
 import { storyHref } from "@/lib/pages";
 
@@ -24,6 +25,7 @@ const PAGES = [
 	Page8,
 	Page9,
 	Page10,
+	Page11,
 ];
 
 export default function StagePage({ page }: { page: number }) {

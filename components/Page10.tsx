@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
-import useStats, { type Stat } from "@/components/useStats";
-import usePortrait from "@/components/usePortrait";
 import Zhenya from "@/components/Zhenya";
 import { asset } from "@/lib/asset";
-import { useDrawings } from "@/lib/drawings";
-import { STORY_PAGES } from "@/lib/pages";
 import * as sound from "@/lib/sound";
 
 type PageProps = {
@@ -17,291 +14,217 @@ type PageProps = {
 	curtainsOpen: boolean;
 };
 
+const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 
-const CUT = asset("/imgs/zhenya/cut-strings-slow.webp");
-const CUT_AT_MS = 1800;
-const CUT_MS = 35 * 110;
-const FADE_MS = 200;
-const ZOOM_AT_MS = CUT_AT_MS + CUT_MS + 300;
-
-const ZOOM_MS = 10000;
-const ZOOM_EASE = "cubic-bezier(0.75, 0, 0.45, 1)";
-const START_HOLE = { x: 50.3, y: 56.2 };
-const END_HOLE = { x: 49.7, y: 38.7, size: 0.675 };
-const START_SCALE = 1 / END_HOLE.size;
-const ORIGIN_X = (START_HOLE.x - START_SCALE * END_HOLE.x) / (1 - START_SCALE);
-const ORIGIN_Y = (START_HOLE.y - START_SCALE * END_HOLE.y) / (1 - START_SCALE);
-
-const PANEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
-const STICK = asset("/imgs/stage/popsicle-stick.webp");
-const EXTRAS = STORY_PAGES.filter((p) => "extra" in p);
+const CURTAIN_FRAMES = Array.from({ length: 7 }, (_, i) =>
+	asset(`/imgs/stage/closing/${String(i).padStart(2, "0")}.webp`),
+);
+const LIFT_MS = 700;
+const PUSH_MS = 2400;
+const PUSH_EASE = "cubic-bezier(0.6, 0, 0.9, 0.5)";
+const PUSH_SCALE = 9;
+const TURN_AT_MS = LIFT_MS + PUSH_MS + 200;
+const TURN_MS = 2800;
+const TURN_EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
+const ARRIVED_MS = TURN_AT_MS + TURN_MS + 300;
 
 const LABEL =
-	"relative text-center scribbler bg-white border-[0.2svh] border-black px-[0.8vw] portrait:px-[2vw] py-[0.4svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
+	"relative text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
 const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer`;
-const DROP_STAGGER_MS = 350;
-const STATS_IN_MS = 1500;
-const GALLERY_IN_MS = STATS_IN_MS + 11 * DROP_STAGGER_MS;
-const EXTRAS_IN_MS = GALLERY_IN_MS + 1200;
 
 const Strings = () => (
 	<>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[0.8vw] absolute"></span>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[0.8vw] absolute"></span>
+		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[1vw] absolute"></span>
+		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[1vw] absolute"></span>
 	</>
 );
 
-const DOLL = { height: 100, top: -28, left: 50 };
-const PHONE_DOLL = { height: 60, top: -8, left: 50 };
-const CUT_HEIGHT = 1.2619;
-const CUT_TOP = 0.0169;
-const CUT_LEFT = 0.3371;
-
 const hang = (shown: boolean, from: "top" | "bottom", delay = 0) => ({
 	visibility: shown ? ("visible" as const) : ("hidden" as const),
-	transition: `transform 900ms ${DOLL_DROP} ${shown ? delay : 0}ms`,
+	transition: `transform 800ms ${LABEL_DROP} ${shown ? delay : 0}ms`,
 	transform: shown
 		? "translateY(0)"
 		: `translateY(${from === "top" ? "-120svh" : "110svh"})`,
 });
 
+const Wall = ({ children }: { children?: React.ReactNode }) => (
+	<div className="absolute inset-0 bg-white overflow-hidden [backface-visibility:hidden]">
+		<img
+			src={asset("/imgs/stage/paper-bg-1920.webp")}
+			className="absolute inset-0 w-full h-full object-cover opacity-60"
+			alt=""
+			aria-hidden
+		/>
+		{children}
+	</div>
+);
+
 export default function Page10({ curtainsOpen }: PageProps) {
 	const { goTo } = useStage();
 	const blinkSrc = useBlinkingDoll();
-	const portrait = usePortrait();
-	const doll = portrait ? PHONE_DOLL : DOLL;
 
 	const [shown, setShown] = useState(false);
-	const [cutSrc, setCutSrc] = useState<string | null>(null);
-	const [cutShowing, setCutShowing] = useState(false);
-	const [gone, setGone] = useState(false);
-	const [zoom, setZoom] = useState<"in" | "out">("in");
-	const [settled, setSettled] = useState(false);
-	const cutBlob = useRef<Blob | null>(null);
-	const [theatre, setTheatre] = useState(
-		asset("/imgs/stage/theatre-white.webp"),
+	const [going, setGoing] = useState(false);
+	const [pushing, setPushing] = useState(false);
+	const [frame, setFrame] = useState(-1);
+	const [turning, setTurning] = useState(false);
+	const [arrived, setArrived] = useState(false);
+
+	const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+	const later = (ms: number, fn: () => void) =>
+		timers.current.push(setTimeout(fn, ms));
+	useEffect(
+		() => () => {
+			timers.current.forEach(clearTimeout);
+			document.documentElement.classList.remove("zoomed-out");
+		},
+		[],
 	);
 
 	useEffect(() => {
-		fetch(CUT)
-			.then((res) => res.blob())
-			.then((b) => (cutBlob.current = b));
-		const src = asset(
-			window.innerWidth * window.devicePixelRatio <= 1000
-				? "/imgs/stage/theatre-white-1200.webp"
-				: "/imgs/stage/theatre-white.webp",
-		);
-		const timer = setTimeout(() => setTheatre(src), 0);
-		document.documentElement.classList.add("zoomed-out");
-		new Image().src = src;
-		return () => {
-			clearTimeout(timer);
-			document.documentElement.classList.remove("zoomed-out");
-			sound.hushMurmur(1500);
-		};
+		CURTAIN_FRAMES.forEach((src) => (new Image().src = src));
+		new Image().src = asset("/imgs/stage/room.webp");
 	}, []);
 
 	useEffect(() => {
-		if (!curtainsOpen) return;
-		const timers: ReturnType<typeof setTimeout>[] = [];
-		const at = (ms: number, then: () => void) =>
-			timers.push(setTimeout(then, ms));
-		at(0, () => setShown(true));
-		at(CUT_AT_MS, () =>
-			setCutSrc(cutBlob.current ? URL.createObjectURL(cutBlob.current) : CUT),
-		);
-		at(CUT_AT_MS + CUT_MS - FADE_MS, () => setGone(true));
-		at(ZOOM_AT_MS, () => {
-			setZoom("out");
-			sound.startMurmur();
-			sound.whoosh(ZOOM_MS);
-		});
-		at(ZOOM_AT_MS, () => setSettled(true));
-		return () => timers.forEach(clearTimeout);
-	}, [curtainsOpen]);
-
-	const drawings = useDrawings();
-	const stats: Stat[] = [
-		...useStats(settled).flatMap(({ lines }) => lines),
-		[`${drawings.length}`, "drawings in the gallery"],
-	];
-	const place = (i: number) => ({
-		zIndex: 10 - i,
-		transition: `transform 800ms ${PANEL_DROP} ${settled ? STATS_IN_MS + i * DROP_STAGGER_MS : 0}ms`,
-		transform: settled ? "translateY(0)" : "translateY(-110svh)",
-	});
-
-	const loop = drawings.length
-		? Array.from(
-				{ length: Math.max(5, drawings.length) },
-				(_, i) => drawings[i % drawings.length],
-			)
-		: [];
+		if (pushing) document.documentElement.classList.add("zoomed-out");
+	}, [pushing]);
 
 	useEffect(() => {
-		if (!cutSrc?.startsWith("blob:")) return;
-		return () => URL.revokeObjectURL(cutSrc);
-	}, [cutSrc]);
+		if (!curtainsOpen) return;
+		const timer = setTimeout(() => setShown(true), 0);
+		return () => clearTimeout(timer);
+	}, [curtainsOpen]);
+
+	const follow = () => {
+		sound.click();
+		setGoing(true);
+		setFrame(0);
+		later(LIFT_MS, () => {
+			setPushing(true);
+			sound.whoosh(PUSH_MS);
+		});
+		CURTAIN_FRAMES.forEach((_, i) =>
+			later(LIFT_MS + ((i + 1) * PUSH_MS) / CURTAIN_FRAMES.length, () =>
+				setFrame(i + 1 < CURTAIN_FRAMES.length ? i + 1 : -1),
+			),
+		);
+		later(TURN_AT_MS, () => {
+			setTurning(true);
+			sound.whoosh(TURN_MS);
+		});
+		later(ARRIVED_MS, () => setArrived(true));
+	};
 
 	return (
 		<div className="h-full relative">
-			<h1 className="sr-only">Cutting the strings</h1>
+			<h1 className="sr-only">Backstage</h1>
+
+			<div
+				aria-hidden
+				className="fixed inset-0 z-5 pointer-events-none"
+				style={{
+					perspective: "50vw",
+					visibility: turning ? "visible" : "hidden",
+				}}
+			>
+				<div
+					className="absolute inset-0 [transform-style:preserve-3d]"
+					style={{
+						transform: `translateZ(50vw) rotateY(${turning ? 90 : 0}deg)`,
+						transition: `transform ${TURN_MS}ms ${TURN_EASE}`,
+					}}
+				>
+					<div
+						className="absolute inset-0 [transform-style:preserve-3d]"
+						style={{ transform: "translateZ(-50vw)" }}
+					>
+						<Wall />
+					</div>
+					<div
+						className="absolute inset-0 [transform-style:preserve-3d]"
+						style={{ transform: "rotateY(-90deg) translateZ(-50vw)" }}
+					>
+						<Wall>
+							<img
+								src={asset("/imgs/stage/room.webp")}
+								className="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
+								alt=""
+							/>
+						</Wall>
+					</div>
+				</div>
+			</div>
 
 			<Zhenya
 				src={blinkSrc}
-				className="h-svh w-auto max-w-none absolute top-[-28svh] portrait:h-[60svh] portrait:top-[-8svh] translate-x-[-50%] z-9"
+				className="fixed h-svh w-auto max-w-none top-[-4svh] left-[27vw] portrait:h-[66svh] portrait:top-[-2svh] portrait:left-[24vw] translate-x-[-50%] z-9 test-shadow-darker"
 				style={{
-					...hang(shown && !cutShowing, "top"),
-					filter: "drop-shadow(12px 12px 2px #28282857)",
-					translate: "-50% -4svh",
-					scale: "-1 1",
-					left: `${doll.left}%`,
-					visibility: shown && !cutShowing ? "visible" : "hidden",
+					visibility: shown ? "visible" : "hidden",
+					transition: `transform 900ms ${DOLL_DROP}`,
+					transform: shown ? "translateY(0)" : "translateY(-120svh)",
 				}}
-				alt="Zhenya, a marionette doll on strings, holding a pair of scissors"
+				alt="Zhenya, a marionette doll on strings"
 			/>
 
-			{cutSrc && (
+			{frame >= 0 && (
 				<img
-					src={cutSrc}
-					onLoad={() => setCutShowing(true)}
-					className="absolute w-auto max-w-none z-9 pointer-events-none"
+					src={CURTAIN_FRAMES[frame]}
+					className="fixed w-screen h-svh top-0 left-0 portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none z-12 pointer-events-none scene-shadow"
 					style={{
-						height: `${doll.height * CUT_HEIGHT}svh`,
-						top: `${doll.top - 4 - doll.height * CUT_TOP}svh`,
-						left: `${doll.left}%`,
-						marginLeft: `${-doll.height * CUT_LEFT}svh`,
-						filter: "drop-shadow(12px 12px 2px #28282857)",
-						opacity: gone ? 0 : 1,
-						transition: `opacity ${FADE_MS}ms ease`,
+						visibility: pushing ? "visible" : "hidden",
+						transformOrigin: "50% 58%",
+						scale: pushing ? `${PUSH_SCALE}` : "1",
+						transition: `scale ${PUSH_MS}ms ${PUSH_EASE}`,
 					}}
-					alt="Zhenya cuts her own strings and falls"
+					alt=""
+					aria-hidden
 				/>
 			)}
 
-			{
-				<div className="fixed top-0 left-0 w-screen h-svh portrait:w-[125vw] portrait:left-[-12.5vw] max-w-none z-12 pointer-events-none overflow-hidden">
-					<div
-						className="absolute inset-0"
-						style={{
-							transformOrigin: `${ORIGIN_X}% ${ORIGIN_Y}%`,
-							scale: zoom === "out" ? "1" : `${START_SCALE}`,
-							transition:
-								zoom === "out" ? `scale ${ZOOM_MS}ms ${ZOOM_EASE}` : "none",
-						}}
-					>
-						<div
-							className="absolute top-0 left-[68%] translate-x-[-50%] h-[68%] w-[24svh] portrait:hidden overflow-hidden test-shadow-darker"
-							style={{
-								opacity: settled ? 1 : 0,
-								transition: `opacity 900ms ease ${GALLERY_IN_MS}ms`,
-							}}
-						>
-							<span className="w-[0.1vw] min-w-px bg-black/60 h-full top-0 left-[15%] absolute"></span>
-							<span className="w-[0.1vw] min-w-px bg-black/60 h-full top-0 right-[15%] absolute"></span>
-							{loop.length > 0 && (
-								<div
-									className="flex flex-col marquee-up hover-pause pointer-events-auto"
-									style={{ animationDuration: `${loop.length * 7}s` }}
-								>
-									{[0, 1].map((copy) => (
-										<ul
-											key={copy}
-											className="flex flex-col gap-[2svh] pb-[2svh]"
-											aria-hidden={copy === 1}
-										>
-											{loop.map((drawing, i) => (
-												<li key={`${drawing.id}-${i}`}>
-													<img
-														src={drawing.image}
-														className="w-full h-auto"
-														alt={`A drawing by ${drawing.by.toLowerCase()}, in a picture frame`}
-													/>
-												</li>
-											))}
-										</ul>
-									))}
-								</div>
-							)}
-						</div>
+			<div className="absolute top-[4svh] portrait:top-[2svh] left-[66%] portrait:left-[62%] translate-x-[-50%] w-max max-w-[30vw] portrait:max-w-[60vw] flex flex-col items-center gap-[2svh] z-9">
+				<p
+					className={`${LABEL} text-[3.4svh] portrait:text-[2.3svh] z-2`}
+					style={hang(shown && !going, "top")}
+				>
+					<Strings />
+					Come backstage with me.
+				</p>
+				<button
+					onClick={follow}
+					disabled={going}
+					className={`${BUTTON} text-[3svh] portrait:text-[2.2svh] z-1`}
+					style={hang(shown && !going, "top", 300)}
+				>
+					<Strings />
+					Follow her {"->"}
+				</button>
+			</div>
 
-						<section className="absolute top-[17%] left-[42%] portrait:top-[16%] portrait:left-[50%] translate-x-[-50%] w-[30%] portrait:w-[50%] flex flex-col items-center gap-[1.2svh]">
-							<h2
-								className={`${LABEL} w-max text-[3.5svh] portrait:text-[1.6svh]`}
-								style={place(0)}
-							>
-								<Strings />
-								Your stats
-							</h2>
-							<div className="grid grid-cols-3 gap-[1.2svh] w-full">
-								{stats.map(([value, label], i) => (
-									<p
-										key={i}
-										className={`${LABEL} flex flex-col items-center justify-center gap-[0.4svh] min-h-[8svh] portrait:min-h-[5svh] border-[0.3svh]`}
-										style={place(i + 1)}
-									>
-										<Strings />
-										<span className="text-[4svh] portrait:text-[1.9svh] leading-none whitespace-nowrap">
-											{value}
-										</span>
-										<span className="text-[1.8svh] portrait:text-[1svh] leading-tight text-black/70">
-											{label}
-										</span>
-									</p>
-								))}
-							</div>
-						</section>
+			<p
+				role="status"
+				aria-live="polite"
+				className={`fixed top-[16svh] portrait:top-[8svh] left-[66vw] portrait:left-[70vw] translate-x-[-50%] w-max text-[3.4svh] portrait:text-[2.3svh] z-9 ${LABEL}`}
+				style={hang(arrived, "top")}
+			>
+				<Strings />
+				{arrived ? "This is my room." : ""}
+			</p>
 
-						<nav
-							aria-label="Extras"
-							className="absolute top-[58%] left-[42%] portrait:top-[44%] portrait:left-[50%] translate-x-[-50%] w-max portrait:w-[54%] flex flex-wrap justify-center items-start gap-[1.4vw] portrait:gap-x-[2vw] portrait:gap-y-[4svh]"
-						>
-							{EXTRAS.map(({ title, href }, i) => (
-								<div
-									key={href}
-									className="relative test-shadow-darker"
-									style={{
-										transition: `transform 900ms ${DOLL_DROP} ${settled ? EXTRAS_IN_MS + i * DROP_STAGGER_MS : 0}ms`,
-										transform: settled ? "translateY(0)" : "translateY(60svh)",
-									}}
-								>
-									<img
-										src={STICK}
-										className="absolute w-[2vw] portrait:w-[2.5svh] h-[30svh] max-w-none left-[50%] translate-x-[-50%] top-[60%] z-0"
-										alt=""
-										aria-hidden
-									/>
-									<a
-										href={href}
-										onClick={(e) => {
-											if (
-												e.metaKey ||
-												e.ctrlKey ||
-												e.shiftKey ||
-												e.button !== 0
-											)
-												return;
-											e.preventDefault();
-											goTo(href);
-										}}
-										tabIndex={settled ? undefined : -1}
-										className={`${BUTTON} block w-max text-[2.3svh] portrait:text-[1.3svh] pointer-events-auto z-1`}
-									>
-										{title} {"->"}
-									</a>
-								</div>
-							))}
-						</nav>
-
-						<img
-							src={theatre}
-							className="absolute inset-0 w-full h-full scene-shadow"
-							alt=""
-						/>
-					</div>
-				</div>
-			}
+			<PopsicleButton
+				onClick={() => goTo("/cutting-the-strings")}
+				href="/cutting-the-strings"
+				style={{
+					...hang(arrived, "bottom", 900),
+					right: "-5vw",
+					bottom: "-2svh",
+					filter: "drop-shadow(12px 12px 2px #000000a0)",
+					zIndex: 20,
+				}}
+			>
+				Continue {"->"}
+			</PopsicleButton>
 		</div>
 	);
 }

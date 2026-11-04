@@ -8,6 +8,6 @@ export const metadata: Metadata = pageMetadata(
 	"/cutting-the-strings",
 );
 
-export default function Page10Route() {
-	return <StagePage page={10} />;
+export default function Page11Route() {
+	return <StagePage page={11} />;
 }

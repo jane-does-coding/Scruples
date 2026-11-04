@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Atkinson_Hyperlegible_Next } from "next/font/google";
+import { Comic_Neue } from "next/font/google";
 import Stage from "@/components/Stage";
 import { FONT_SCRIPT } from "@/lib/fontScript";
 import { OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -55,8 +55,9 @@ const jsonLd = {
 	inLanguage: "en",
 };
 
-const readable = Atkinson_Hyperlegible_Next({
+const readable = Comic_Neue({
 	subsets: ["latin"],
+	weight: ["400", "700"],
 	variable: "--font-readable",
 	display: "swap",
 });

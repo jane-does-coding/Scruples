@@ -84,6 +84,7 @@ type StageContextValue = {
 	wearing: HatId | null;
 	equip: (hat: HatId | null) => void;
 	pins: string | null;
+	ribbon: string | null;
 	goBack: () => void;
 	reached: number;
 };
@@ -102,15 +103,15 @@ const ITEM_FADE_MS = 200;
 const NAV_GLIDE_MS = 650;
 const NAV_REOPEN_MS = 800;
 const TEST_ITEMS: ItemId[] = [
-	/* "pins",
+	"pins",
 	"pens",
 	"notebook",
-	 "mona-lisa",
+	"mona-lisa",
 	"daphne-drawing",
 	"hats",
 	"magic-drawing",
 	"prize",
-	"honorable-mention", */
+	"honorable-mention",
 ];
 const ROW = "(var(--slot) + var(--slot-gap))";
 const scatter = (n: number, j: number, which: number) => {
@@ -200,7 +201,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 	const give = (item: ItemId) => {
 		if (owned.includes(item)) return;
 		setOwned([...owned.filter((i) => i !== ONLY_ONE[item]), item]);
-		notify(`${ITEMS[item].name} was added to inventory`);
+		if (item === "honorable-mention") setRibbonOn(true);
+		notify(
+			item === "honorable-mention"
+				? "Zhenya is wearing the honorable mention"
+				: `${ITEMS[item].name} was added to inventory`,
+		);
 		itemAdded();
 	};
 	const donate = (amount: number) => {
@@ -240,6 +246,17 @@ export default function Stage({ children }: { children: ReactNode }) {
 			on
 				? "Zhenya is wearing the button pins"
 				: "Zhenya took off the button pins",
+			false,
+		);
+		closeItem();
+	};
+	const [ribbonOn, setRibbonOn] = useState(false);
+	const wearRibbon = (on: boolean) => {
+		setRibbonOn(on);
+		notify(
+			on
+				? "Zhenya is wearing the honorable mention"
+				: "Zhenya took off the honorable mention",
 			false,
 		);
 		closeItem();
@@ -817,10 +834,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 				if (saved) {
 					setReached((furthest) => Math.max(furthest, saved.reached ?? 0));
 					setMoney(saved.money ?? STARTING_MONEY);
-					setOwned(saved.owned ?? []);
+					setOwned([...new Set([...TEST_ITEMS, ...(saved.owned ?? [])])]);
 					setDrawings(saved.drawings ?? []);
 					setWearing(saved.wearing ?? null);
 					setPinsOn(saved.pinsOn ?? false);
+					setRibbonOn(saved.ribbonOn ?? false);
 				}
 			} catch {}
 			setProgressLoaded(true);
@@ -832,10 +850,27 @@ export default function Stage({ children }: { children: ReactNode }) {
 		try {
 			localStorage.setItem(
 				PROGRESS_KEY,
-				JSON.stringify({ reached, money, owned, drawings, wearing, pinsOn }),
+				JSON.stringify({
+					reached,
+					money,
+					owned,
+					drawings,
+					wearing,
+					pinsOn,
+					ribbonOn,
+				}),
 			);
 		} catch {}
-	}, [progressLoaded, reached, money, owned, drawings, wearing, pinsOn]);
+	}, [
+		progressLoaded,
+		reached,
+		money,
+		owned,
+		drawings,
+		wearing,
+		pinsOn,
+		ribbonOn,
+	]);
 	useEffect(() => {
 		const timer = setTimeout(
 			() => setReached((furthest) => Math.max(furthest, pageNumber)),
@@ -880,6 +915,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 				pins:
 					pinsOn && owned.includes("pins")
 						? asset("/imgs/zhenya/badges-wear.webp")
+						: null,
+				ribbon:
+					ribbonOn && owned.includes("honorable-mention")
+						? asset("/imgs/zhenya/ribbon-wear.webp")
 						: null,
 				goBack,
 				reached,
@@ -1092,8 +1131,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 													</li>
 												);
 											const here = pathname === href;
-											const isExtras = i === MAIN_PAGES.length + 1;
-											const isExtraPage = i > MAIN_PAGES.length;
+											const isExtras = i === MAIN_PAGES.length;
+											const isExtraPage = i >= MAIN_PAGES.length;
 
 											return (
 												<li key={href}>
@@ -1410,6 +1449,14 @@ export default function Stage({ children }: { children: ReactNode }) {
 															className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
 														>
 															{pinsOn ? "Take off" : "Wear"}
+														</button>
+													)}
+													{opened.item === "honorable-mention" && (
+														<button
+															onClick={() => wearRibbon(!ribbonOn)}
+															className="text-[2.5svh] bg-white border-[0.3svh] border-black border-dashed px-[1vw] cursor-pointer"
+														>
+															{ribbonOn ? "Take off" : "Wear"}
 														</button>
 													)}
 													{opened.item === "mystery-box" && (

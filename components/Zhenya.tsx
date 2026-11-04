@@ -7,12 +7,12 @@ export default function Zhenya({
 	style,
 	...props
 }: ComponentProps<"img">) {
-	const { hat, pins } = useStage();
+	const { hat, pins, ribbon } = useStage();
 	const overlay = `${(className ?? "").replace(/\S*shadow\S*/g, "")} pointer-events-none hat-on`;
 	return (
 		<>
 			<img className={className} style={style} {...props} />
-			{[pins, hat].map(
+			{[pins, ribbon, hat].map(
 				(src) =>
 					src && (
 						<img

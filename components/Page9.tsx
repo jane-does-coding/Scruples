@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
@@ -71,6 +71,80 @@ const WHAAA_MS = LABELS_IN_MS + 500;
 const FLIP_MS = 700;
 const LABELS_OUT_MS = FLIP_MS + 2000;
 const SPOTLIGHT_OFF_MS = (LABELS.length - 1) * LABEL_EXIT_STAGGER_MS + 800;
+
+type Ending = "talk" | "there" | "dunno";
+type Question = "root" | "real" | "steals" | "easy" | "matter";
+type Answer = { text: string; next: Question | Ending; back?: string };
+
+const QUESTIONS: Record<Question, { ask: string; answers: Answer[] }> = {
+	root: {
+		ask: "So... why is the Magic Button bad?",
+		answers: [
+			{ text: "It isn't real art.", next: "real" },
+			{ text: "It steals from artists.", next: "steals" },
+			{ text: "It's way too easy.", next: "easy" },
+		],
+	},
+	real: {
+		ask: "But why isn't it real?",
+		answers: [
+			{ text: "Nobody actually made it.", next: "matter" },
+			{ text: "It has no mistakes in it.", next: "matter" },
+			{ text: "It doesn't mean anything.", next: "matter" },
+		],
+	},
+	steals: {
+		ask: "But why is that so bad?",
+		answers: [
+			{ text: "Nobody asked them first.", next: "matter" },
+			{ text: "It copies their hands.", next: "matter" },
+			{ text: "They never get paid.", next: "matter" },
+		],
+	},
+	easy: {
+		ask: "But why is easy bad?",
+		answers: [
+			{ text: "You skip all the learning.", next: "matter" },
+			{ text: "There's nothing to be proud of.", next: "matter" },
+			{ text: "Everything looks the same.", next: "matter" },
+		],
+	},
+	matter: {
+		ask: "But why does any of that matter?",
+		answers: [
+			{ text: "Art is how people talk.", next: "talk", back: "Yes!" },
+			{ text: "Because someone was there.", next: "there", back: "Yes." },
+			{ text: "...I don't know.", next: "dunno", back: "Okay." },
+		],
+	},
+};
+
+const OUTRO = [
+	"A drawing is a little piece of whoever made it.",
+	"Even the wobbly ones. Especially the wobbly ones.",
+	"Come on. I'll show you where I make mine.",
+];
+const ENDINGS: Record<Ending, string[]> = {
+	talk: ["And a Magic Button has nothing to say.", ...OUTRO],
+	there: ["Someone sat there, and tried, and cared.", ...OUTRO],
+	dunno: ["That's okay. I only just figured it out.", ...OUTRO],
+};
+const INTRO = "Everyone's shouting. Nobody's saying why.";
+
+const isQuestion = (id: Question | Ending): id is Question => id in QUESTIONS;
+
+const TALK_AT_MS = TWEAK_MS + 1800;
+const LINE_MS = 2800;
+const SAY_SWAP_MS = 450;
+const PICK_FLIP_MS = 700;
+const PICK_HOLD_MS = 900;
+const ANSWERS_OUT_MS = 700;
+
+const ANSWER_SPOTS = [
+	{ top: "24svh", left: "24%", rotate: "-1.5deg" },
+	{ top: "36svh", left: "29%", rotate: "1deg" },
+	{ top: "48svh", left: "22%", rotate: "-0.5deg" },
+];
 
 export default function Page9({ curtainsOpen }: PageProps) {
 	const [step, setStep] = useState(0);
@@ -152,6 +226,72 @@ export default function Page9({ curtainsOpen }: PageProps) {
 			: { top, left };
 	const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 	useEffect(() => () => timers.current.forEach(clearTimeout), []);
+	const later = (ms: number, fn: () => void) =>
+		timers.current.push(setTimeout(fn, ms));
+
+	const [said, setSaid] = useState<string | null>(null);
+	const [saying, setSaying] = useState(false);
+	const [question, setQuestion] = useState<Question>("root");
+	const [answersEver, setAnswersEver] = useState(false);
+	const [answersIn, setAnswersIn] = useState(false);
+	const [picked, setPicked] = useState<number | null>(null);
+	const [lean, setLean] = useState(false);
+	const [done, setDone] = useState(false);
+
+	const say = (text: string) => {
+		setSaying(false);
+		later(SAY_SWAP_MS, () => {
+			setSaid(text);
+			setSaying(true);
+		});
+	};
+	const ask = (id: Question) => {
+		setQuestion(id);
+		setPicked(null);
+		say(QUESTIONS[id].ask);
+		later(SAY_SWAP_MS + 500, () => {
+			setAnswersEver(true);
+			setAnswersIn(true);
+		});
+	};
+	const finish = (id: Ending) => {
+		ENDINGS[id].forEach((line, k) => later(k * LINE_MS, () => say(line)));
+		later((ENDINGS[id].length - 1) * LINE_MS + 900, () => {
+			setDone(true);
+			sound.chime();
+		});
+	};
+	const pick = (i: number) => {
+		if (picked !== null || !answersIn) return;
+		const { next } = QUESTIONS[question].answers[i];
+		sound.click();
+		setPicked(i);
+		setLean(true);
+		later(PICK_FLIP_MS, () => setLean(false));
+		later(PICK_FLIP_MS + PICK_HOLD_MS, () => {
+			setAnswersIn(false);
+			setSaying(false);
+		});
+		later(PICK_FLIP_MS + PICK_HOLD_MS + ANSWERS_OUT_MS, () =>
+			isQuestion(next) ? ask(next) : finish(next),
+		);
+	};
+
+	useEffect(() => {
+		if (stage < 2) return;
+		const t = setTimeout(() => {
+			setSaid(INTRO);
+			setSaying(true);
+		}, TALK_AT_MS);
+		return () => clearTimeout(t);
+	}, [stage]);
+	const startAsking = useEffectEvent(() => ask("root"));
+	useEffect(() => {
+		if (said !== INTRO) return;
+		const t = setTimeout(startAsking, LINE_MS);
+		return () => clearTimeout(t);
+	}, [said]);
+
 	const whaaa = () => {
 		if (flipped) return;
 		setFlipped(true);
@@ -236,14 +376,72 @@ export default function Page9({ curtainsOpen }: PageProps) {
 				Whaaa-
 			</PopsicleButton>
 
+			<p
+				role="status"
+				aria-live="polite"
+				className={`absolute top-[6svh] left-[40%] portrait:top-[1svh] portrait:left-[32%] translate-x-[-50%] w-max max-w-[26vw] portrait:max-w-[52vw] text-[3.4svh] portrait:text-[2.2svh] z-14 ${LABEL}`}
+				style={hang(said !== null, saying, "top")}
+			>
+				<Strings />
+				{said}
+			</p>
+
+			{QUESTIONS[question].answers.map((answer, i) => {
+				const spot = ANSWER_SPOTS[i];
+				const flipped = picked === i;
+				return (
+					<button
+						key={i}
+						onClick={() => pick(i)}
+						disabled={!answersIn || picked !== null}
+						aria-hidden={!answersIn}
+						tabIndex={answersIn ? 0 : -1}
+						className="absolute translate-x-[-50%] w-max max-w-[24vw] portrait:max-w-[70vw] text-[3svh] portrait:text-[2.2svh] cursor-pointer disabled:cursor-default drop-shadow-md drop-shadow-black/40 test-shadow-darkest perspective-[100svh] left-(--left) portrait:left-[42%] top-(--top) portrait:top-(--ptop)"
+						style={
+							{
+								"--top": spot.top,
+								"--ptop": `${50 + i * 7.5}svh`,
+								"--left": spot.left,
+								zIndex: 13 - i,
+								...hang(answersEver, answersIn, "top", {
+									delay: i * 150,
+									exitDelay: flipped ? 250 : i * 60,
+								}),
+							} as React.CSSProperties
+						}
+					>
+						<Strings />
+						<span
+							className="relative block transform-3d"
+							style={{
+								rotate: spot.rotate,
+								transition: `transform ${PICK_FLIP_MS}ms cubic-bezier(0.34, 1.2, 0.64, 1)`,
+								transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+							}}
+						>
+							<span
+								className={`${FACE} border-dashed border-[0.3svh] block backface-hidden`}
+							>
+								{answer.text}
+							</span>
+							<span
+								aria-hidden
+								className={`${FACE} border-[0.3svh] backface-hidden absolute inset-0 flex items-center justify-center rotate-y-180`}
+							>
+								{isQuestion(answer.next) ? "But why?" : answer.back}
+							</span>
+						</span>
+					</button>
+				);
+			})}
+
 			<PopsicleButton
-				onClick={() => goTo("/cutting-the-strings")}
-				href="/cutting-the-strings"
+				onClick={() => goTo("/backstage")}
+				href="/backstage"
 				style={{
-					...hang(stage >= 2, stage >= 2, "bottom", {
+					...hang(done, done, "bottom", {
 						ms: 900,
 						easing: BUTTON_DROP,
-						delay: 2200,
 					}),
 					right: "-5vw",
 					bottom: "-2svh",
@@ -263,7 +461,9 @@ export default function Page9({ curtainsOpen }: PageProps) {
 							? "drop-shadow(12px 12px 2px #28282857)"
 							: "drop-shadow(20px 30px 3px #000000e6)",
 					visibility: step >= 1 ? "visible" : "hidden",
-					transition: `transform 900ms ${DOLL_DROP}, filter 600ms ease, scale 600ms ease-in-out ${TWEAK_MS}ms, left 1200ms ease-in-out ${TWEAK_MS + 300}ms`,
+					transition: `transform 900ms ${DOLL_DROP}, filter 600ms ease, scale 600ms ease-in-out ${TWEAK_MS}ms, left 1200ms ease-in-out ${TWEAK_MS + 300}ms, rotate 350ms ease-in-out`,
+					transformOrigin: "50% 0%",
+					rotate: lean ? "-3deg" : "0deg",
 					transform:
 						step < 1
 							? "translateY(-120svh)"

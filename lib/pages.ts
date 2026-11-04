@@ -11,6 +11,7 @@ export const STORY_PAGES = [
 	{ title: "The art competition", href: "/art-competition" },
 	{ title: "The results", href: "/competition-results" },
 	{ title: "In the spotlight", href: "/in-the-spotlight" },
+	{ title: "Backstage", href: "/backstage" },
 	{ title: "Cutting the strings", href: "/cutting-the-strings" },
 	{ title: "About the creator", href: "/about", extra: true },
 	{ title: "The progress", href: "/the-progress", extra: true },
