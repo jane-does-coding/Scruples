@@ -518,6 +518,16 @@ button {
 	}
 }
 
+.lamp-ants {
+	animation: lamp-ants 1.8s linear infinite;
+}
+
+@keyframes lamp-ants {
+	to {
+		stroke-dashoffset: -7;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.border-dashed:hover {
 		animation-play-state: paused !important;
@@ -527,6 +537,7 @@ button {
 		animation: none;
 	}
 
+	.lamp-ants,
 	.marquee,
 	.marquee-up,
 	.ticket-shake,
