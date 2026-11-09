@@ -24,6 +24,7 @@ const CUT = asset("/imgs/zhenya/cut-strings-slow.webp");
 const CUT_AT_MS = 1800;
 const CUT_MS = 35 * 110;
 const FADE_MS = 200;
+const ITEM_FADE_MS = 700;
 const ZOOM_AT_MS = CUT_AT_MS + CUT_MS + 300;
 
 const ZOOM_MS = 10000;
@@ -153,6 +154,14 @@ export default function Page11({ curtainsOpen }: PageProps) {
 					left: `${doll.left}%`,
 					visibility: shown && !cutShowing ? "visible" : "hidden",
 				}}
+				itemStyle={
+					cutShowing
+						? {
+								...hang(true, "top"),
+								animation: `item-fade ${ITEM_FADE_MS}ms ease forwards`,
+							}
+						: undefined
+				}
 				alt="Zhenya, a marionette doll on strings, holding a pair of scissors"
 			/>
 

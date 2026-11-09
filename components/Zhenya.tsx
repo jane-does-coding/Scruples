@@ -1,12 +1,13 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import type { ComponentProps, CSSProperties } from "react";
 import { useStage } from "@/components/Stage";
 export default function Zhenya({
 	className,
 	style,
+	itemStyle,
 	...props
-}: ComponentProps<"img">) {
+}: ComponentProps<"img"> & { itemStyle?: CSSProperties }) {
 	const { hat, pins, ribbon } = useStage();
 	const overlay = `${(className ?? "").replace(/\S*shadow\S*/g, "")} pointer-events-none hat-on`;
 	return (
@@ -19,7 +20,7 @@ export default function Zhenya({
 							key={src}
 							src={src}
 							className={overlay}
-							style={{ ...style, filter: "none" }}
+							style={{ ...style, filter: "none", ...itemStyle }}
 							alt=""
 							aria-hidden
 							draggable={false}

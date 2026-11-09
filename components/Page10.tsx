@@ -97,6 +97,14 @@ const REPLY: Record<Choice, { who: Who; text: string }[]> = {
 	upset: [
 		{ who: "daphne", text: "My drawing is there too!" },
 		{ who: "daphne", text: "I mean, why do you care?" },
+		{
+			who: "zhenya",
+			text: "Because I never agreed to this, and I don't like it.",
+		},
+		{
+			who: "zhenya",
+			text: "Just because it doesn't bother you doesn't mean it won't bother anyone else.",
+		},
 	],
 };
 
@@ -801,14 +809,15 @@ export default function Page10({ curtainsOpen }: PageProps) {
 							</p>
 						))}
 					{cReady && cStep < lines.length && lines[cStep - 1]?.who === who && (
-						<button
-							key={`next-${cStep}`}
-							onClick={nextLine}
-							className={`${ASK} hang-in pointer-events-auto`}
-						>
-							<Strings inset="1vw" />
-							Next {"->"}
-						</button>
+						<div key={`next-${cStep}`} className="hang-in">
+							<button
+								onClick={nextLine}
+								className={`${ASK} pointer-events-auto`}
+							>
+								<Strings inset="1vw" />
+								Next {"->"}
+							</button>
+						</div>
 					)}
 				</div>
 			))}

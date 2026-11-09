@@ -398,6 +398,12 @@ button {
 	}
 }
 
+@keyframes item-fade {
+	to {
+		opacity: 0;
+	}
+}
+
 .marquee-up {
 	animation: marquee-up 40s linear infinite;
 }
