@@ -1,4 +1,5 @@
 "use client";
+import Strings from "@/components/Strings";
 
 import { useEffect, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
@@ -30,8 +31,7 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 
 	const strings = (
 		<>
-			<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[1vw] absolute"></span>
-			<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[1vw] absolute"></span>
+			<Strings inset="1vw" />
 		</>
 	);
 	const CARD =
@@ -48,8 +48,7 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 					className={`${tall ? "max-h-[56svh]" : "max-h-[40svh]"} max-w-[30vw] portrait:max-h-[24svh] portrait:max-w-[80vw] test-shadow z-2 relative`}
 					alt={`${frame.label} by ${frame.artist}, in a picture frame`}
 				/>
-				<span className="w-[0.1vw] bg-black/60 h-[30svh] top-[-25svh] left-[3vw] absolute z-1"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[30svh] top-[-25svh] right-[3vw] absolute z-1"></span>
+				<Strings inset="3vw" place="h-[30svh] top-[-25svh]" className="z-1" />
 			</div>
 
 			<div className="absolute z-3 top-0 left-[34.5vw] w-[28vw] flex flex-col gap-[1svh] portrait:top-[32.5svh] portrait:left-[4vw] portrait:w-[92vw] portrait:gap-[1.2svh]">

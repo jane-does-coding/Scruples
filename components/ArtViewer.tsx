@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Strings from "@/components/Strings";
 
 const DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 const MS = 800;
@@ -47,8 +48,7 @@ export default function ArtViewer({
 					transform: shown ? "translateY(0)" : "translateY(-110svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] bottom-[calc(100%-12svh)] left-[30%] absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] bottom-[calc(100%-12svh)] right-[30%] absolute"></span>
+				<Strings inset="30%" place="h-[100svh] bottom-[calc(100%-12svh)]" />
 				<img
 					src={image}
 					className="relative z-1 max-h-[70svh] max-w-[80vw] w-auto h-auto test-shadow-darker"
@@ -56,8 +56,7 @@ export default function ArtViewer({
 				/>
 				<div className="relative z-0 flex items-center gap-[1vw]">
 					<p className="relative text-[3svh] portrait:text-[2.3svh] scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40">
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+						<Strings />
 						{name}
 					</p>
 					<button
@@ -65,8 +64,7 @@ export default function ArtViewer({
 						autoFocus
 						className="relative text-[3svh] portrait:text-[2.3svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] cursor-pointer drop-shadow-md drop-shadow-black/40"
 					>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
+						<Strings />
 						Close
 					</button>
 				</div>

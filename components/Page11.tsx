@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Strings from "@/components/Strings";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import useStats, { type Stat } from "@/components/useStats";
@@ -44,13 +45,6 @@ const DROP_STAGGER_MS = 350;
 const STATS_IN_MS = 1500;
 const GALLERY_IN_MS = STATS_IN_MS + 11 * DROP_STAGGER_MS;
 const EXTRAS_IN_MS = GALLERY_IN_MS + 1200;
-
-const Strings = () => (
-	<>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[0.8vw] absolute"></span>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[0.8vw] absolute"></span>
-	</>
-);
 
 const DOLL = { height: 100, top: -28, left: 50 };
 const PHONE_DOLL = { height: 60, top: -8, left: 50 };
@@ -198,8 +192,7 @@ export default function Page11({ curtainsOpen }: PageProps) {
 								transition: `opacity 900ms ease ${GALLERY_IN_MS}ms`,
 							}}
 						>
-							<span className="w-[0.1vw] min-w-px bg-black/60 h-full top-0 left-[15%] absolute"></span>
-							<span className="w-[0.1vw] min-w-px bg-black/60 h-full top-0 right-[15%] absolute"></span>
+							<Strings inset="15%" place="h-full top-0" />
 							{loop.length > 0 && (
 								<div
 									className="flex flex-col marquee-up hover-pause pointer-events-auto"
@@ -231,7 +224,7 @@ export default function Page11({ curtainsOpen }: PageProps) {
 								className={`${LABEL} w-max text-[3.5svh] portrait:text-[1.6svh]`}
 								style={place(0)}
 							>
-								<Strings />
+								<Strings inset="0.8vw" />
 								Your stats
 							</h2>
 							<div className="grid grid-cols-3 gap-[1.2svh] w-full">
@@ -241,7 +234,7 @@ export default function Page11({ curtainsOpen }: PageProps) {
 										className={`${LABEL} flex flex-col items-center justify-center gap-[0.4svh] min-h-[8svh] portrait:min-h-[5svh] border-[0.3svh]`}
 										style={place(i + 1)}
 									>
-										<Strings />
+										<Strings inset="0.8vw" />
 										<span className="text-[4svh] portrait:text-[1.9svh] leading-none whitespace-nowrap">
 											{value}
 										</span>

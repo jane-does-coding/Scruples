@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Strings from "@/components/Strings";
 import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
@@ -104,13 +105,6 @@ const hang = (
 const LABEL =
 	"text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
 const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer disabled:cursor-default`;
-
-const Strings = () => (
-	<>
-		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-	</>
-);
 
 const YourArt = ({
 	drawingUrl,

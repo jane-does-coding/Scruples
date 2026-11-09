@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Strings, { LABEL, BUTTON } from "@/components/Strings";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
 import useFrownDoll, { ZHENYA_FROWN } from "@/components/useFrownDoll";
@@ -48,23 +49,12 @@ const DARKNESS: Record<RoomKey, number> = {
 	all: 0,
 };
 const ROOM_IMGS = {
-	none: asset("/room-no-lights.png"),
-	lamp: asset("/room-lamp.png"),
-	stars: asset("/room-fairy.png"),
-	all: asset("/room-all-lights.png"),
+	none: asset("/imgs/stage/room-no-lights.webp"),
+	lamp: asset("/imgs/stage/room-lamp.webp"),
+	stars: asset("/imgs/stage/room-fairy.webp"),
+	all: asset("/imgs/stage/room-all-lights.webp"),
 };
 type RoomKey = keyof typeof ROOM_IMGS;
-
-const LABEL =
-	"relative text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
-const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer`;
-
-const Strings = () => (
-	<>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[1vw] absolute"></span>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[1vw] absolute"></span>
-	</>
-);
 
 const hang = (shown: boolean, from: "top" | "bottom", delay = 0) => ({
 	visibility: shown ? ("visible" as const) : ("hidden" as const),
@@ -544,6 +534,12 @@ export default function Page10({ curtainsOpen }: PageProps) {
 		later(ARRIVED_MS, () => setArrived(true));
 	};
 
+	const toggle = (id: LightId) => {
+		sound.click();
+		setLit((l) => ({ ...l, [id]: !l[id] }));
+		if (id === "lamp" && !lit.lamp && !phase) startTalk();
+	};
+
 	const flashHint = () => {
 		sound.click();
 		setHint(true);
@@ -610,11 +606,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 						switchesReady={arrived}
 						lit={lit}
 						hint={hint}
-						onSwitch={(id) => {
-							sound.click();
-							setLit((l) => ({ ...l, [id]: !l[id] }));
-							if (id === "lamp" && !lit.lamp && !phase) startTalk();
-						}}
+						onSwitch={toggle}
 						onPoster={() => {
 							sound.click();
 							setPoster(true);
@@ -705,7 +697,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 					className={`${LABEL} text-[3.4svh] portrait:text-[2.3svh] z-2`}
 					style={hang(shown && !going, "top")}
 				>
-					<Strings />
+					<Strings inset="1vw" />
 					{"Wait, what's that?"}
 				</p>
 				<button
@@ -714,7 +706,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 					className={`${BUTTON} text-[3svh] portrait:text-[2.2svh] z-1 pointer-events-auto`}
 					style={hang(shown && !going, "top", 300)}
 				>
-					<Strings />
+					<Strings inset="1vw" />
 					Peek through {"->"}
 				</button>
 			</div>
@@ -725,19 +717,19 @@ export default function Page10({ curtainsOpen }: PageProps) {
 				className={`fixed top-[16svh] portrait:top-[-10svh] left-[66vw] portrait:left-[70vw] translate-x-[-50%] w-max text-[3.4svh] portrait:text-[2.3svh] z-9 ${LABEL}`}
 				style={away(arrived, arrived && !phase)}
 			>
-				<Strings />
+				<Strings inset="1vw" />
 				{arrived ? "The backstage??" : ""}
 			</p>
 
 			<button
-				onClick={flashHint}
+				onClick={portrait ? () => toggle("lamp") : flashHint}
 				disabled={!arrived || !!phase}
 				tabIndex={arrived && !phase ? undefined : -1}
 				className={`!fixed top-[3svh] left-[60vw] portrait:top-[3svh] portrait:left-[50vw] translate-x-[-50%] w-max text-[2.8svh] portrait:text-[2svh] z-9 ${BUTTON}`}
 				style={away(arrived, arrived && !phase, 300)}
 			>
-				<Strings />
-				Try clicking around
+				<Strings inset="1vw" />
+				{portrait ? "Turn on the lamp" : "Try clicking around"}
 			</button>
 
 			<div className="fixed top-[41svh] left-[83.6vw] portrait:top-[12svh] portrait:left-[66vw] translate-x-[-50%] w-max flex flex-col items-center gap-[1.5svh] z-10 pointer-events-none">
@@ -745,14 +737,14 @@ export default function Page10({ curtainsOpen }: PageProps) {
 					className={SAY}
 					style={away(aStep >= 1, aStep >= 1 && phase === "a")}
 				>
-					<Strings />
+					<Strings inset="1vw" />
 					Wait...
 				</p>
 				<p
 					className={SAY}
 					style={away(aStep >= 2, aStep >= 2 && phase === "a", 0)}
 				>
-					<Strings />
+					<Strings inset="1vw" />
 					The Magic Button is stealing art!
 				</p>
 				<button
@@ -762,7 +754,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 					className={`${ASK} pointer-events-auto`}
 					style={away(aStep >= 3, aStep >= 3 && phase === "a")}
 				>
-					<Strings />
+					<Strings inset="1vw" />
 					Next {"->"}
 				</button>
 			</div>
@@ -772,7 +764,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 					className={SAY}
 					style={away(bStep >= 1, bStep >= 1 && phase === "b")}
 				>
-					<Strings />
+					<Strings inset="1vw" />
 					My drawing is there too!
 				</p>
 				{(["fine", "upset"] as const).map((key, i) => (
@@ -784,7 +776,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 						className={`${ASK} pointer-events-auto`}
 						style={away(bStep >= 2, bStep >= 2 && phase === "b", i * 200)}
 					>
-						<Strings />
+						<Strings inset="1vw" />
 						{key === "fine"
 							? "I mean, I don't care"
 							: "I didn't agree to this!"}
@@ -797,14 +789,14 @@ export default function Page10({ curtainsOpen }: PageProps) {
 					key={who}
 					role="log"
 					aria-live="polite"
-					className={`fixed portrait:bottom-[4svh] flex flex-col gap-[1.5svh] z-10 pointer-events-none ${who === "zhenya" ? "top-[9svh] left-[3vw] portrait:top-auto portrait:left-[4vw] items-start" : "top-[9svh] right-[3vw] portrait:top-auto portrait:right-[4vw] items-end"}`}
+					className={`fixed portrait:bottom-[20svh] flex flex-col gap-[1.5svh] z-10 pointer-events-none ${who === "zhenya" ? "top-[9svh] left-[3vw] portrait:top-auto portrait:left-[4vw] items-start" : "top-[9svh] right-[3vw] portrait:top-auto portrait:right-[4vw] items-end"}`}
 				>
 					{lines
 						.filter((line) => line.who === who && cStep > line.i)
 						.slice(-2)
 						.map(({ text, i }) => (
 							<p key={i} className={`${SAY} hang-in`}>
-								<Strings />
+								<Strings inset="1vw" />
 								{text}
 							</p>
 						))}
@@ -814,7 +806,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 							onClick={nextLine}
 							className={`${ASK} hang-in pointer-events-auto`}
 						>
-							<Strings />
+							<Strings inset="1vw" />
 							Next {"->"}
 						</button>
 					)}

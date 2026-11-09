@@ -1,4 +1,5 @@
 "use client";
+import Strings, { LABEL } from "@/components/Strings";
 
 import {
 	Fragment,
@@ -14,9 +15,6 @@ import { STORY_PAGES } from "@/lib/pages";
 
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
-
-const LABEL =
-	"relative text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
 
 const PERSONAL_SITE = "";
 
@@ -50,13 +48,6 @@ const ABOUT: ReactNode[] = [
 ];
 
 const DROP_STAGGER_MS = 250;
-
-const Strings = () => (
-	<>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[1vw] absolute"></span>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[1vw] absolute"></span>
-	</>
-);
 
 const hang = (
 	shown: boolean,
@@ -121,7 +112,7 @@ export default function AboutPage() {
 					className={`${LABEL} w-max max-w-full text-[4.5svh] portrait:text-[3svh]`}
 					style={{ ...hang(shown, "top"), zIndex: 9 }}
 				>
-					<Strings />
+					<Strings inset="1vw" />
 					About the creator
 				</h1>
 				{ABOUT.map((line, i) => (
@@ -133,7 +124,7 @@ export default function AboutPage() {
 							zIndex: 8 - i,
 						}}
 					>
-						<Strings />
+						<Strings inset="1vw" />
 						{line}
 					</p>
 				))}

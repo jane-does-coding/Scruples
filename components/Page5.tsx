@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Strings from "@/components/Strings";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll, { DAPHNE } from "@/components/useBlinkingDoll";
 import useFrownDoll, {
@@ -327,8 +328,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						step >= 2 && !done ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Click this magic button to get a cute drawing
 			</p>
 
@@ -432,8 +432,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					transform: aww && !done ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Aww cute!
 			</button>
 
@@ -473,8 +472,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					"top",
 				)}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				This is Daphne
 			</p>
 
@@ -487,8 +485,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					{ exitDelay: 80 },
 				)}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Daphne likes to draw
 			</p>
 
@@ -504,8 +501,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						: style;
 				})()}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				{hatName
 					? "Hi Daphne!"
 					: "Daphne could you please draw something for me?"}
@@ -517,8 +513,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-max max-w-[26vw] portrait:max-w-[60vw] text-center scribbler absolute bottom-[42svh] left-[62%] ml-[-5vw] portrait:ml-0 portrait:bottom-[17svh] portrait:left-[56%] translate-x-[-50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 						style={hang(niceHat, niceHat && !asked, "top")}
 					>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+						<Strings />
 						Nice {hatName}!
 					</p>
 					<button
@@ -528,8 +523,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] w-[24vw] portrait:w-[70vw] mx-auto text-center scribbler absolute bottom-[25svh] portrait:bottom-[5svh] left-[46%] portrait:left-[50%] translate-x-[-50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 						style={hang(thanks, thanks && !asked, "top", { exitDelay: 80 })}
 					>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+						<Strings />
 						Thanks! Could you please draw something for me?
 					</button>
 				</>
@@ -606,8 +600,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] max-w-[22vw] portrait:max-w-[55vw] mx-auto text-center scribbler absolute bottom-[60svh] portrait:bottom-[44svh] left-[50%] translate-x-[-50%] bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] z-7 drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 				style={hang(asked, asked && !decided, "top", { delay: PRICE_DELAY_MS })}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Daphne charges $10 per drawing
 			</p>
 
@@ -620,8 +613,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					delay: CANCEL_DELAY_MS,
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Cancel
 			</button>
 
@@ -632,8 +624,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				className="text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] mx-auto text-center scribbler absolute bottom-[50svh] left-[60%] portrait:bottom-[36svh] portrait:left-[68%] translate-x-[-50%] bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] z-6 drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 				style={hang(asked, asked && !decided, "top", { delay: BUY_DELAY_MS })}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Buy
 			</button>
 
@@ -643,8 +634,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					delay: 400,
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				{plea === "please"
 					? "Pleeease can I draw for you?"
 					: "Aww man, you don't have $10 - any donation would help"}
@@ -659,8 +649,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					delay: 1000,
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Yes
 			</button>
 
@@ -672,8 +661,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					"top",
 				)}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Would you like to donate? Anything helps!
 			</p>
 			<div
@@ -693,8 +681,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						tabIndex={donateOptions !== null && !donated ? undefined : -1}
 						className="relative w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker border-dashed cursor-pointer disabled:cursor-default"
 					>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+						<Strings />
 						{amount === 0
 							? all.length === 1
 								? "Sorry, I have nothing..."
@@ -719,9 +706,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						{ exitDelay: rowExit(0) },
 					)}
 				>
-					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-					I love it!
+					<Strings />I love it!
 				</button>
 				<button
 					onClick={() => choose("dislike")}
@@ -735,9 +720,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						{ exitDelay: rowExit(0) },
 					)}
 				>
-					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-					I dislike it...
+					<Strings />I dislike it...
 				</button>
 			</div>
 
@@ -747,8 +730,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					exitDelay: rowExit(1),
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				{choice === "dislike" ? "Oh..." : "Thanks!"}
 			</p>
 
@@ -761,8 +743,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					exitDelay: rowExit(2),
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Why won&apos;t you just use the magic button?
 			</button>
 
@@ -772,9 +753,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					exitDelay: rowExit(3),
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-				I enjoy the process of creating art, it is part of me
+				<Strings />I enjoy the process of creating art, it is part of me
 			</p>
 
 			<button
@@ -786,8 +765,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					exitDelay: rowExit(4),
 				})}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Really? Why?
 			</button>
 
@@ -799,8 +777,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						style={{ top: daphneSaid === LAST_ANSWER ? "-1svh" : 0 }}
 						className="hang-out absolute top-0 left-[50%] translate-x-[-50%] w-max max-w-[24vw] portrait:max-w-[84vw] z-2 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 					>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+						<Strings />
 						{daphneSaid}
 					</p>
 				)}
@@ -810,8 +787,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						style={{ top: daphneSays === LAST_ANSWER ? "-1svh" : 0 }}
 						className="hang-in absolute top-0 left-[50%] translate-x-[-50%] w-max max-w-[24vw] portrait:max-w-[84vw] z-1 text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker"
 					>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-						<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+						<Strings />
 						{daphneSays}
 					</p>
 				)}
@@ -822,8 +798,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					className="absolute top-[21svh] left-[80%] portrait:top-[16svh] portrait:left-[75%] translate-x-[-50%] w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
 					style={hang(answerLine !== null, nextUp, "top", { delay: 400 })}
 				>
-					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+					<Strings />
 					next {"->"}
 				</button>
 				<button
@@ -835,8 +810,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 						delay: 400,
 					})}
 				>
-					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-					<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+					<Strings />
 					{"<-"} back
 				</button>
 			</div>

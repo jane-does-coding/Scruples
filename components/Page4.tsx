@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Strings from "@/components/Strings";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import { asset } from "@/lib/asset";
@@ -123,8 +124,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 								: "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Now people post their art on social medias
 			</h1>
 
@@ -143,8 +143,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 								: "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				Wow Cool!
 			</button>
 
@@ -159,8 +158,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 					transform: wowed && !soWhat ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				So what?
 			</button>
 
@@ -172,8 +170,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 					transform: wowed && !soWhat ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[70svh] top-[-70svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[70svh] top-[-70svh] right-0 absolute"></span>
+				<Strings />
 				There is digital and traditional art, that people post.
 			</p>
 
@@ -185,8 +182,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 					transform: soWhat ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				It opens a way for people to share their work with the whole world
 			</p>
 			<p
@@ -197,8 +193,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 					transform: soWhat ? "translateY(0)" : "translateY(-100svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+				<Strings />
 				while also opening a huge portal for comparison to other artists
 			</p>
 
@@ -213,8 +208,7 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 				}}
 			>
 				<div className="absolute top-[-25svh] right-0 h-svh w-[43.5svh] portrait:top-[-20svh] portrait:right-[3vw] portrait:w-[21.75svh] test-shadow-darker pointer-events-auto">
-					<span className="w-[0.1vw] bg-black/60 h-full top-0 left-[2vw] absolute"></span>
-					<span className="w-[0.1vw] bg-black/60 h-full top-0 right-[2vw] absolute"></span>
+					<Strings inset="2vw" place="h-full top-0" />
 				</div>
 
 				<div

@@ -1,4 +1,5 @@
 "use client";
+import Strings from "@/components/Strings";
 
 import { useEffect, useState } from "react";
 import { useStage } from "@/components/Stage";
@@ -64,9 +65,8 @@ export default function DrawingGallery() {
 					transform: shown ? "translateY(0)" : "translateY(-110svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[100svh] top-[-100svh] right-0 absolute"></span>
-				The Gallery of Everyone's Art
+				<Strings />
+				{"The Gallery of Everyone's Art"}
 			</h1>
 
 			<div
@@ -157,8 +157,7 @@ export default function DrawingGallery() {
 							transform: closeUp ? "translateY(0)" : "translateY(-110svh)",
 						}}
 					>
-						<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[90%] left-[20%] absolute"></span>
-						<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[90%] right-[20%] absolute"></span>
+						<Strings inset="20%" place="h-svh bottom-[90%]" />
 						<img
 							src={open.image}
 							className="relative max-h-[72svh] max-w-[90vw] w-auto h-auto test-shadow-darker"

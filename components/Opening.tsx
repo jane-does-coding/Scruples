@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import Strings from "@/components/Strings";
 import { setReadable, useReadableFont } from "@/lib/font";
 
 const BOUNCE = "cubic-bezier(0.34, 1.25, 0.64, 1)";
@@ -38,8 +39,7 @@ export function PhoneCard({
 					: `transform 600ms ${LIFT}, visibility 0s 600ms`,
 			}}
 		>
-			<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-			<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
+			<Strings />
 			<img src="/no-phone.png" alt="" className="w-[7vw]" />
 			<h2
 				id="phones-card"

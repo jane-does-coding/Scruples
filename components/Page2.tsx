@@ -1,4 +1,5 @@
 import PopsicleButton from "@/components/PopsicleButton";
+import Strings from "@/components/Strings";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FRAMES, type FrameSize } from "@/lib/frames";
 import { asset } from "@/lib/asset";
@@ -51,8 +52,7 @@ const CARD =
 	"relative scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.7svh] text-[1.9svh] portrait:text-[1.45svh] leading-snug drop-shadow-md drop-shadow-black/40 test-shadow";
 const CardStrings = () => (
 	<>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[1vw] absolute"></span>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[1vw] absolute"></span>
+		<Strings inset="1vw" />
 	</>
 );
 
@@ -284,8 +284,7 @@ export default function Page2({
 						step >= 2 && !open ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] right-0 absolute"></span>
+				<Strings />
 				Zhenya likes art
 			</h1>
 			<p
@@ -296,8 +295,7 @@ export default function Page2({
 						step >= 3 && !open ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] right-0 absolute"></span>
+				<Strings />
 				Click on some pieces
 			</p>
 

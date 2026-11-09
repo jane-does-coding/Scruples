@@ -1,4 +1,5 @@
 "use client";
+import Strings, { LABEL, BUTTON } from "@/components/Strings";
 
 import { useEffect, useState } from "react";
 import PopsicleButton from "@/components/PopsicleButton";
@@ -9,19 +10,8 @@ import { HATS, type HatId } from "@/lib/shop";
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
 
-const LABEL =
-	"relative text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
-const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer`;
-
 const DOLL =
 	"h-[103svh] absolute top-[-32svh] left-[calc(2svh+2vw)] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none";
-
-const Strings = () => (
-	<>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-	</>
-);
 
 const hang = (
 	shown: boolean,

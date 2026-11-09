@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Strings from "@/components/Strings";
 import PopsicleButton from "@/components/PopsicleButton";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import { asset } from "@/lib/asset";
@@ -62,8 +63,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 					transform: step >= 2 ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[15svh] top-[-15svh] right-0 absolute"></span>
+				<Strings />
 				This is Zhenya
 			</h1>
 
@@ -74,8 +74,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 					top: step >= 3 ? (portrait ? "37svh" : "22.5svh") : "-60svh",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[40svh] top-[-40svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[40svh] top-[-40svh] right-0 absolute"></span>
+				<Strings />
 
 				<button
 					onClick={handleSayHi}
@@ -92,8 +91,7 @@ export default function Page1({ nextPage, curtainsOpen }: PageProps) {
 					top: saidHi ? (portrait ? "50svh" : "35svh") : "-60svh",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[50svh] top-[-50svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[50svh] top-[-50svh] right-0 absolute"></span>
+				<Strings />
 				&quot;Hi&quot;
 			</p>
 

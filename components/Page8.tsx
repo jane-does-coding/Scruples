@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Strings from "@/components/Strings";
 import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
@@ -40,13 +41,6 @@ const hang = (
 		? "translateY(0)"
 		: `translateY(${from === "top" ? "-120svh" : "120svh"})`,
 });
-
-const Strings = () => (
-	<>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-	</>
-);
 
 const TEXT =
 	"text-center scribbler bg-white border-black px-[1.2vw] portrait:px-[3vw] py-[0.7svh] drop-shadow-md drop-shadow-black/40 test-shadow";
@@ -266,8 +260,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 					easing: DOLL_DROP,
 				})}
 			>
-				<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[85%] left-[25%] absolute z-2"></span>
-				<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[85%] right-[25%] absolute z-2"></span>
+				<Strings inset="25%" place="h-svh bottom-[85%]" className="z-2" />
 				{/* eslint-disable-next-line @next/next/no-img-element */}
 				<img
 					src={asset("/imgs/art/drawing-lilies.webp")}
@@ -291,8 +284,7 @@ export default function Page8({ nextPage, curtainsOpen }: PageProps) {
 						delay: 300,
 					})}
 				>
-					<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[85%] left-[25%] absolute z-2"></span>
-					<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[85%] right-[25%] absolute z-2"></span>
+					<Strings inset="25%" place="h-svh bottom-[85%]" className="z-2" />
 					{/* eslint-disable-next-line @next/next/no-img-element */}
 					<img
 						src={yours ?? asset("/imgs/art/empty_square_frame.webp")}

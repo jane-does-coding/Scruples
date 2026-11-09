@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Strings from "@/components/Strings";
 import { asset } from "@/lib/asset";
 import usePortrait from "@/components/usePortrait";
 import { penDown, penMove, penUp, pointsOn, type Pen } from "@/lib/stroke";
@@ -43,13 +44,6 @@ const loadPages = (): Pages => {
 	} catch {}
 	return blank();
 };
-
-const Strings = () => (
-	<>
-		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-	</>
-);
 
 export default function Notebook({ onClose }: { onClose: () => void }) {
 	const canvases = useRef<(HTMLCanvasElement | null)[]>([null, null]);
@@ -154,8 +148,11 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 					transform: shown ? "translateY(0)" : "translateY(-110svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[200svh] bottom-[3svh] left-[25%] absolute portrait:hidden"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[200svh] bottom-[3svh] right-[25%] absolute portrait:hidden"></span>
+				<Strings
+					inset="25%"
+					place="h-[200svh] bottom-[3svh]"
+					className="portrait:hidden"
+				/>
 				{COLORS.map((c) => (
 					<button
 						key={c.value}
@@ -165,8 +162,7 @@ export default function Notebook({ onClose }: { onClose: () => void }) {
 						title={c.name}
 						className={`relative ${BUTTON} drop-shadow-md drop-shadow-black/40 w-[8svh] h-[5svh] portrait:w-[11vw] transition-all ease-in-out duration-150 ${color === c.value ? "border-solid!  p-[0.3svh]!" : " p-[0.7svh]!"}`}
 					>
-						<span className="hidden portrait:block w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[15%] absolute"></span>
-						<span className="hidden portrait:block w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[15%] absolute"></span>
+						<Strings inset="15%" className="hidden portrait:block" />
 						<span
 							className="block w-full h-full"
 							style={{ background: c.value }}

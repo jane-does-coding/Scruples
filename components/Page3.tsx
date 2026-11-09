@@ -1,4 +1,5 @@
 import PopsicleButton from "@/components/PopsicleButton";
+import Strings from "@/components/Strings";
 import { useEffect, useRef, useState } from "react";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import useFrownDoll, { ZHENYA_FROWN } from "@/components/useFrownDoll";
@@ -184,8 +185,7 @@ export default function Page3({
 						step >= 2 && !entered ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				<Strings />
 				Click to enter
 			</button>
 
@@ -336,8 +336,7 @@ export default function Page3({
 					transform: entered ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				<Strings />
 				Next item
 			</button>
 			<button
@@ -351,8 +350,7 @@ export default function Page3({
 					transform: pinsUp ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				<Strings />
 				{buyText("pins", "Buy the buttons for $10", "You bought the buttons!")}
 			</button>
 
@@ -367,8 +365,7 @@ export default function Page3({
 					transform: pensUp ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				<Strings />
 				{buyText("pens", "Buy the pens for $16", "You bought the pens!")}
 			</button>
 
@@ -383,8 +380,7 @@ export default function Page3({
 					transform: monaUp ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				<Strings />
 				{buyText(
 					"mona-lisa",
 					"Buy the Mona Lisa for $1,000,000,000",
@@ -403,8 +399,7 @@ export default function Page3({
 					transform: notebookUp ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				<Strings />
 				{buyText(
 					"notebook",
 					"Buy the notebook for $8",
@@ -423,8 +418,7 @@ export default function Page3({
 					transform: boxUp ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				<Strings />
 				{soldOut
 					? "Sold out - you have all the hats!"
 					: buyText(
@@ -444,8 +438,7 @@ export default function Page3({
 					transform: entered ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				<Strings />
 				Exit
 			</button>
 
@@ -459,8 +452,7 @@ export default function Page3({
 					transform: entered ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] left-0 absolute"></span>
-				<span className="w-[0.1vw] bg-black/60 h-[25svh] top-[-25svh] right-0 absolute"></span>
+				<Strings />
 				Prev item
 			</button>
 

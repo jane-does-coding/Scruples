@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Strings from "@/components/Strings";
 import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
@@ -45,20 +46,6 @@ const hang = (
 		? "translateY(0)"
 		: `translateY(${from === "top" ? "-120svh" : "120svh"})`,
 });
-
-const Strings = () => (
-	<>
-		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"></span>
-	</>
-);
-
-const FrameStrings = () => (
-	<>
-		<span className="w-[0.1vw] bg-black/60 h-svh top-[-90svh] left-[5vw] absolute"></span>
-		<span className="w-[0.1vw] bg-black/60 h-svh top-[-90svh] right-[5vw] absolute"></span>
-	</>
-);
 
 const LABEL =
 	"text-[3svh] portrait:text-[2svh] max-w-[70%] mx-auto text-center scribbler absolute portrait:max-w-[50vw] bg-white border-black px-[2vw] portrait:px-[3vw] py-[1svh] portrait:py-[0.7svh] drop-shadow-md drop-shadow-black/40 test-shadow";
@@ -461,8 +448,7 @@ export default function Page7({ nextPage, curtainsOpen }: PageProps) {
 							aria-hidden
 							className="relative z-2 test-shadow-darker cursor-pointer disabled:cursor-default"
 						>
-							<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[85%] left-[25%] absolute"></span>
-							<span className="w-[0.1vw] min-w-px bg-black/60 h-svh bottom-[85%] right-[25%] absolute"></span>
+							<Strings inset="25%" place="h-svh bottom-[85%]" />
 							{/* eslint-disable-next-line @next/next/no-img-element */}
 							<img
 								src={

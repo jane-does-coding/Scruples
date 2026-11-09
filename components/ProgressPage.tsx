@@ -1,4 +1,5 @@
 "use client";
+import Strings, { LABEL, BUTTON } from "@/components/Strings";
 
 import { useEffect, useState } from "react";
 import { useStage } from "@/components/Stage";
@@ -7,10 +8,6 @@ import { asset } from "@/lib/asset";
 
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
-
-const LABEL =
-	"relative text-center scribbler bg-white border-[0.2svh] border-black px-[1vw] portrait:px-[2.5vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker";
-const BUTTON = `${LABEL.replace("border-[0.2svh]", "border-[0.3svh]")} border-dashed cursor-pointer`;
 
 const DOLL =
 	"h-[103svh] absolute top-[-32svh] left-[-9vw] portrait:h-[62svh] portrait:top-[-6svh] portrait:left-[-18vw] max-w-none";
@@ -32,13 +29,6 @@ const WEARABLES = [
 		src: asset("/imgs/progress/purple-hair.webp"),
 	},
 ];
-
-const Strings = () => (
-	<>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] left-[1vw] absolute"></span>
-		<span className="w-[0.1vw] min-w-px bg-black/60 h-svh top-[-100svh] right-[1vw] absolute"></span>
-	</>
-);
 
 const hang = (
 	shown: boolean,
@@ -125,7 +115,7 @@ export default function ProgressPage() {
 					className={`${LABEL} text-[4.5svh] portrait:text-[3svh]`}
 					style={{ ...hang(shown, "top"), zIndex: 3 + WEARABLES.length }}
 				>
-					<Strings />
+					<Strings inset="1vw" />
 					The progress
 				</h1>
 				<p
@@ -135,7 +125,7 @@ export default function ProgressPage() {
 						zIndex: 2 + WEARABLES.length,
 					}}
 				>
-					<Strings />
+					<Strings inset="1vw" />
 					Drawn for the show, but never made it on stage
 				</p>
 				<div
@@ -154,7 +144,7 @@ export default function ProgressPage() {
 								zIndex: 1 + WEARABLES.length - i,
 							}}
 						>
-							<Strings />
+							<Strings inset="1vw" />
 							{name}
 						</button>
 					))}
