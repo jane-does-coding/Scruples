@@ -462,6 +462,51 @@ export default function Stage({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
+	useEffect(() => {
+		const STRING = 'span[class*="bg-black/60"][class*="w-[0.1vw]"]';
+		const clipped = new WeakMap<HTMLElement, string>();
+		let frame = 0;
+		const update = () => {
+			frame = requestAnimationFrame(update);
+			const strings = [...document.querySelectorAll<HTMLElement>(STRING)];
+			if (!strings.length) return;
+			const owners = new Set<Element>();
+			strings.forEach((el) => el.parentElement && owners.add(el.parentElement));
+			document
+				.querySelectorAll(
+					'[class*="bg-white"][class*="border-black"]:not([class*="bg-white/0"])',
+				)
+				.forEach((el) => owners.add(el));
+			const boxes = [...owners].flatMap((el) => {
+				const r = el.getBoundingClientRect();
+				if (!r.width || !r.height || r.bottom < 0 || r.top > innerHeight)
+					return [];
+				if (getComputedStyle(el).visibility !== "visible") return [];
+				return [{ el, r }];
+			});
+			strings.forEach((el) => {
+				const r = el.getBoundingClientRect();
+				const x = r.left + r.width / 2;
+				const owner = el.parentElement;
+				let cut = r.top;
+				for (const { el: box, r: b } of boxes) {
+					if (box.contains(el) || owner?.contains(box)) continue;
+					if (x < b.left || x > b.right) continue;
+					if (b.bottom <= cut || b.top >= r.bottom) continue;
+					cut = Math.min(b.bottom, r.bottom);
+				}
+				const local =
+					r.height > 0 ? ((cut - r.top) * el.offsetHeight) / r.height : 0;
+				const clip = local > 0.5 ? `inset(${local.toFixed(1)}px 0 0 0)` : "";
+				if ((clipped.get(el) ?? "") === clip) return;
+				clipped.set(el, clip);
+				el.style.clipPath = clip;
+			});
+		};
+		frame = requestAnimationFrame(update);
+		return () => cancelAnimationFrame(frame);
+	}, []);
+
 	const navOpenedBefore = useRef(false);
 	useEffect(() => {
 		if (!navOpenedBefore.current && !navOpen) return;
