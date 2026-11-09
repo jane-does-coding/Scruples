@@ -466,61 +466,115 @@ export default function Stage({ children }: { children: ReactNode }) {
 		const STRING = 'span[class*="bg-black/60"][class*="w-[0.1vw]"]';
 		const PANEL =
 			'[class*="bg-white"][class*="border-black"]:not([class*="bg-white/0"]), [data-panel]';
-		const masked = new WeakMap<HTMLElement, string>();
-		let frame = 0;
-		const update = () => {
-			frame = requestAnimationFrame(update);
+		const layerOf = (el: Element) => {
+			const z = parseInt(getComputedStyle(el).zIndex);
+			return Number.isNaN(z) ? 0 : z;
+		};
+		const branches = (a: Element, b: Element) => {
+			let lower: Element | null = a;
+			while (lower && !lower.parentElement?.contains(b))
+				lower = lower.parentElement;
+			const common = lower?.parentElement;
+			if (!lower || !common) return null;
+			let upper: Element | null = b;
+			while (upper && upper.parentElement !== common)
+				upper = upper.parentElement;
+			return upper ? { lower, upper } : null;
+		};
+		const canStack = (el: Element) => {
+			const cs = getComputedStyle(el);
+			if (cs.display === "contents") return false;
+			if (cs.position !== "static") return true;
+			const parent = el.parentElement && getComputedStyle(el.parentElement);
+			return !!parent && /flex|grid/.test(parent.display);
+		};
+		const raised = new Map<HTMLElement, string>();
+		const visible = (el: Element, r: DOMRect) => {
+			if (!r.width || !r.height || r.bottom <= 0 || r.top >= innerHeight)
+				return false;
+			const cs = getComputedStyle(el);
+			return cs.visibility === "visible" && cs.opacity !== "0";
+		};
+		const order = () => {
+			raised.forEach((z, el) => (el.style.zIndex = z));
+			raised.clear();
 			const strings = [...document.querySelectorAll<HTMLElement>(STRING)];
 			if (!strings.length) return;
 			const panels = [...document.querySelectorAll(PANEL)].flatMap((el) => {
 				const r = el.getBoundingClientRect();
-				if (!r.width || !r.height || r.bottom < 0 || r.top > innerHeight)
-					return [];
-				const style = getComputedStyle(el);
-				if (style.visibility !== "visible" || style.opacity === "0") return [];
-				return [{ el, r }];
+				return visible(el, r) ? [{ el, r }] : [];
 			});
-			strings.forEach((el) => {
-				const r = el.getBoundingClientRect();
+			const pairs: { lower: Element; upper: HTMLElement }[] = [];
+			strings.forEach((string) => {
+				const r = string.getBoundingClientRect();
+				if (!r.height) return;
 				const x = r.left + r.width / 2;
-				const scale = r.height > 0 ? el.offsetHeight / r.height : 1;
-				const layer = el.closest("[aria-modal]");
-				const gaps = panels
-					.filter(
-						({ el: panel, r: p }) =>
-							!panel.contains(el) &&
-							(!layer || layer.contains(panel)) &&
-							x >= p.left &&
-							x <= p.right &&
-							p.bottom > r.top &&
-							p.top < r.bottom,
+				const owner =
+					string.parentElement?.closest(PANEL) ?? string.parentElement;
+				if (!owner) return;
+				const ownerRect = owner.getBoundingClientRect();
+				if (!visible(owner, ownerRect)) return;
+				const layer = string.closest("[aria-modal]");
+				panels.forEach(({ el: panel, r: p }) => {
+					if (
+						panel.closest("[aria-modal]") !== layer ||
+						panel.contains(string) ||
+						owner.contains(panel) ||
+						panel.contains(owner) ||
+						x < p.left ||
+						x > p.right ||
+						p.bottom <= r.top ||
+						p.top >= r.bottom ||
+						p.top >= ownerRect.top
 					)
-					.map(({ r: p }) => [
-						(Math.max(p.top, r.top) - r.top) * scale,
-						(Math.min(p.bottom, r.bottom) - r.top) * scale,
-					])
-					.sort((m, n) => m[0] - n[0])
-					.reduce<number[][]>((merged, gap) => {
-						const last = merged[merged.length - 1];
-						if (last && gap[0] <= last[1]) last[1] = Math.max(last[1], gap[1]);
-						else merged.push(gap);
-						return merged;
-					}, []);
-				const stops = gaps.map(
-					([from, to]) =>
-						`#000 ${from.toFixed(1)}px, transparent ${from.toFixed(1)}px ${to.toFixed(1)}px, #000 ${to.toFixed(1)}px`,
-				);
-				const mask = stops.length
-					? `linear-gradient(to bottom, ${stops.join(", ")})`
-					: "";
-				if ((masked.get(el) ?? "") === mask) return;
-				masked.set(el, mask);
-				el.style.maskImage = mask;
-				el.style.setProperty("-webkit-mask-image", mask);
+						return;
+					const pair = branches(string, panel);
+					if (pair && canStack(pair.upper))
+						pairs.push({
+							lower: pair.lower,
+							upper: pair.upper as HTMLElement,
+						});
+				});
 			});
+			for (let pass = 0; pass < 8; pass++) {
+				let changed = false;
+				pairs.forEach(({ lower, upper }) => {
+					const below = layerOf(lower);
+					const above = layerOf(upper);
+					const after =
+						lower.compareDocumentPosition(upper) &
+						Node.DOCUMENT_POSITION_FOLLOWING;
+					if (above > below || (above === below && after)) return;
+					if (!raised.has(upper)) raised.set(upper, upper.style.zIndex);
+					upper.style.zIndex = `${below + 1}`;
+					changed = true;
+				});
+				if (!changed) break;
+			}
 		};
-		frame = requestAnimationFrame(update);
-		return () => cancelAnimationFrame(frame);
+		let frame = 0;
+		const schedule = () => {
+			cancelAnimationFrame(frame);
+			frame = requestAnimationFrame(order);
+		};
+		const observer = new MutationObserver(schedule);
+		observer.observe(document.body, {
+			childList: true,
+			subtree: true,
+			attributes: true,
+			attributeFilter: ["class"],
+		});
+		window.addEventListener("resize", schedule);
+		document.addEventListener("transitionend", schedule, true);
+		document.addEventListener("animationend", schedule, true);
+		schedule();
+		return () => {
+			cancelAnimationFrame(frame);
+			observer.disconnect();
+			window.removeEventListener("resize", schedule);
+			document.removeEventListener("transitionend", schedule, true);
+			document.removeEventListener("animationend", schedule, true);
+		};
 	}, []);
 
 	const navOpenedBefore = useRef(false);
