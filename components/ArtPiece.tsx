@@ -45,10 +45,11 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 			>
 				<img
 					src={frame.src}
+					data-panel
 					className={`${tall ? "max-h-[56svh]" : "max-h-[40svh]"} max-w-[30vw] portrait:max-h-[24svh] portrait:max-w-[80vw] test-shadow z-2 relative`}
 					alt={`${frame.label} by ${frame.artist}, in a picture frame`}
 				/>
-				<Strings inset="3vw" place="h-[30svh] top-[-25svh]" className="z-1" />
+				<Strings inset="3vw" className="z-1" />
 			</div>
 
 			<div className="absolute z-3 top-0 left-[34.5vw] w-[28vw] flex flex-col gap-[1svh] portrait:top-[32.5svh] portrait:left-[4vw] portrait:w-[92vw] portrait:gap-[1.2svh]">
@@ -122,7 +123,7 @@ export default function ArtPiece({ frame }: { frame: Frame }) {
 				</p>
 				<img
 					src={asset("/imgs/stage/popsicle-stick.webp")}
-					className="absolute w-[2.3vw] portrait:w-[2.5svh] h-[38svh] max-w-none bottom-[-19svh] left-[50%] translate-x-[-50%] z-0"
+					className="absolute w-[2.3vw] portrait:hidden h-[38svh] max-w-none bottom-[-19svh] left-[50%] translate-x-[-50%] z-0"
 					alt="Wooden popsicle stick holding up the labels"
 				/>
 			</div>

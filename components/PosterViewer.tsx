@@ -101,7 +101,7 @@ export default function PosterViewer({ onClose }: { onClose: () => void }) {
 						transform: shown ? "translateY(0)" : "translateY(-110svh)",
 					}}
 				>
-					<Strings inset="30%" place="h-[100svh] bottom-[calc(100%-6svh)]" />
+					<Strings inset="30%" place="h-[200svh] bottom-[calc(100%-6svh)]" />
 					<div className="relative h-[72svh] portrait:h-[38svh] aspect-[2706/3897] test-shadow-darker">
 						<img
 							src={asset("/imgs/stage/sunbeam-poster.webp")}
@@ -119,15 +119,32 @@ export default function PosterViewer({ onClose }: { onClose: () => void }) {
 							className="absolute inset-0 w-full h-full"
 							alt=""
 						/>
+						<span
+							data-panel
+							aria-hidden
+							className="absolute pointer-events-none"
+							style={{
+								left: "1.4%",
+								top: "1.7%",
+								right: "1.1%",
+								bottom: "1.1%",
+							}}
+						/>
 					</div>
-					<button
-						onClick={close}
-						autoFocus
-						className="relative text-[3svh] portrait:text-[2.3svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[3vw] py-[0.5svh] cursor-pointer drop-shadow-md drop-shadow-black/40"
-					>
-						<Strings inset="20%" place="h-[2svh] top-[-2svh]" />
-						Close
-					</button>
+					<div className="relative">
+						<Strings
+							inset="20%"
+							place="h-[200svh] top-[-200svh]"
+							className="-z-1"
+						/>
+						<button
+							onClick={close}
+							autoFocus
+							className="relative text-[3svh] portrait:text-[2.3svh] scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] portrait:px-[3vw] py-[0.5svh] cursor-pointer drop-shadow-md drop-shadow-black/40"
+						>
+							Close
+						</button>
+					</div>
 				</div>
 				<div className="contents portrait:flex portrait:gap-[3vw] portrait:items-start portrait:w-full">
 					<div className="hidden portrait:contents">

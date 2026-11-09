@@ -465,7 +465,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		const STRING = 'span[class*="bg-black/60"][class*="w-[0.1vw]"]';
 		const PANEL =
-			'[class*="bg-white"][class*="border-black"]:not([class*="bg-white/0"])';
+			'[class*="bg-white"][class*="border-black"]:not([class*="bg-white/0"]), [data-panel]';
 		const masked = new WeakMap<HTMLElement, string>();
 		let frame = 0;
 		const update = () => {
@@ -484,10 +484,12 @@ export default function Stage({ children }: { children: ReactNode }) {
 				const r = el.getBoundingClientRect();
 				const x = r.left + r.width / 2;
 				const scale = r.height > 0 ? el.offsetHeight / r.height : 1;
+				const layer = el.closest("[aria-modal]");
 				const gaps = panels
 					.filter(
 						({ el: panel, r: p }) =>
 							!panel.contains(el) &&
+							(!layer || layer.contains(panel)) &&
 							x >= p.left &&
 							x <= p.right &&
 							p.bottom > r.top &&
@@ -497,7 +499,13 @@ export default function Stage({ children }: { children: ReactNode }) {
 						(Math.max(p.top, r.top) - r.top) * scale,
 						(Math.min(p.bottom, r.bottom) - r.top) * scale,
 					])
-					.sort((m, n) => m[0] - n[0]);
+					.sort((m, n) => m[0] - n[0])
+					.reduce<number[][]>((merged, gap) => {
+						const last = merged[merged.length - 1];
+						if (last && gap[0] <= last[1]) last[1] = Math.max(last[1], gap[1]);
+						else merged.push(gap);
+						return merged;
+					}, []);
 				const stops = gaps.map(
 					([from, to]) =>
 						`#000 ${from.toFixed(1)}px, transparent ${from.toFixed(1)}px ${to.toFixed(1)}px, #000 ${to.toFixed(1)}px`,

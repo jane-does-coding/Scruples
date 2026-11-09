@@ -48,7 +48,7 @@ export default function ArtViewer({
 					transform: shown ? "translateY(0)" : "translateY(-110svh)",
 				}}
 			>
-				<Strings inset="30%" place="h-[100svh] bottom-[calc(100%-12svh)]" />
+				<Strings inset="30%" place="h-[200svh] bottom-[calc(100%-12svh)]" />
 				<img
 					src={image}
 					className="relative z-1 max-h-[70svh] max-w-[80vw] w-auto h-auto test-shadow-darker"
