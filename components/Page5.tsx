@@ -33,7 +33,7 @@ const FRAME3_MS = SPIRAL_GONE_MS + 500;
 const AWW_MS = FRAME3_MS + 1100;
 
 const DAPHNE_WALK_START_MS = 600;
-const WALK_MS = 4000;
+const WALK_MS = 3500;
 const DAPHNE_ARRIVED_MS = DAPHNE_WALK_START_MS + WALK_MS;
 const THIS_IS_DAPHNE_MS = DAPHNE_ARRIVED_MS + 500;
 const LIKES_TO_DRAW_MS = THIS_IS_DAPHNE_MS + 200;
@@ -78,7 +78,6 @@ const PROPS = [
 		alt: "The Earth, held up on a popsicle stick",
 		size: "h-[24svh] portrait:h-[13svh] bottom-[4svh] portrait:bottom-[3svh]",
 		stick: "top-[75%] h-[40svh]",
-		tilt: "-4deg",
 	},
 	{
 		line: 1,
@@ -86,7 +85,6 @@ const PROPS = [
 		alt: "A pair of glasses, held up on a popsicle stick",
 		size: "h-[15svh] portrait:h-[8svh] bottom-[7svh] portrait:bottom-[5svh] ml-[-2.5vw] portrait:ml-0",
 		stick: "top-[1svh] h-[44svh]",
-		tilt: "3deg",
 	},
 	{
 		line: 2,
@@ -94,7 +92,6 @@ const PROPS = [
 		alt: "A paint palette, held up on a popsicle stick",
 		size: "h-[24svh] portrait:h-[13svh] bottom-[4svh] portrait:bottom-[3svh]",
 		stick: "top-[75%] h-[40svh]",
-		tilt: "-3deg",
 	},
 	{
 		line: 3,
@@ -102,7 +99,6 @@ const PROPS = [
 		alt: "A heart, held up on a popsicle stick",
 		size: "h-[26svh] portrait:h-[14svh] bottom-[4svh] portrait:bottom-[3svh]",
 		stick: "top-[75%] h-[40svh]",
-		tilt: "5deg",
 	},
 ];
 
@@ -162,6 +158,11 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 	const [replied, setReplied] = useState(false);
 	const chatCleared = zhenyaStage >= 6;
 	const [answerLine, setAnswerLine] = useState<number | null>(null);
+	const [furthestLine, setFurthestLine] = useState(-1);
+	const showLine = (line: number) => {
+		setAnswerLine(line);
+		setFurthestLine((furthest) => Math.max(furthest, line));
+	};
 	const daphneSays = answerLine !== null ? DAPHNE_ANSWER[answerLine] : null;
 	const daphneSaid = useLeaving(daphneSays);
 	const nextUp = answerLine !== null && answerLine < DAPHNE_ANSWER.length - 1;
@@ -311,7 +312,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 
 	const askWhy = () => {
 		setZhenyaStage(6);
-		later(ANSWER_START_MS, () => setAnswerLine(0));
+		later(ANSWER_START_MS, () => showLine(0));
 	};
 	const rowExit = (row: number) =>
 		chatCleared ? row * CHAT_EXIT_STAGGER_MS : 0;
@@ -345,20 +346,19 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				}}
 			>
 				<span
-					className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] absolute"
+					className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] left-0 absolute"
 					style={{
-						transition: `rotate ${TILT}, left ${TILT}`,
+						transformOrigin: "50% 100%",
+						transition: `rotate ${TILT}`,
 						rotate: step >= 3 ? "-6deg" : "0deg",
-						left: step >= 3 ? "-2.8vw" : "0",
 					}}
 				></span>
 				<span
-					className="w-[0.1vw] bg-black/60 h-svh absolute"
+					className="w-[0.1vw] bg-black/60 h-svh top-[-100svh] right-0 absolute"
 					style={{
-						transition: `rotate ${TILT}, right ${TILT}, top ${TILT}`,
+						transformOrigin: "50% 100%",
+						transition: `rotate ${TILT}`,
 						rotate: step >= 3 ? "-6deg" : "0deg",
-						right: step >= 3 ? "3vw" : "0",
-						top: step >= 3 ? "-99.7svh" : "-100svh",
 					}}
 				></span>
 				MAGIC BUTTON
@@ -453,8 +453,12 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				className="absolute top-[-28svh] h-svh portrait:h-[52svh] portrait:top-[-12svh] translate-x-[-50%] scale-x-[-1] z-4"
 				style={{
 					visibility: daphneIn ? "visible" : "hidden",
-					transition: `left ${WALK_MS}ms cubic-bezier(0.25, 0.1, 0.45, 1)`,
-					left: daphneIn ? (portrait ? "78%" : "88%") : "160%",
+					transition: `transform ${WALK_MS}ms cubic-bezier(0.25, 0.1, 0.45, 1)`,
+					left: portrait ? "78%" : "88%",
+					transform: daphneIn
+						? "translateX(0)"
+						: `translateX(${portrait ? "-82vw" : "-72vw"})`,
+					willChange: "transform",
 				}}
 			>
 				<img
@@ -792,7 +796,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					</p>
 				)}
 				<button
-					onClick={() => setAnswerLine((line) => (line ?? 0) + 1)}
+					onClick={() => showLine((answerLine ?? 0) + 1)}
 					disabled={!nextUp}
 					tabIndex={nextUp ? undefined : -1}
 					className="absolute top-[21svh] left-[80%] portrait:top-[16svh] portrait:left-[75%] translate-x-[-50%] w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
@@ -802,7 +806,7 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 					next {"->"}
 				</button>
 				<button
-					onClick={() => setAnswerLine((line) => Math.max(0, (line ?? 0) - 1))}
+					onClick={() => showLine(Math.max(0, (answerLine ?? 0) - 1))}
 					disabled={!backUp}
 					tabIndex={backUp ? undefined : -1}
 					className="absolute top-[21svh] left-[20%] portrait:top-[16svh] portrait:left-[25%] translate-x-[-50%] w-max text-[3svh] portrait:text-[2.3svh] portrait:px-[2.5vw] text-center scribbler bg-white border-[0.3svh] border-black border-dashed px-[1vw] py-[0.5svh] drop-shadow-md drop-shadow-black/40 test-shadow-darker cursor-pointer disabled:cursor-default"
@@ -815,20 +819,21 @@ export default function Page5({ nextPage, curtainsOpen }: PageProps) {
 				</button>
 			</div>
 
-			{PROPS.map(({ line, src, alt, size, stick, tilt }, i) => {
+			{PROPS.map(({ line, src, alt, size, stick }, i) => {
 				const shown = answerLine !== null && answerLine >= line;
 				const up =
 					shown && (i === PROPS.length - 1 || answerLine < PROPS[i + 1].line);
+				const seen = furthestLine >= line;
 				return (
 					<div
 						key={src}
 						className={`absolute left-[60%] portrait:left-[66%] translate-x-[-50%] ${size} z-5 test-shadow-darker`}
 						style={{
-							...hang(shown, up, "bottom", {
+							...hang(seen, up, "bottom", {
 								ms: 900,
 								easing: DOLL_DROP,
+								delay: 350,
 							}),
-							rotate: tilt,
 						}}
 					>
 						<img

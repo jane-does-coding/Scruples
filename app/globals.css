@@ -585,6 +585,18 @@ html.readable-font .font-sample-readable {
 	transition: filter 900ms ease;
 }
 
+.fade-in {
+	transition:
+		opacity 500ms ease,
+		filter 900ms ease;
+}
+
+@starting-style {
+	.fade-in {
+		opacity: 0;
+	}
+}
+
 html.dim-controls .stage-control {
 	--tw-brightness: brightness(78%);
 }

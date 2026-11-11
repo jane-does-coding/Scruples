@@ -19,11 +19,13 @@ export default function Strings({
 		<>
 			<span
 				aria-hidden
+				data-string
 				className={`${base} ${inset ? "" : "left-0"}`}
 				style={inset ? { left: inset } : undefined}
 			/>
 			<span
 				aria-hidden
+				data-string
 				className={`${base} ${inset ? "" : "right-0"}`}
 				style={inset ? { right: inset } : undefined}
 			/>

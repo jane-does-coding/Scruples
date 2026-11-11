@@ -491,6 +491,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 					? "stars"
 					: "none";
 	const [arrived, setArrived] = useState(false);
+	const labelsIn = pushing || arrived;
 
 	const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 	const later = (ms: number, fn: () => void) =>
@@ -723,18 +724,18 @@ export default function Page10({ curtainsOpen }: PageProps) {
 				role="status"
 				aria-live="polite"
 				className={`fixed top-[16svh] portrait:top-[-10svh] left-[66vw] portrait:left-[70vw] translate-x-[-50%] w-max text-[3.4svh] portrait:text-[2.3svh] z-9 ${LABEL}`}
-				style={away(arrived, arrived && !phase)}
+				style={away(labelsIn, labelsIn && !phase)}
 			>
 				<Strings inset="1vw" />
-				{arrived ? "The backstage??" : ""}
+				{labelsIn ? "The backstage??" : ""}
 			</p>
 
 			<button
 				onClick={portrait ? () => toggle("lamp") : flashHint}
-				disabled={!arrived || !!phase}
-				tabIndex={arrived && !phase ? undefined : -1}
+				disabled={!labelsIn || !!phase}
+				tabIndex={labelsIn && !phase ? undefined : -1}
 				className={`!fixed top-[3svh] left-[60vw] portrait:top-[3svh] portrait:left-[50vw] translate-x-[-50%] w-max text-[2.8svh] portrait:text-[2svh] z-9 ${BUTTON}`}
-				style={away(arrived, arrived && !phase, 300)}
+				style={away(labelsIn, labelsIn && !phase, 300)}
 			>
 				<Strings inset="1vw" />
 				{portrait ? "Turn on the lamp" : "Try clicking around"}

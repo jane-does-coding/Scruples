@@ -6,9 +6,30 @@ import PopsicleButton from "@/components/PopsicleButton";
 import { useStage } from "@/components/Stage";
 import useBlinkingDoll from "@/components/useBlinkingDoll";
 import { HATS, type HatId } from "@/lib/shop";
+import { asset } from "@/lib/asset";
 
 const LABEL_DROP = "cubic-bezier(0.34, 1.25, 0.64, 1)";
 const DOLL_DROP = "cubic-bezier(0.34, 1.1, 0.64, 1)";
+
+const EXTRAS = [
+	{
+		id: "pins",
+		item: "pins",
+		name: "Button pins",
+		image: asset("/imgs/shop/buttons.webp"),
+		wear: asset("/imgs/zhenya/badges-wear.webp"),
+	},
+	{
+		id: "ribbon",
+		item: "honorable-mention",
+		name: "Honorable mention ribbon",
+		image: asset("/imgs/awards/honorable-mention.webp"),
+		wear: asset("/imgs/zhenya/ribbon-wear.webp"),
+	},
+] as const;
+
+const SLOT =
+	"relative w-[calc(14svh+1vw)] h-[calc(14svh+1vw)] portrait:w-[16vw] portrait:h-[16vw] flex items-center justify-center p-[1svh] bg-white border-black cursor-pointer drop-shadow-md drop-shadow-black/40 border-[0.3svh]";
 
 const DOLL =
 	"h-[103svh] absolute top-[-32svh] left-[calc(2svh+2vw)] portrait:h-[66svh] portrait:top-[-10svh] portrait:left-[-16vw] max-w-none";
@@ -23,8 +44,16 @@ const hang = (
 });
 
 export default function WardrobePage() {
-	const { curtainsOpen, goTo, goBack, owned, wearing, equip, pins, ribbon } =
-		useStage();
+	const {
+		curtainsOpen,
+		goTo,
+		goBack,
+		owned,
+		wearing,
+		pinsOn,
+		ribbonOn,
+		dress,
+	} = useStage();
 	const dollSrc = useBlinkingDoll();
 	const [shown, setShown] = useState(false);
 	useEffect(() => {
@@ -34,7 +63,15 @@ export default function WardrobePage() {
 	}, [curtainsOpen]);
 
 	const [trying, setTrying] = useState(wearing);
+	const [tryingExtras, setTryingExtras] = useState({
+		pins: pinsOn,
+		ribbon: ribbonOn,
+	});
 	const hasHats = owned.includes("hats");
+	const extras = EXTRAS.filter(({ item }) => owned.includes(item));
+	const canWear = hasHats || extras.length > 0;
+	const extrasAt = hasHats ? 980 : 500;
+	const saveAt = Math.max(1300, extrasAt + 200 + extras.length * 120);
 
 	return (
 		<div className="h-full">
@@ -51,25 +88,19 @@ export default function WardrobePage() {
 						: "Zhenya, a marionette doll on strings"
 				}
 			/>
-			{ribbon && (
-				// eslint-disable-next-line @next/next/no-img-element
-				<img
-					src={ribbon}
-					className={`${DOLL} z-5 pointer-events-none`}
-					style={hang(shown, { ms: 900, easing: DOLL_DROP })}
-					alt=""
-					aria-hidden
-				/>
-			)}
-			{pins && (
-				// eslint-disable-next-line @next/next/no-img-element
-				<img
-					src={pins}
-					className={`${DOLL} z-5 pointer-events-none`}
-					style={hang(shown, { ms: 900, easing: DOLL_DROP })}
-					alt=""
-					aria-hidden
-				/>
+			{extras.map(
+				({ id, wear }) =>
+					tryingExtras[id] && (
+						// eslint-disable-next-line @next/next/no-img-element
+						<img
+							key={id}
+							src={wear}
+							className={`${DOLL} z-5 pointer-events-none hat-on`}
+							style={hang(shown, { ms: 900, easing: DOLL_DROP })}
+							alt=""
+							aria-hidden
+						/>
+					),
 			)}
 			{trying && (
 				// eslint-disable-next-line @next/next/no-img-element
@@ -83,60 +114,110 @@ export default function WardrobePage() {
 				/>
 			)}
 
-			<div className="absolute z-6 top-[1svh] right-[5vw] portrait:top-[37svh] portrait:right-auto portrait:left-[50%] portrait:translate-x-[-50%] flex flex-col items-center gap-[2.2svh] portrait:gap-[1.5svh]">
+			<div
+				className={`absolute z-6 top-[1svh] ${hasHats && extras.length ? "right-[2vw]" : "right-[5vw]"} portrait:top-[37svh] portrait:right-auto portrait:left-[50%] portrait:translate-x-[-50%] flex flex-col items-center gap-[2.2svh] portrait:gap-[1.5svh]`}
+			>
 				<h2
 					className={`${LABEL} text-[4svh] portrait:text-[2.8svh]`}
 					style={{ ...hang(shown, { delay: 300 }), zIndex: 9 }}
 				>
 					<Strings />
-					{hasHats ? "Try on a hat" : "No hats yet"}
+					{hasHats
+						? "Try on a hat"
+						: canWear
+							? "Try something on"
+							: "No hats yet"}
 				</h2>
 
-				{hasHats ? (
+				{canWear ? (
 					<>
-						<ul className="relative z-[8] grid grid-cols-2 portrait:grid-cols-4 gap-[1.5vw] portrait:gap-[2vw]">
-							{(Object.keys(HATS) as HatId[]).map((id, i) => (
-								<li
-									key={id}
-									className="relative"
-									style={{
-										...hang(shown, { delay: 500 + i * 120 }),
-										zIndex: 6 - i,
-									}}
+						<div className="relative z-[8] flex items-start gap-[1.5vw] portrait:flex-col portrait:items-center portrait:gap-[1.5svh]">
+							{hasHats && (
+								<ul className="relative z-[8] grid grid-cols-2 portrait:grid-cols-4 gap-[1.5vw] portrait:gap-[2vw]">
+									{(Object.keys(HATS) as HatId[]).map((id, i) => (
+										<li
+											key={id}
+											className="relative"
+											style={{
+												...hang(shown, { delay: 500 + i * 120 }),
+												zIndex: 6 - i,
+											}}
+										>
+											<button
+												onClick={() => setTrying((t) => (t === id ? null : id))}
+												aria-pressed={trying === id}
+												aria-label={HATS[id].name}
+												className={`${SLOT} ${trying === id ? "" : "border-dashed"}`}
+											>
+												<Strings />
+												{/* eslint-disable-next-line @next/next/no-img-element */}
+												<img
+													src={HATS[id].image}
+													className="max-w-full max-h-full w-auto h-auto"
+													alt=""
+												/>
+											</button>
+										</li>
+									))}
+								</ul>
+							)}
+							{extras.length > 0 && (
+								<ul
+									aria-label="Extras"
+									className="relative z-[6] grid grid-cols-1 portrait:grid-cols-2 gap-[1.5vw] portrait:gap-[2vw]"
 								>
-									<button
-										onClick={() => setTrying((t) => (t === id ? null : id))}
-										aria-pressed={trying === id}
-										aria-label={HATS[id].name}
-										className={`relative w-[calc(14svh+1vw)] h-[calc(14svh+1vw)] portrait:w-[16vw] portrait:h-[16vw] flex items-center justify-center p-[1svh] bg-white border-black cursor-pointer drop-shadow-md drop-shadow-black/40 border-[0.3svh] ${trying === id ? "" : "border-dashed"}`}
-									>
-										<Strings />
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={HATS[id].image}
-											className="max-w-full max-h-full w-auto h-auto"
-											alt=""
-										/>
-									</button>
-								</li>
-							))}
-						</ul>
-						<button
-							onClick={() => setTrying(null)}
-							aria-pressed={!trying}
-							className={`${BUTTON.replace(" border-dashed", "")} ${trying ? "border-dashed" : ""} self-stretch text-[3svh] portrait:text-[2.3svh]`}
-							style={{ ...hang(shown, { delay: 1100 }), zIndex: 7 }}
-						>
-							<Strings />
-							No hat
-						</button>
+									{extras.map(({ id, name, image }, i) => (
+										<li
+											key={id}
+											className="relative"
+											style={{
+												...hang(shown, { delay: extrasAt + i * 120 }),
+												zIndex: 6 - i,
+											}}
+										>
+											<button
+												onClick={() =>
+													setTryingExtras((on) => ({ ...on, [id]: !on[id] }))
+												}
+												aria-pressed={tryingExtras[id]}
+												aria-label={name}
+												className={`${SLOT} ${tryingExtras[id] ? "" : "border-dashed"}`}
+											>
+												<Strings />
+												{/* eslint-disable-next-line @next/next/no-img-element */}
+												<img
+													src={image}
+													className="max-w-full max-h-full w-auto h-auto"
+													alt=""
+												/>
+											</button>
+										</li>
+									))}
+								</ul>
+							)}
+						</div>
+						{hasHats && (
+							<button
+								onClick={() => setTrying(null)}
+								aria-pressed={!trying}
+								className={`${BUTTON.replace(" border-dashed", "")} ${trying ? "border-dashed" : ""} self-stretch text-[3svh] portrait:text-[2.3svh]`}
+								style={{ ...hang(shown, { delay: 1100 }), zIndex: 7 }}
+							>
+								<Strings />
+								No hat
+							</button>
+						)}
 						<div
-							className="relative z-[6] flex gap-[1.5vw] portrait:gap-[3vw]"
-							style={hang(shown, { delay: 1300 })}
+							className="relative z-[5] flex gap-[1.5vw] portrait:gap-[3vw]"
+							style={hang(shown, { delay: saveAt })}
 						>
 							<button
 								onClick={() => {
-									equip(trying);
+									dress({
+										hat: trying,
+										pins: tryingExtras.pins,
+										ribbon: tryingExtras.ribbon,
+									});
 									goBack();
 								}}
 								className={`${BUTTON} text-[4svh] portrait:text-[2.8svh]`}

@@ -18,7 +18,7 @@ const LEFT = [
 const RIGHT = [
 	{
 		title: "What is Sunbeam?",
-		body: "38 all-girls hackathons happening on the same day, internationally in 38 different cities! Got together 1,600+ girls to code and make projects. Sunbeam was brought to live by Athena Initiative from Hack Club.",
+		body: "Sunbeam happened on August 29th, 2026! 38 all-girls hackathons happening on the same day, internationally in 38 different cities! Got together 1,600+ girls to code and make projects. Sunbeam was brought to live by Athena Initiative from Hack Club.",
 	},
 ];
 

@@ -45,6 +45,8 @@ const MOVE_MS = 900;
 const RISE_MS = 900;
 const RISE_AT_MS = 300;
 const RISE_STAGGER_MS = 100;
+const POP_STAGGER_MS = 180;
+const POP_MS = 700;
 
 const turnOf = (along: number) => 2 * Math.abs(along) - (along < 0 ? 2 : 1);
 
@@ -70,21 +72,42 @@ export default function Page2({
 		visibility: shown ? ("visible" as const) : ("hidden" as const),
 	});
 	const [step, setStep] = useState(0);
+	const [popAt, setPopAt] = useState<number[]>([]);
 
 	const portrait = usePortrait();
 
 	useEffect(() => {
 		if (!curtainsOpen) return;
 
+		const frames = [
+			...(marqueeRef.current?.querySelectorAll("a") ?? []),
+		] as HTMLElement[];
+		const onScreen = frames
+			.map((el, i) => ({ i, rect: el.getBoundingClientRect() }))
+			.filter(({ rect }) => rect.right > 0 && rect.left < innerWidth)
+			.sort((a, b) => a.rect.left - b.rect.left);
+		const order = frames.map(() => onScreen.length * POP_STAGGER_MS);
+		onScreen.forEach(({ i }, n) => (order[i] = n * POP_STAGGER_MS));
+		const dollAt = onScreen.length * POP_STAGGER_MS + POP_MS - 200;
+
 		const timers = [
 			[0, 1],
-			[400, 2],
-			[800, 3],
-			[2000, 4],
+			[dollAt, 2],
+			[dollAt + 400, 3],
+			[dollAt + 800, 4],
+			[dollAt + 2000, 5],
 		].map(([ms, n]) => setTimeout(() => setStep((s) => Math.max(s, n)), ms));
+		const start = setTimeout(() => setPopAt(order), 0);
 
-		return () => timers.forEach(clearTimeout);
+		return () => {
+			timers.forEach(clearTimeout);
+			clearTimeout(start);
+		};
 	}, [curtainsOpen]);
+	const popIn = (i: number) => ({
+		transform: popAt.length ? "translateY(0)" : "translateY(110svh)",
+		transition: `transform ${POP_MS}ms ${FOCUS_DROP} ${popAt[i] ?? 0}ms`,
+	});
 
 	const [hoveringArt, setHoveringArt] = useState(false);
 	const [blinking, setBlinking] = useState(false);
@@ -268,10 +291,10 @@ export default function Page2({
 				src={dollImage}
 				className="h-svh absolute top-[-27svh] left-[-8vw] portrait:h-[62svh] portrait:top-[-10svh] portrait:left-[-22vw] max-w-none test-shadow-darker z-5"
 				style={{
-					...drop(step >= 1, 900, DOLL_DROP),
-					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",
+					...drop(step >= 2, 900, DOLL_DROP),
+					transform: step >= 2 ? "translateY(0)" : "translateY(-120svh)",
 					translate: open ? "-4vw 0" : "0 0",
-					transition: `${drop(step >= 1, 900, DOLL_DROP).transition}, translate 700ms ${FOCUS_DROP} ${open ? focus.moveAt : 0}ms`,
+					transition: `${drop(step >= 2, 900, DOLL_DROP).transition}, translate 700ms ${FOCUS_DROP} ${open ? focus.moveAt : 0}ms`,
 				}}
 				alt="Zhenya, a marionette doll on strings"
 			/>
@@ -279,9 +302,9 @@ export default function Page2({
 			<h1
 				className="text-[3svh] portrait:text-[2.3svh] max-w-[70%] mx-auto text-center scribbler absolute top-[-7svh] right-[25vw] portrait:top-0 portrait:right-[12vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
-					...drop(step >= 2),
+					...drop(step >= 3),
 					transform:
-						step >= 2 && !open ? "translateY(0)" : "translateY(-60svh)",
+						step >= 3 && !open ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
 				<Strings />
@@ -290,9 +313,9 @@ export default function Page2({
 			<p
 				className="text-[3svh] portrait:text-[2.3svh] max-w-[70%] mx-auto text-center scribbler absolute top-[1svh] right-[13vw] portrait:top-[8svh] portrait:right-[16vw] bg-white border-[0.2svh] border-black px-[2vw] py-[1svh] z-2 drop-shadow-md drop-shadow-black/40 test-shadow"
 				style={{
-					...drop(step >= 3),
+					...drop(step >= 4),
 					transform:
-						step >= 3 && !open ? "translateY(0)" : "translateY(-60svh)",
+						step >= 4 && !open ? "translateY(0)" : "translateY(-60svh)",
 				}}
 			>
 				<Strings />
@@ -342,21 +365,26 @@ export default function Page2({
 								}
 								style={placeFrame(copy, index)}
 							>
-								<img
-									src={asset("/imgs/stage/popsicle.webp")}
-									className="absolute top-[30%] left-[50%] translate-x-[-50%] h-[80svh] min-w-[22vw] portrait:min-w-[22svh] z-1"
-									alt="Wooden popsicle stick holding up the frame"
-									data-hit
-								/>
-								<img
-									src={src}
-									className={`${FRAME_SIZES[size]} relative z-2`}
-									alt={`${label}, painting in a picture frame`}
-									data-hit
-									data-frame
-								/>
-								<span className="border-[0.2svh] border-black bg-white px-[1vw] portrait:px-[3vw] py-[0.5svh] text-[3svh] portrait:text-[2.3svh] left-[50%] translate-x-[-50%] absolute top-full mt-[1svh] z-5 w-max whitespace-nowrap portrait:whitespace-normal portrait:max-w-[24svh] text-center">
-									{label.split(" • ")[0]}
+								<span
+									className="relative block"
+									style={popIn(copy * FRAMES.length + index)}
+								>
+									<img
+										src={asset("/imgs/stage/popsicle.webp")}
+										className="absolute top-[30%] left-[50%] translate-x-[-50%] h-[80svh] min-w-[22vw] portrait:min-w-[22svh] z-1"
+										alt="Wooden popsicle stick holding up the frame"
+										data-hit
+									/>
+									<img
+										src={src}
+										className={`${FRAME_SIZES[size]} relative z-2`}
+										alt={`${label}, painting in a picture frame`}
+										data-hit
+										data-frame
+									/>
+									<span className="border-[0.2svh] border-black bg-white px-[1vw] portrait:px-[3vw] py-[0.5svh] text-[3svh] portrait:text-[2.3svh] left-[50%] translate-x-[-50%] absolute top-full mt-[1svh] z-5 w-max whitespace-nowrap portrait:whitespace-normal portrait:max-w-[24svh] text-center">
+										{label.split(" • ")[0]}
+									</span>
 								</span>
 							</a>
 						))}
@@ -419,10 +447,10 @@ export default function Page2({
 				onClick={nextPage}
 				href="/souvenir-shop"
 				style={{
-					...drop(step >= 4, 900, BUTTON_DROP),
+					...drop(step >= 5, 900, BUTTON_DROP),
 					right: "-5vw",
 					transform:
-						step >= 4 && !open ? "translateY(0)" : "translateY(100svh)",
+						step >= 5 && !open ? "translateY(0)" : "translateY(100svh)",
 				}}
 			>
 				Continue {"->"}

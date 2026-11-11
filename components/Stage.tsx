@@ -15,6 +15,11 @@ import ArtViewer from "@/components/ArtViewer";
 import Notebook from "@/components/Notebook";
 import { PhoneCard } from "@/components/Opening";
 import usePortrait from "@/components/usePortrait";
+import {
+	useDropSounds,
+	useStringLayering,
+	useStringTug,
+} from "@/components/useStringEffects";
 import { asset, srcSet } from "@/lib/asset";
 import { opaqueAt } from "@/lib/opaque";
 import { STORY_PAGES, storyHref } from "@/lib/pages";
@@ -85,6 +90,13 @@ type StageContextValue = {
 	equip: (hat: HatId | null) => void;
 	pins: string | null;
 	ribbon: string | null;
+	pinsOn: boolean;
+	ribbonOn: boolean;
+	dress: (outfit: {
+		hat: HatId | null;
+		pins: boolean;
+		ribbon: boolean;
+	}) => void;
 	goBack: () => void;
 	reached: number;
 };
@@ -101,18 +113,10 @@ const ITEM_GROW_MS = 400;
 const ITEM_SHRINK_MS = 350;
 const ITEM_FADE_MS = 200;
 const NAV_GLIDE_MS = 650;
+const SLIDE_VW = 4;
+const SLIDE_OUT_MS = 180;
+const SLIDE_IN_MS = 280;
 const NAV_REOPEN_MS = 800;
-const TEST_ITEMS: ItemId[] = [
-	"pins",
-	"pens",
-	"notebook",
-	"mona-lisa",
-	"daphne-drawing",
-	"hats",
-	"magic-drawing",
-	"prize",
-	"honorable-mention",
-];
 const ROW = "(var(--slot) + var(--slot-gap))";
 const scatter = (n: number, j: number, which: number) => {
 	const x = Math.sin(n * 12.9898 + j * 78.233 + which * 37.719) * 43758.5453;
@@ -130,7 +134,7 @@ const INVENTORY_ARROW =
 	"relative text-[2svh] portrait:text-[1.7svh] bg-white border-[0.2svh] border-black border-dashed px-[0.8vw] portrait:px-[2vw] cursor-pointer disabled:opacity-30 disabled:cursor-default";
 
 const NOTE =
-	"note-pop fixed top-[0.5svh] right-[calc(1.3vw+max(6.5vw,72px))] portrait:top-[1.5vw] portrait:right-[22vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
+	"fade-in fixed top-[0.5svh] right-[calc(1.3vw+max(6.5vw,72px))] portrait:top-[1.5vw] portrait:right-[22vw] z-23 max-w-[40vw] portrait:max-w-[66vw] text-[2.5svh] portrait:text-[1.8svh] text-left scribbler bg-white border-[0.3svh] border-black px-[1vw] py-[0.5svh] drop-shadow-lg drop-shadow-black/60";
 
 const StageContext = createContext<StageContextValue | null>(null);
 
@@ -176,17 +180,19 @@ export default function Stage({ children }: { children: ReactNode }) {
 	const [navOpen, setNavOpen] = useState(false);
 
 	const [money, setMoney] = useState(STARTING_MONEY);
-	const [owned, setOwned] = useState<ItemId[]>(TEST_ITEMS);
+	const [owned, setOwned] = useState<ItemId[]>([]);
 	const [note, setNote] = useState<{
 		text: string;
 		id: number;
 		link: boolean;
 	} | null>(null);
+	const [noteShown, setNoteShown] = useState(false);
 	const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const notify = (text: string, link = true) => {
 		setNote((n) => ({ text, link, id: (n?.id ?? 0) + 1 }));
 		clearTimeout(noteTimer.current);
-		noteTimer.current = setTimeout(() => setNote(null), 5000);
+		setNoteShown(true);
+		noteTimer.current = setTimeout(() => setNoteShown(false), 5000);
 	};
 	const buy = (item: ItemId): BuyResult => {
 		if (owned.includes(item)) return "already-owned";
@@ -251,6 +257,22 @@ export default function Stage({ children }: { children: ReactNode }) {
 		closeItem();
 	};
 	const [ribbonOn, setRibbonOn] = useState(false);
+	const dress = (outfit: {
+		hat: HatId | null;
+		pins: boolean;
+		ribbon: boolean;
+	}) => {
+		if (
+			outfit.hat === wearing &&
+			outfit.pins === pinsOn &&
+			outfit.ribbon === ribbonOn
+		)
+			return;
+		setWearing(outfit.hat);
+		setPinsOn(outfit.pins);
+		setRibbonOn(outfit.ribbon);
+		notify("Zhenya's outfit was saved", false);
+	};
 	const wearRibbon = (on: boolean) => {
 		setRibbonOn(on);
 		notify(
@@ -316,14 +338,29 @@ export default function Stage({ children }: { children: ReactNode }) {
 			: k;
 		return { g, entry: g > 0 ? entries[g - 1] : undefined };
 	});
+	const [slide, setSlide] = useState<{ x: number; instant: boolean } | null>(
+		null,
+	);
+	const sliding = useRef(false);
 	const scrollInventory = (direction: number) => {
-		if (openItem) closeItem();
-		setScrollColumn(
-			Math.max(
-				0,
-				Math.min(firstColumn + direction * SCROLL_COLUMNS, lastColumn),
-			),
+		const next = Math.max(
+			0,
+			Math.min(firstColumn + direction * SCROLL_COLUMNS, lastColumn),
 		);
+		if (next === firstColumn || sliding.current) return;
+		if (openItem) closeItem();
+		sliding.current = true;
+		setSlide({ x: -direction * SLIDE_VW, instant: false });
+		setTimeout(() => {
+			setScrollColumn(next);
+			setSlide({ x: direction * SLIDE_VW, instant: true });
+			requestAnimationFrame(() =>
+				requestAnimationFrame(() => {
+					setSlide(null);
+					sliding.current = false;
+				}),
+			);
+		}, SLIDE_OUT_MS);
 	};
 	const [allPages, setAllPages] = useState(false);
 	const reopening = useRef(false);
@@ -438,144 +475,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 		return () => window.removeEventListener("load", onLoad);
 	}, []);
 
-	useEffect(() => {
-		const hangs = (el: Element) =>
-			!!el.querySelector(':scope > span[class*="bg-black/60"]');
-		const onTransitionEnd = (e: TransitionEvent) => {
-			if (!(e.target instanceof HTMLElement) || !hangs(e.target)) return;
-			if (e.propertyName === "transform") {
-				if (/^translateY\(0(px|svh)?\)$/.test(e.target.style.transform))
-					sound.drop();
-			} else if (e.propertyName === "top") {
-				const top = parseFloat(getComputedStyle(e.target).top);
-				if (top > 0) sound.drop();
-			}
-		};
-		const onAnimationEnd = (e: AnimationEvent) => {
-			if (e.animationName === "hang-in") sound.drop();
-		};
-		document.addEventListener("transitionend", onTransitionEnd);
-		document.addEventListener("animationend", onAnimationEnd);
-		return () => {
-			document.removeEventListener("transitionend", onTransitionEnd);
-			document.removeEventListener("animationend", onAnimationEnd);
-		};
-	}, []);
-
-	useEffect(() => {
-		const STRING = 'span[class*="bg-black/60"][class*="w-[0.1vw]"]';
-		const PANEL =
-			'[class*="bg-white"][class*="border-black"]:not([class*="bg-white/0"]), [data-panel]';
-		const layerOf = (el: Element) => {
-			const z = parseInt(getComputedStyle(el).zIndex);
-			return Number.isNaN(z) ? 0 : z;
-		};
-		const branches = (a: Element, b: Element) => {
-			let lower: Element | null = a;
-			while (lower && !lower.parentElement?.contains(b))
-				lower = lower.parentElement;
-			const common = lower?.parentElement;
-			if (!lower || !common) return null;
-			let upper: Element | null = b;
-			while (upper && upper.parentElement !== common)
-				upper = upper.parentElement;
-			return upper ? { lower, upper } : null;
-		};
-		const canStack = (el: Element) => {
-			const cs = getComputedStyle(el);
-			if (cs.display === "contents") return false;
-			if (cs.position !== "static") return true;
-			const parent = el.parentElement && getComputedStyle(el.parentElement);
-			return !!parent && /flex|grid/.test(parent.display);
-		};
-		const raised = new Map<HTMLElement, string>();
-		const visible = (el: Element, r: DOMRect) => {
-			if (!r.width || !r.height || r.bottom <= 0 || r.top >= innerHeight)
-				return false;
-			const cs = getComputedStyle(el);
-			return cs.visibility === "visible" && cs.opacity !== "0";
-		};
-		const order = () => {
-			raised.forEach((z, el) => (el.style.zIndex = z));
-			raised.clear();
-			const strings = [...document.querySelectorAll<HTMLElement>(STRING)];
-			if (!strings.length) return;
-			const panels = [...document.querySelectorAll(PANEL)].flatMap((el) => {
-				const r = el.getBoundingClientRect();
-				return visible(el, r) ? [{ el, r }] : [];
-			});
-			const pairs: { lower: Element; upper: HTMLElement }[] = [];
-			strings.forEach((string) => {
-				const r = string.getBoundingClientRect();
-				if (!r.height) return;
-				const x = r.left + r.width / 2;
-				const owner =
-					string.parentElement?.closest(PANEL) ?? string.parentElement;
-				if (!owner) return;
-				const ownerRect = owner.getBoundingClientRect();
-				if (!visible(owner, ownerRect)) return;
-				const layer = string.closest("[aria-modal]");
-				panels.forEach(({ el: panel, r: p }) => {
-					if (
-						panel.closest("[aria-modal]") !== layer ||
-						panel.contains(string) ||
-						owner.contains(panel) ||
-						panel.contains(owner) ||
-						x < p.left ||
-						x > p.right ||
-						p.bottom <= r.top ||
-						p.top >= r.bottom ||
-						p.top >= ownerRect.top
-					)
-						return;
-					const pair = branches(string, panel);
-					if (pair && canStack(pair.upper))
-						pairs.push({
-							lower: pair.lower,
-							upper: pair.upper as HTMLElement,
-						});
-				});
-			});
-			for (let pass = 0; pass < 8; pass++) {
-				let changed = false;
-				pairs.forEach(({ lower, upper }) => {
-					const below = layerOf(lower);
-					const above = layerOf(upper);
-					const after =
-						lower.compareDocumentPosition(upper) &
-						Node.DOCUMENT_POSITION_FOLLOWING;
-					if (above > below || (above === below && after)) return;
-					if (!raised.has(upper)) raised.set(upper, upper.style.zIndex);
-					upper.style.zIndex = `${below + 1}`;
-					changed = true;
-				});
-				if (!changed) break;
-			}
-		};
-		let frame = 0;
-		const schedule = () => {
-			cancelAnimationFrame(frame);
-			frame = requestAnimationFrame(order);
-		};
-		const observer = new MutationObserver(schedule);
-		observer.observe(document.body, {
-			childList: true,
-			subtree: true,
-			attributes: true,
-			attributeFilter: ["class"],
-		});
-		window.addEventListener("resize", schedule);
-		document.addEventListener("transitionend", schedule, true);
-		document.addEventListener("animationend", schedule, true);
-		schedule();
-		return () => {
-			cancelAnimationFrame(frame);
-			observer.disconnect();
-			window.removeEventListener("resize", schedule);
-			document.removeEventListener("transitionend", schedule, true);
-			document.removeEventListener("animationend", schedule, true);
-		};
-	}, []);
+	useDropSounds();
+	useStringLayering();
+	useStringTug();
 
 	const navOpenedBefore = useRef(false);
 	useEffect(() => {
@@ -595,48 +497,6 @@ export default function Stage({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
-	useEffect(() => {
-		const tug = (el: Element) => {
-			el.getAnimations()
-				.filter((a) => a.id === "tug")
-				.forEach((a) => a.cancel());
-			const dip = el.animate(
-				[
-					{ translate: "0 0" },
-					{ translate: "0 0.8svh", offset: 0.25 },
-					{ translate: "0 -0.3svh", offset: 0.55 },
-					{ translate: "0 0.1svh", offset: 0.8 },
-					{ translate: "0 0" },
-				],
-				{ duration: 450, easing: "ease-out", composite: "add" },
-			);
-			dip.id = "tug";
-		};
-		const onPointerDown = (e: PointerEvent) => {
-			const dashed =
-				e.target instanceof Element
-					? e.target.closest(".border-dashed:not(:disabled)")
-					: null;
-			if (!dashed || dashed.closest("[data-no-tug]")) return;
-			if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-			const partnerId = dashed.getAttribute("data-tug-with");
-			const partner = partnerId && document.getElementById(partnerId);
-			if (partner) {
-				tug(dashed);
-				tug(partner);
-				return;
-			}
-			let el: Element | null = dashed;
-			while (el && el !== document.body) {
-				if (el.querySelector(':scope > span[class*="bg-black/60"]')) break;
-				el = el.parentElement;
-			}
-			if (!el || el === document.body) return;
-			tug(el);
-		};
-		document.addEventListener("pointerdown", onPointerDown);
-		return () => document.removeEventListener("pointerdown", onPointerDown);
-	}, []);
 	useEffect(() => {
 		if (!navOpen) return;
 		const closeOnEscape = (e: KeyboardEvent) => {
@@ -949,7 +809,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				if (saved) {
 					setReached((furthest) => Math.max(furthest, saved.reached ?? 0));
 					setMoney(saved.money ?? STARTING_MONEY);
-					setOwned([...new Set([...TEST_ITEMS, ...(saved.owned ?? [])])]);
+					setOwned(saved.owned ?? []);
 					setDrawings(saved.drawings ?? []);
 					setWearing(saved.wearing ?? null);
 					setPinsOn(saved.pinsOn ?? false);
@@ -1006,6 +866,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [pathname]);
 
+	const controlsIn: CSSProperties | undefined =
+		animationStage === "loading" ? { opacity: 0 } : undefined;
 	const menuOnly: CSSProperties = {
 		opacity: navOpen ? 1 : 0,
 		visibility: navOpen ? "visible" : "hidden",
@@ -1035,6 +897,9 @@ export default function Stage({ children }: { children: ReactNode }) {
 					ribbonOn && owned.includes("honorable-mention")
 						? asset("/imgs/zhenya/ribbon-wear.webp")
 						: null,
+				pinsOn,
+				ribbonOn,
+				dress,
 				goBack,
 				reached,
 			}}
@@ -1045,7 +910,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 					aria-expanded={navOpen}
 					aria-controls="nav"
 					aria-label={navOpen ? "Close menu" : "Open menu"}
-					className="stage-control fixed top-[0.5svh] font-semibold right-[0.5vw] scribbler text-[2.5svh] cursor-pointer z-23 w-[6.5vw] h-[3vw] min-w-18 min-h-11 portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:w-[18vw] portrait:text-[1.8svh] bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+					style={controlsIn}
+					className="stage-control fade-in fixed top-[0.5svh] font-semibold right-[0.5vw] scribbler text-[2.5svh] cursor-pointer z-23 w-[6.5vw] h-[3vw] min-w-18 min-h-11 portrait:top-[1.5vw] portrait:right-[1.5vw] portrait:w-[18vw] portrait:text-[1.8svh] bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 				>
 					menu
 				</button>
@@ -1054,7 +920,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 					<button
 						onClick={() => setNavOpen(true)}
 						aria-label={`Page ${pageNumber} of ${PAGES.length} - open the page list`}
-						className="stage-control fixed font-semibold bottom-[0.5svh] left-[0.5vw] portrait:bottom-[1.5vw] portrait:left-[1.5vw] z-23 h-[3.5vw] min-h-11 px-[1vw] portrait:px-[3vw] text-[2.5svh] portrait:text-[1.8svh] scribbler cursor-pointer bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+						style={controlsIn}
+						className="stage-control fade-in fixed font-semibold bottom-[0.5svh] left-[0.5vw] portrait:bottom-[1.5vw] portrait:left-[1.5vw] z-23 h-[3.5vw] min-h-11 px-[1vw] portrait:px-[3vw] text-[2.5svh] portrait:text-[1.8svh] scribbler cursor-pointer bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 					>
 						page {pageNumber} of {PAGES.length}
 					</button>
@@ -1109,7 +976,7 @@ export default function Stage({ children }: { children: ReactNode }) {
 				</button>
 
 				<p role="status" aria-live="polite" className="sr-only">
-					{note?.text}
+					{noteShown && note?.text}
 				</p>
 
 				{note &&
@@ -1117,15 +984,25 @@ export default function Stage({ children }: { children: ReactNode }) {
 						<button
 							key={note.id}
 							onClick={() => {
-								setNote(null);
+								setNoteShown(false);
 								setNavOpen(true);
 							}}
+							tabIndex={noteShown ? undefined : -1}
 							className={`${NOTE} border-dashed cursor-pointer`}
+							style={{
+								opacity: noteShown ? undefined : 0,
+								pointerEvents: noteShown ? "auto" : "none",
+							}}
 						>
 							{note.text}, click to view {"->"}
 						</button>
 					) : (
-						<p key={note.id} aria-hidden className={NOTE}>
+						<p
+							key={note.id}
+							aria-hidden
+							className={NOTE}
+							style={{ opacity: noteShown ? undefined : 0 }}
+						>
 							{note.text}
 						</p>
 					))}
@@ -1140,7 +1017,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 							goBack();
 						}}
 						aria-label="Back"
-						className="stage-control fixed top-[0.5svh] left-[0.5vw] text-[3.75svh] font-extrabold cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 portrait:top-[1.5vw] portrait:left-[1.5vw] portrait:text-[2.4svh] bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
+						style={controlsIn}
+						className="stage-control fade-in fixed top-[0.5svh] left-[0.5vw] text-[3.75svh] font-extrabold cursor-pointer z-23 w-[3.5vw] h-[3.5vw] min-w-11 min-h-11 portrait:top-[1.5vw] portrait:left-[1.5vw] portrait:text-[2.4svh] bg-white border-dashed border-[0.3svh] items-center justify-center flex drop-shadow-lg drop-shadow-black/60"
 					>
 						{"<-"}
 					</a>
@@ -1172,10 +1050,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 						<img
 							src={asset("/imgs/stage/hidden-scribble.webp")}
 							fetchPriority="low"
-							className="absolute bottom-[90svh] left-0 w-screen h-[8svh] max-w-none pointer-events-none"
+							className={`${navGliding ? "nav-smooth" : "nav-bounce"} absolute bottom-[90svh] left-0 w-screen h-[8svh] max-w-none pointer-events-none`}
 							style={{
-								opacity: allItems ? 0 : 1,
-								transition: allItems ? "none" : "opacity 0s 1100ms",
+								transform: allItems
+									? `translateY(calc(-1 * ${ROW}))`
+									: "translateY(0)",
 							}}
 							alt=""
 							aria-hidden
@@ -1360,6 +1239,21 @@ export default function Stage({ children }: { children: ReactNode }) {
 								</div>
 								<ul
 									className={`relative grid grid-cols-4 ${twoRows ? "h-[calc(2*var(--slot)+var(--slot-gap))]" : "h-(--slot)"} auto-rows-(--slot) gap-(--slot-gap)`}
+									style={
+										slide
+											? {
+													transform: `translateX(${slide.x}vw)`,
+													opacity: 0,
+													transition: slide.instant
+														? "none"
+														: `transform ${SLIDE_OUT_MS}ms ease-in, opacity ${SLIDE_OUT_MS}ms ease-in`,
+												}
+											: {
+													transform: "translateX(0)",
+													opacity: 1,
+													transition: `transform ${SLIDE_IN_MS}ms ease-out, opacity ${SLIDE_IN_MS}ms ease-out`,
+												}
+									}
 								>
 									{cells.map(({ g, entry }, k) => {
 										if (g === 0)
