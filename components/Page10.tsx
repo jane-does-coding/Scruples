@@ -93,6 +93,11 @@ const REPLY: Record<Choice, { who: Who; text: string }[]> = {
 			who: "daphne",
 			text: "I don't like it. I never agreed to my art feeding the Magic Button.",
 		},
+		{ who: "zhenya", text: "...You're right. Nobody asked me either." },
+		{
+			who: "zhenya",
+			text: "I do care. I just didn't want it to be true.",
+		},
 	],
 	upset: [
 		{ who: "daphne", text: "My drawing is there too!" },

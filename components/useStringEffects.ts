@@ -66,9 +66,22 @@ export function useStringLayering() {
 			const cs = getComputedStyle(el);
 			return cs.visibility === "visible" && cs.opacity !== "0";
 		};
-		const settle = () => {
+		const settle = (elements: Element[]) => {
+			const moving = new Set<Element>();
+			elements.forEach((el) => {
+				let at: Element | null = el;
+				while (at && !moving.has(at)) {
+					moving.add(at);
+					at = at.parentElement;
+				}
+			});
 			const seeked: [Animation, CSSNumberish | null][] = [];
 			document.getAnimations().forEach((animation) => {
+				const target =
+					animation.effect instanceof KeyframeEffect
+						? animation.effect.target
+						: null;
+				if (!target || !moving.has(target)) return;
 				const end = Number(animation.effect?.getComputedTiming().endTime);
 				if (!Number.isFinite(end) || animation.playState === "finished") return;
 				seeked.push([animation, animation.currentTime]);
@@ -78,15 +91,6 @@ export function useStringLayering() {
 				seeked.forEach(([animation, time]) => (animation.currentTime = time));
 		};
 		const order = () => {
-			const started = performance.now();
-			try {
-				orderNow();
-			} finally {
-				const stats = (window as unknown as { __layer?: number[] }).__layer;
-				stats?.push(performance.now() - started);
-			}
-		};
-		const orderNow = () => {
 			raised.forEach((z, el) => (el.style.zIndex = z));
 			raised.clear();
 			const strings = [...document.querySelectorAll<HTMLElement>(STRING)];
@@ -107,7 +111,7 @@ export function useStringLayering() {
 			const now = new Map(
 				elements.map((el) => [el, el.getBoundingClientRect()]),
 			);
-			const restore = settle();
+			const restore = settle(elements);
 			const rest = new Map(
 				elements.map((el) => [el, el.getBoundingClientRect()]),
 			);
@@ -179,14 +183,33 @@ export function useStringLayering() {
 			"animationstart",
 			"animationend",
 		];
-		events.forEach((name) => document.addEventListener(name, schedule, true));
+		const onMotion = (e: Event) => {
+			const target = e.target;
+			if (!(target instanceof Element)) return;
+			if (e instanceof AnimationEvent) {
+				const css = target
+					.getAnimations()
+					.find(
+						(a) =>
+							a instanceof CSSAnimation && a.animationName === e.animationName,
+					);
+				if (css?.effect?.getTiming().iterations === Infinity) return;
+			}
+			if (
+				target.matches(PANEL) ||
+				target.querySelector(STRING) ||
+				target.querySelector(PANEL)
+			)
+				schedule();
+		};
+		events.forEach((name) => document.addEventListener(name, onMotion, true));
 		schedule();
 		return () => {
 			cancelAnimationFrame(frame);
 			observer.disconnect();
 			window.removeEventListener("resize", schedule);
 			events.forEach((name) =>
-				document.removeEventListener(name, schedule, true),
+				document.removeEventListener(name, onMotion, true),
 			);
 		};
 	}, []);
