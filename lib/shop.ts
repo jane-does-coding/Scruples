@@ -73,6 +73,25 @@ export const ITEMS = {
 		description:
 			"An honorable mention from the Annual Art Competition, for a drawing Zhenya made herself.",
 	},
+	key: {
+		name: "Old key",
+		price: 0,
+		image: asset("/imgs/stage/key.webp"),
+		description:
+			"An old key Zhenya found under the corner of the carpet backstage. I wonder what it could be for...",
+	},
+	secret: {
+		name: "Secret",
+		price: 0,
+		image: asset("/imgs/stage/keyhole.webp"),
+		description: "Something that was hidden behind the little keyhole...",
+	},
+	"bird-secret": {
+		name: "Bird's secret",
+		price: 0,
+		image: asset("/imgs/stage/bird.webp"),
+		description: "Something the little bird by the souvenir shop was keeping...",
+	},
 } as const;
 
 export type ItemId = keyof typeof ITEMS;

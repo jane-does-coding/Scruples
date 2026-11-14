@@ -5,6 +5,9 @@ import useBlinkingDoll from "@/components/useBlinkingDoll";
 import { asset } from "@/lib/asset";
 import usePortrait from "@/components/usePortrait";
 import Zhenya from "@/components/Zhenya";
+import { useStage } from "@/components/Stage";
+import * as sound from "@/lib/sound";
+import { findSecret } from "@/lib/secrets";
 
 type PageProps = {
 	nextPage: () => void;
@@ -51,6 +54,15 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 	const [step, setStep] = useState(0);
 	const portrait = usePortrait();
 	const dollSrc = useBlinkingDoll();
+	const { owned, give, say } = useStage();
+	const unlock = () => {
+		sound.click();
+		if (owned.includes("secret")) say("It's already unlocked");
+		else if (owned.includes("key")) {
+			findSecret("keyhole");
+			give("secret");
+		} else say("You need a key");
+	};
 
 	const [wowed, setWowed] = useState(false);
 
@@ -145,6 +157,14 @@ export default function Page4({ nextPage, curtainsOpen }: PageProps) {
 			>
 				<Strings />
 				Wow Cool!
+			</button>
+
+			<button
+				onClick={unlock}
+				aria-label="A little keyhole"
+				className="fixed bottom-[5vh] right-[10%] w-[5vw] opacity-40 cursor-pointer"
+			>
+				<img src={asset("/key-opening.png")} className="w-full" alt="" />
 			</button>
 
 			<button

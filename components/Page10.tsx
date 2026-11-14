@@ -11,6 +11,7 @@ import Zhenya from "@/components/Zhenya";
 import { asset } from "@/lib/asset";
 import { useDrawings } from "@/lib/drawings";
 import * as sound from "@/lib/sound";
+import { findSecret } from "@/lib/secrets";
 
 type PageProps = {
 	nextPage: () => void;
@@ -266,6 +267,82 @@ const LIGHTS: {
 	},
 ];
 
+type Prop = {
+	rest: string;
+	moving?: string;
+	reveal?: boolean;
+	moved: string;
+	ms: number;
+	label: string;
+	box: { x: number; y: number; w: number; h: number };
+	shape: string;
+};
+const PHOTO: Prop = {
+	rest: asset("/imgs/stage/table-photo.webp"),
+	moving: asset("/imgs/stage/table-photo-falling.webp"),
+	moved: asset("/imgs/stage/table-photo-fallen.webp"),
+	ms: 13 * 70,
+	label: "Knock over the photo on the table",
+	box: { x: 708, y: 393, w: 42, h: 45 },
+	shape: "M10 2 L39 6 L37 42 L2 39 Z",
+};
+const CARPET: Prop = {
+	rest: asset("/imgs/stage/carpet.webp"),
+	moving: asset("/imgs/stage/carpet-unfold-6.webp"),
+	moved: asset("/imgs/stage/carpet-unfolded.webp"),
+	ms: 6 * 80,
+	label: "Lift the corner of the carpet",
+	box: { x: 528, y: 506, w: 147, h: 42 },
+	shape: "M57 4 L143 25 L66 38 L5 25 Z",
+};
+type PropState = { stage: "rest" | "moving" | "moved"; play: string | null };
+const AT_REST: PropState = { stage: "rest", play: null };
+
+const PropLayer = ({ prop, state }: { prop: Prop; state: PropState }) => {
+	const reveal = prop.reveal;
+	return (
+		<>
+			<img
+				src={prop.rest}
+				className="absolute inset-0 w-full h-full"
+				style={{
+					opacity:
+						state.stage === "rest" || (reveal && state.stage === "moving")
+							? 1
+							: 0,
+				}}
+				alt=""
+			/>
+			<img
+				src={prop.moved}
+				className="absolute inset-0 w-full h-full"
+				style={{
+					opacity:
+						state.stage === "moved" || (reveal && state.stage === "moving")
+							? 1
+							: 0,
+					transition: reveal ? `opacity ${prop.ms}ms ease-in-out` : undefined,
+				}}
+				alt=""
+			/>
+			{!reveal && state.stage === "moving" && state.play && (
+				<img
+					key={state.play}
+					src={state.play}
+					className="absolute inset-0 w-full h-full"
+					alt=""
+				/>
+			)}
+		</>
+	);
+};
+
+const BOOK_KEY = "scruples-book-money";
+const PINK_BOOK = {
+	box: { x: 809, y: 304, w: 22, h: 64 },
+	shape: "M2 7 C2 0 20 0 20 7 L21 62 L1 62 Z",
+};
+
 const POSTER = {
 	box: { x: 597, y: 174, w: 62, h: 105 },
 	shape: "M-2 10.4 L60.6 -2 L63.2 99.3 L-0.9 106.6 Z",
@@ -278,8 +355,10 @@ const Hotspot = ({
 	pressed,
 	onClick,
 	hint,
+	ants = false,
 }: {
 	hint: boolean;
+	ants?: boolean;
 	box: { x: number; y: number; w: number; h: number };
 	shape: string;
 	label: string;
@@ -302,7 +381,7 @@ const Hotspot = ({
 				d={shape}
 				fill="transparent"
 				stroke="#000"
-				strokeOpacity={hint ? 0.75 : 0.1}
+				strokeOpacity={ants ? (hint ? 0.75 : 0.1) : 0}
 				strokeWidth={hint ? 1.6 : 0.9}
 				strokeDasharray="4 3"
 				strokeLinejoin="round"
@@ -323,6 +402,11 @@ const WallArt = ({
 	onSwitch,
 	onPoster,
 	hint,
+	photo,
+	carpet,
+	onPhoto,
+	onCarpet,
+	onBook,
 }: {
 	mine: string | null;
 	room: RoomKey;
@@ -331,6 +415,11 @@ const WallArt = ({
 	onSwitch: (id: LightId) => void;
 	onPoster: () => void;
 	hint: boolean;
+	photo: PropState;
+	carpet: PropState;
+	onPhoto: () => void;
+	onCarpet: () => void;
+	onBook: () => void;
 }) => {
 	const { k, left, top } = useRoomScale();
 	const place = GRID_PLACE[usePortrait() ? "tall" : "wide"];
@@ -357,6 +446,8 @@ const WallArt = ({
 					alt=""
 				/>
 			))}
+			<PropLayer prop={CARPET} state={carpet} />
+			<PropLayer prop={PHOTO} state={photo} />
 			<div
 				className="absolute left-0 top-0 origin-top-left flex flex-col items-center"
 				style={{
@@ -429,6 +520,7 @@ const WallArt = ({
 							label={lit[id] ? off : on}
 							pressed={lit[id]}
 							hint={hint}
+							ants
 							onClick={() => onSwitch(id)}
 						/>
 					))}
@@ -439,6 +531,31 @@ const WallArt = ({
 						hint={hint}
 						onClick={onPoster}
 					/>
+					<Hotspot
+						box={PINK_BOOK.box}
+						shape={PINK_BOOK.shape}
+						label="The pink book"
+						hint={hint}
+						onClick={onBook}
+					/>
+					{photo.stage === "rest" && (
+						<Hotspot
+							box={PHOTO.box}
+							shape={PHOTO.shape}
+							label={PHOTO.label}
+							hint={hint}
+							onClick={onPhoto}
+						/>
+					)}
+					{carpet.stage === "rest" && (
+						<Hotspot
+							box={CARPET.box}
+							shape={CARPET.shape}
+							label={CARPET.label}
+							hint={hint}
+							onClick={onCarpet}
+						/>
+					)}
 				</>
 			)}
 		</div>
@@ -458,7 +575,7 @@ const Wall = ({ children }: { children?: React.ReactNode }) => (
 );
 
 export default function Page10({ curtainsOpen }: PageProps) {
-	const { goTo, myDrawing } = useStage();
+	const { goTo, myDrawing, give, findMoney, owned } = useStage();
 	const saved = useDrawings().find((d) => !d.id.startsWith("sample"));
 	const mine = myDrawing ?? saved?.image ?? null;
 	const blinkSrc = useBlinkingDoll();
@@ -486,6 +603,25 @@ export default function Page10({ curtainsOpen }: PageProps) {
 	const [pushing, setPushing] = useState(false);
 	const [frame, setFrame] = useState(-1);
 	const [lit, setLit] = useState({ lamp: false, stars: false });
+	const [photo, setPhoto] = useState<PropState>(AT_REST);
+	const [keyFound, setKeyFound] = useState(false);
+	const [keyShown, setKeyShown] = useState(false);
+	useEffect(() => {
+		if (!keyFound) return;
+		const timer = setTimeout(() => setKeyShown(true), 20);
+		return () => clearTimeout(timer);
+	}, [keyFound]);
+	const takeKey = () => {
+		sound.click();
+		findSecret("key");
+		give("key");
+		setKeyShown(false);
+		later(700, () => setKeyFound(false));
+	};
+	const [carpet, setCarpet] = useState<PropState>(AT_REST);
+	const clips = useRef<Record<string, Blob>>({});
+	const played = useRef<string[]>([]);
+	const busy = useRef(new Set<string>());
 	const [poster, setPoster] = useState(false);
 	const roomKey: RoomKey =
 		lit.lamp && lit.stars
@@ -512,7 +648,40 @@ export default function Page10({ curtainsOpen }: PageProps) {
 	useEffect(() => {
 		CURTAIN_FRAMES.forEach((src) => (new Image().src = src));
 		Object.values(ROOM_IMGS).forEach((src) => (new Image().src = src));
+		for (const { rest, moving, moved } of [PHOTO, CARPET]) {
+			new Image().src = rest;
+			new Image().src = moved;
+			if (!moving) continue;
+			fetch(moving)
+				.then((res) => res.blob())
+				.then((blob) => (clips.current[moving] = blob));
+		}
+		const urls = played.current;
+		return () => urls.forEach((url) => URL.revokeObjectURL(url));
 	}, []);
+
+	const nudge = (
+		prop: Prop,
+		state: PropState,
+		set: (state: PropState) => void,
+	) => {
+		const key = prop.moving ?? prop.moved;
+		if (state.stage !== "rest" || busy.current.has(key)) return;
+		busy.current.add(key);
+		sound.click();
+		const blob = prop.moving ? clips.current[prop.moving] : undefined;
+		const play = blob ? URL.createObjectURL(blob) : (prop.moving ?? prop.moved);
+		if (blob) played.current.push(play);
+		const ready = new Image();
+		ready.src = play;
+		ready
+			.decode()
+			.catch(() => {})
+			.then(() => {
+				set({ stage: "moving", play: prop.moving ? play : null });
+				later(prop.ms, () => set({ stage: "moved", play: null }));
+			});
+	};
 
 	useEffect(() => {
 		if (closing) document.documentElement.classList.add("zoomed-out");
@@ -623,7 +792,31 @@ export default function Page10({ curtainsOpen }: PageProps) {
 						onSwitch={toggle}
 						onPoster={() => {
 							sound.click();
+							findSecret("poster");
 							setPoster(true);
+						}}
+						photo={photo}
+						carpet={carpet}
+						onPhoto={() => {
+							if (photo.stage === "rest") findSecret("photo");
+							nudge(PHOTO, photo, setPhoto);
+						}}
+						onCarpet={() => {
+							if (carpet.stage === "rest") {
+								findSecret("carpet");
+								if (!owned.includes("key"))
+									later(CARPET.ms + 300, () => setKeyFound(true));
+							}
+							nudge(CARPET, carpet, setCarpet);
+						}}
+						onBook={() => {
+							sound.click();
+							findSecret("book");
+							try {
+								if (localStorage.getItem(BOOK_KEY)) return;
+								localStorage.setItem(BOOK_KEY, "1");
+							} catch {}
+							findMoney(20, "tucked inside the pink book");
 						}}
 					/>
 				</Wall>
@@ -728,7 +921,7 @@ export default function Page10({ curtainsOpen }: PageProps) {
 			<p
 				role="status"
 				aria-live="polite"
-				className={`fixed top-[16svh] portrait:top-[-10svh] left-[66vw] portrait:left-[70vw] translate-x-[-50%] w-max text-[3.4svh] portrait:text-[2.3svh] z-9 ${LABEL}`}
+				className={`fixed top-[4svh] portrait:top-[-10svh] left-[66vw] portrait:left-[70vw] translate-x-[-50%] w-max text-[3.4svh] portrait:text-[2.3svh] z-9 ${LABEL}`}
 				style={away(labelsIn, labelsIn && !phase)}
 			>
 				<Strings inset="1vw" />
@@ -846,6 +1039,62 @@ export default function Page10({ curtainsOpen }: PageProps) {
 			</PopsicleButton>
 
 			{poster && <PosterViewer onClose={() => setPoster(false)} />}
+			{keyFound && (
+				<div
+					role="dialog"
+					aria-modal
+					aria-label="You found a key"
+					className="fixed inset-0 z-25 flex items-center justify-center bg-black/40 backdrop-blur-[1px] transition-opacity duration-500"
+					style={{ opacity: keyShown ? 1 : 0 }}
+				>
+					<div className="relative flex items-center gap-[4vw] portrait:gap-[6vw]">
+						<div
+							className="relative"
+							style={{
+								transition: `transform 900ms ${LABEL_DROP}`,
+								transform: keyShown ? "translateY(0)" : "translateY(-120svh)",
+							}}
+						>
+							<img
+								src={asset("/imgs/stage/key.webp")}
+								className="relative h-[62svh] portrait:h-[40svh] w-auto max-w-none test-shadow-darker"
+								alt="An old key"
+							/>
+							<span
+								aria-hidden
+								data-string
+								className="absolute w-[0.1vw] min-w-px bg-black/60 h-[200svh] bottom-[calc(100%-1.5svh)] left-[50%]"
+							/>
+						</div>
+						<div className="flex flex-col items-center gap-[3svh]">
+							<p
+								className={`${LABEL} text-[4.5svh] portrait:text-[3svh]`}
+								style={{
+									zIndex: 2,
+									transition: `transform 800ms ${LABEL_DROP} 150ms`,
+									transform: keyShown ? "translateY(0)" : "translateY(-110svh)",
+								}}
+							>
+								<Strings />
+								You found a key!
+							</p>
+							<button
+								onClick={takeKey}
+								autoFocus
+								className={`${BUTTON} text-[3.4svh] portrait:text-[2.4svh]`}
+								style={{
+									zIndex: 1,
+									transition: `transform 800ms ${LABEL_DROP} 300ms`,
+									transform: keyShown ? "translateY(0)" : "translateY(-110svh)",
+								}}
+							>
+								<Strings />
+								Okay
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

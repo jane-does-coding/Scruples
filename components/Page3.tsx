@@ -9,6 +9,8 @@ import { useStage } from "@/components/Stage";
 import type { ItemId } from "@/lib/shop";
 import { asset } from "@/lib/asset";
 import Zhenya from "@/components/Zhenya";
+import Bird from "@/components/Bird";
+import { findSecret } from "@/lib/secrets";
 
 type PageProps = {
 	nextPage: () => void;
@@ -40,7 +42,7 @@ export default function Page3({
 
 	const [entered, setEntered] = useState(false);
 	const [opened, setOpened] = useState(false);
-	const { buy, owned } = useStage();
+	const { buy, owned, give } = useStage();
 	const [tooPoor, setTooPoor] = useState<ItemId | null>(null);
 	const tooPoorTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 	useEffect(() => () => clearTimeout(tooPoorTimer.current), []);
@@ -155,7 +157,7 @@ export default function Page3({
 
 			<Zhenya
 				src={frown.src ?? dollSrc ?? blinkSrc}
-				className="h-svh absolute top-[-32.5svh] right-[-5vw] portrait:h-[46svh] portrait:top-[-12svh] portrait:right-[-6svh] max-w-none test-shadow-darker z-5 scale-x-[-1]"
+				className="h-svh absolute top-[-32.5svh] right-[-5vw] portrait:h-[46svh] portrait:top-[-12svh] portrait:right-[-6svh] max-w-none test-shadow-darker z-5 scale-x-[-1] pointer-events-none"
 				style={{
 					...drop(step >= 1, 900, DOLL_DROP),
 					transform: step >= 1 ? "translateY(0)" : "translateY(-120svh)",
@@ -206,6 +208,14 @@ export default function Page3({
 					className="h-[70svh] portrait:h-[42svh] max-w-none z-5 relative"
 					alt="Souvenir shop"
 					data-hit
+				/>
+				<Bird
+					flying={step >= 2}
+					onClick={() => {
+						sound.click();
+						findSecret("bird");
+						give("bird-secret");
+					}}
 				/>
 				<img
 					src={asset("/imgs/stage/popsicle.webp")}

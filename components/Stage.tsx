@@ -83,6 +83,8 @@ type StageContextValue = {
 	buy: (item: ItemId) => BuyResult;
 	give: (item: ItemId) => void;
 	donate: (amount: number) => void;
+	findMoney: (amount: number, where: string) => void;
+	say: (text: string) => void;
 	keepDrawing: (drawing: Omit<Drawing, "key">) => void;
 	myDrawing: string | null;
 	hat: string | null;
@@ -213,6 +215,11 @@ export default function Stage({ children }: { children: ReactNode }) {
 				? "Zhenya is wearing the honorable mention"
 				: `${ITEMS[item].name} was added to inventory`,
 		);
+		itemAdded();
+	};
+	const findMoney = (amount: number, where: string) => {
+		setMoney((m) => m + amount);
+		notify(`You found $${amount} ${where}`);
 		itemAdded();
 	};
 	const donate = (amount: number) => {
@@ -884,6 +891,8 @@ export default function Stage({ children }: { children: ReactNode }) {
 				buy,
 				give,
 				donate,
+				findMoney,
+				say: (text: string) => notify(text, false),
 				keepDrawing,
 				myDrawing: drawings.at(-1)?.image ?? null,
 				hat: wearing && owned.includes("hats") ? HATS[wearing].wear : null,
